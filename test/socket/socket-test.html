@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Heroku Socket.IO Connection Tester</title>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    #status {
+      font-size: 18px;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    #connection-form {
+      margin-bottom: 20px;
+    }
+    #messages {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .warning {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    .connecting {
+      background-color: #cce5ff;
+      color: #004085;
+    }
+    button {
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    input[type="text"] {
+      padding: 8px;
+      width: 300px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Heroku Socket.IO Connection Tester</h1>
+  
+  <div id="connection-form">
+    <input type="text" id="server-url" placeholder="Enter Heroku URL (e.g., https://your-app.herokuapp.com)" 
+           value="" style="width: 350px;">
+    <button id="connect-btn">Connect</button>
+    <button id="disconnect-btn" disabled>Disconnect</button>
+  </div>
+  
+  <div id="status" class="connecting">Waiting to connect...</div>
+  
+  <div>
+    <h3>Connection Information</h3>
+    <div id="messages"></div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const statusDiv = document.getElementById('status');
+      const messagesDiv = document.getElementById('messages');
+      const serverUrlInput = document.getElementById('server-url');
+      const connectBtn = document.getElementById('connect-btn');
+      const disconnectBtn = document.getElementById('disconnect-btn');
+      
+      let socket = null;
+      
+      function updateStatus(message, type) {
+        statusDiv.innerText = message;
+        statusDiv.className = type;
+      }
+      
+      function log(message) {
+        const time = new Date().toLocaleTimeString();
+        messagesDiv.innerHTML += `<p>[${time}] ${message}</p>`;
+        // Scroll to bottom
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+      
+      function connect(url) {
+        if (socket) {
+          socket.disconnect();
+        }
+        
+        try {
+          updateStatus('Connecting...', 'connecting');
+          log(`Attempting to connect to ${url}`);
+          
+          // Connect to the specified Heroku app
+          socket = io(url, {
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            timeout: 10000
+          });
+          
+          socket.on('connect', () => {
+            updateStatus('Connected to server!', 'success');
+            log(`Connected with socket ID: ${socket.id}`);
+            connectBtn.disabled = true;
+            disconnectBtn.disabled = false;
+          });
+          
+          socket.on('connect_error', (error) => {
+            updateStatus('Connection failed!', 'error');
+            log(`Error: ${error.message}`);
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+          });
+          
+          socket.on('disconnect', (reason) => {
+            updateStatus(`Disconnected: ${reason}`, 'warning');
+            log(`Disconnected: ${reason}`);
+            connectBtn.disabled = false;
+            disconnectBtn.disabled = true;
+          });
+          
+          // Listen for any events from the server
+          socket.onAny((eventName, ...args) => {
+            log(`Received event: ${eventName} with data: ${JSON.stringify(args)}`);
+          });
+          
+        } catch (err) {
+          updateStatus('Error creating connection', 'error');
+          log(`Unexpected error: ${err.message}`);
+        }
+      }
+      
+      connectBtn.addEventListener('click', () => {
+        const url = serverUrlInput.value.trim();
+        if (!url) {
+          updateStatus('Please enter a server URL', 'error');
+          return;
+        }
+        connect(url);
+      });
+      
+      disconnectBtn.addEventListener('click', () => {
+        if (socket) {
+          socket.disconnect();
+          updateStatus('Manually disconnected', 'warning');
+          log('Manually disconnected from server');
+          connectBtn.disabled = false;
+          disconnectBtn.disabled = true;
+        }
+      });
+      
+      // Feature to test if URL is reachable via fetch
+      window.testFetch = () => {
+        const url = serverUrlInput.value.trim();
+        if (!url) {
+          updateStatus('Please enter a server URL', 'error');
+          return;
+        }
+        
+        log(`Testing HTTP fetch to ${url}`);
+        
+        fetch(url, { mode: 'no-cors' })
+          .then(() => {
+            log('Server appears to be reachable via HTTP (no-cors mode)');
+          })
+          .catch(err => {
+            log(`Fetch error: ${err.message}`);
+          });
+      };
+      
+      // Add a test fetch button
+      const testFetchBtn = document.createElement('button');
+      testFetchBtn.innerText = 'Test HTTP Fetch';
+      testFetchBtn.style.marginLeft = '10px';
+      testFetchBtn.addEventListener('click', window.testFetch);
+      document.getElementById('connection-form').appendChild(testFetchBtn);
+    });
+  </script>
+</body>
+</html> 

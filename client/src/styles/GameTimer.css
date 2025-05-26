@@ -1,0 +1,50 @@
+.game-timer {
+  display: flex;
+  flex-direction: column;
+  margin: 15px 0;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.time-control-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+}
+
+.time-control-label {
+  font-weight: 500;
+  margin-right: 10px;
+  color: #757575;
+}
+
+.time-control-value {
+  font-weight: 600;
+  color: #212121;
+}
+
+.player-timers {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+
+/* Responsive layout */
+@media (max-width: 600px) {
+  .player-timers {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .player-time {
+    margin-bottom: 15px;
+    max-width: 100%;
+    width: 100%;
+  }
+} 

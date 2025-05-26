@@ -1,0 +1,1556 @@
+/* App Theme Styles */
+/* Modern Theme (Default) */
+.theme-modern {
+  --bg-primary: rgba(18, 18, 24, 0.95);
+  --bg-secondary: rgba(28, 28, 36, 0.8);
+  --text-primary: #ffffff;
+  --text-secondary: #a8b3cf;
+  --accent-color: #5d5dff;
+  --border-color: rgba(82, 82, 120, 0.3);
+  --header-bg: rgba(22, 22, 30, 0.9);
+  --card-bg: rgba(32, 32, 42, 0.7);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  --button-bg: rgba(93, 93, 255, 0.9);
+  --button-text: #ffffff;
+  --button-hover: rgba(111, 111, 255, 1);
+  --button-secondary-bg: rgba(45, 45, 60, 0.7);
+  --button-secondary-text: #ffffff;
+  --button-secondary-hover: rgba(60, 60, 80, 0.9);
+  --panel-bg: rgba(32, 32, 42, 0.9);
+  --panel-border: rgba(82, 82, 120, 0.2);
+  --font-main: 'Inter', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"),
+    radial-gradient(circle at 50% 0%, rgba(93, 93, 255, 0.15), transparent 70%),
+    radial-gradient(circle at 0% 100%, rgba(255, 93, 93, 0.1), transparent 70%);
+}
+
+/* Modern theme panel styling */
+.theme-modern .bg-neutral-50,
+.theme-modern .bg-white {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+}
+
+.theme-modern .border-neutral-200 {
+  border-color: var(--border-color);
+}
+
+.theme-modern .text-neutral-900,
+.theme-modern .text-neutral-800,
+.theme-modern .text-neutral-700 {
+  color: var(--text-primary);
+}
+
+.theme-modern .text-neutral-600,
+.theme-modern .text-neutral-500 {
+  color: var(--text-secondary);
+}
+
+.theme-modern .prose {
+  color: var(--text-primary);
+}
+
+.theme-modern .prose h1,
+.theme-modern .prose h2,
+.theme-modern .prose h3,
+.theme-modern .prose h4 {
+  color: var(--text-primary);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.theme-modern .prose p,
+.theme-modern .prose ul,
+.theme-modern .prose ol {
+  color: var(--text-primary);
+  opacity: 0.9;
+  line-height: 1.7;
+}
+
+.theme-modern .prose strong,
+.theme-modern .font-medium {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.theme-modern .form-input {
+  background-color: var(--button-secondary-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.theme-modern .form-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.theme-modern .shadow-card {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.theme-modern .prose {
+  color: var(--text-primary);
+}
+
+.theme-modern .prose h1,
+.theme-modern .prose h2,
+.theme-modern .prose h3,
+.theme-modern .prose h4 {
+  color: var(--text-primary);
+}
+
+.theme-modern .prose p,
+.theme-modern .prose ul,
+.theme-modern .prose ol {
+  color: var(--text-primary);
+  opacity: 0.9;
+}
+
+.theme-modern .prose strong {
+  color: var(--text-primary);
+}
+
+/* Traditional East Asian Theme */
+.theme-traditional {
+  --bg-primary: #f5f0e6;
+  --bg-secondary: #eae3d6;
+  --text-primary: #483826;
+  --text-secondary: #725a3a;
+  --accent-color: #a34730;
+  --border-color: #c9b18d;
+  --header-bg: #eae3d6;
+  --card-bg: #f9f5eb;
+  --button-bg: #a34730;
+  --button-text: #f9f5eb;
+  --button-hover: #8a3a28;
+  --font-main: 'Noto Serif', 'Times New Roman', serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23paper)' opacity='0.05'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg width='400' height='400' viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30,20 Q50,10 70,30 T100,40' stroke='%23c9b18d' stroke-width='0.5' fill='none' opacity='0.1' transform='rotate(10)'/%3E%3Cpath d='M300,100 Q330,80 360,120' stroke='%23a34730' stroke-width='0.3' fill='none' opacity='0.05' transform='rotate(-5)'/%3E%3C/svg%3E");
+  position: relative;
+}
+
+/* Traditional ink-wash painting decoration - only visible on large screens */
+.theme-traditional::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 400px;
+  height: 350px;
+  background-image: url("data:image/svg+xml,%3Csvg width='400' height='350' viewBox='0 0 400 350' xmlns='http://www.w3.org/2000/svg'%3E%3C!-- Bamboo trunk --%3E%3Cpath d='M330,350 C330,280 325,250 335,200 C345,150 355,100 350,30' stroke='%23483826' stroke-width='8' fill='none' opacity='0.07'/%3E%3C!-- Bamboo sections --%3E%3Cpath d='M328,310 L357,307' stroke='%23483826' stroke-width='2' fill='none' opacity='0.07'/%3E%3Cpath d='M325,270 L360,265' stroke='%23483826' stroke-width='2' fill='none' opacity='0.07'/%3E%3Cpath d='M330,230 L362,228' stroke='%23483826' stroke-width='2' fill='none' opacity='0.07'/%3E%3Cpath d='M335,190 L365,185' stroke='%23483826' stroke-width='2' fill='none' opacity='0.07'/%3E%3Cpath d='M340,150 L368,145' stroke='%23483826' stroke-width='2' fill='none' opacity='0.07'/%3E%3Cpath d='M345,110 L370,105' stroke='%23483826' stroke-width='2' fill='none' opacity='0.07'/%3E%3Cpath d='M350,70 L372,65' stroke='%23483826' stroke-width='2' fill='none' opacity='0.07'/%3E%3C!-- Bamboo leaves --%3E%3Cpath d='M340,70 C320,60 310,40 315,30 C330,35 345,50 340,70' stroke='%23483826' stroke-width='1' fill='none' opacity='0.07'/%3E%3Cpath d='M355,90 C375,80 395,85 400,75 C390,65 370,70 355,90' stroke='%23483826' stroke-width='1' fill='none' opacity='0.07'/%3E%3Cpath d='M325,140 C305,135 290,145 280,140 C290,125 310,125 325,140' stroke='%23483826' stroke-width='1' fill='none' opacity='0.07'/%3E%3Cpath d='M370,160 C390,155 400,140 395,130 C380,135 365,150 370,160' stroke='%23483826' stroke-width='1' fill='none' opacity='0.07'/%3E%3Cpath d='M330,200 C310,195 300,175 305,165 C320,170 335,185 330,200' stroke='%23483826' stroke-width='1' fill='none' opacity='0.07'/%3E%3C!-- Mountains in background --%3E%3Cpath d='M20,350 C60,320 100,330 150,310 C200,290 250,300 300,330 C350,360 380,350 400,340' stroke='%23483826' stroke-width='1' fill='none' opacity='0.04'/%3E%3Cpath d='M0,350 C40,330 80,300 120,310 C180,320 250,340 320,330 C370,325 390,340 400,350' stroke='%23483826' stroke-width='1' fill='none' opacity='0.05'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: bottom right;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Hide decoration on small screens */
+@media (max-width: 768px) {
+  .theme-traditional::after {
+    display: none;
+  }
+}
+
+/* Traditional theme specific elements */
+.theme-traditional .app-card {
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper-texture'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23paper-texture)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* Connection status panel - base styling for all themes */
+.connection-status-panel {
+  z-index: 9999 !important; /* Ensure it's always on top */
+  position: fixed !important;
+  bottom: 1rem !important;
+  right: 1rem !important;
+  background-color: #ffffff !important; /* Explicit background */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 0.375rem !important;
+  padding: 0.75rem !important;
+  font-size: 0.875rem !important;
+  width: auto !important;
+  min-width: 200px !important;
+  max-width: 300px !important;
+}
+
+/* Add modern connection status styling */
+.theme-modern .connection-status-panel {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--card-shadow) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.theme-modern .connection-status-text {
+  color: var(--text-primary) !important;
+}
+
+.theme-modern .connection-status-refresh {
+  color: var(--accent-color) !important;
+}
+
+.theme-modern .connection-status-refresh:hover {
+  opacity: 0.8 !important;
+}
+
+.theme-modern .connection-status-timestamp {
+  color: var(--text-secondary) !important;
+}
+
+/* Mobile adjustments for connection status panel */
+@media (max-width: 640px) {
+  .connection-status-panel {
+    bottom: 0.5rem !important;
+    right: 0.5rem !important;
+    padding: 0.5rem !important;
+    font-size: 0.75rem !important;
+    max-width: 200px;
+  }
+
+  .connection-status-panel button {
+    font-size: 0.75rem !important;
+  }
+
+  .connection-status-timestamp {
+    font-size: 0.65rem !important;
+  }
+}
+
+/* Connection status panel in traditional theme */
+.theme-traditional .connection-status-panel {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1) !important;
+  color: var(--text-primary) !important;
+}
+
+.theme-traditional .connection-status-text {
+  color: var(--text-primary) !important;
+}
+
+.theme-traditional .connection-status-refresh {
+  color: var(--accent-color) !important;
+}
+
+.theme-traditional .connection-status-refresh:hover {
+  color: var(--button-hover) !important;
+}
+
+.theme-traditional .connection-status-timestamp {
+  color: var(--text-secondary) !important;
+}
+
+/* Fix Board Theme dropdown in traditional theme */
+.theme-traditional .board-theme-button {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+}
+
+.theme-traditional .board-theme-dropdown {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.theme-traditional .board-theme-option {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.theme-traditional .board-theme-option:hover,
+.theme-traditional .board-theme-option.selected {
+  background-color: var(--bg-secondary);
+}
+
+.theme-traditional .board-theme-option-description {
+  color: var(--text-secondary);
+}
+
+/* Traditional theme buttons */
+.theme-traditional .btn,
+.theme-traditional button {
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  font-family: var(--font-main);
+  letter-spacing: 0.3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-traditional .btn-primary,
+.theme-traditional .btn-success,
+.theme-traditional .bg-primary-600 {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid #93402b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='brushed'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='3' stitchTiles='stitch'/%3E%3Crect width='100' height='100' filter='url(%23brushed)' opacity='0.1'/%3E%3C/svg%3E");
+}
+
+.theme-traditional .btn-primary:hover,
+.theme-traditional .btn-success:hover, 
+.theme-traditional .bg-primary-600:hover {
+  background-color: var(--button-hover);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.theme-traditional .btn-primary:active,
+.theme-traditional .btn-success:active,
+.theme-traditional .bg-primary-600:active {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.theme-traditional .btn-secondary {
+  background-color: #e8dcc8;
+  color: #483826;
+  border: 1px solid #c9b18d;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='brushed-light'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='3' stitchTiles='stitch'/%3E%3Crect width='100' height='100' filter='url(%23brushed-light)' opacity='0.07'/%3E%3C/svg%3E");
+}
+
+.theme-traditional .btn-secondary:hover {
+  background-color: #ded0b6;
+}
+
+.theme-traditional .btn-secondary:active {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.theme-traditional h1, 
+.theme-traditional h2, 
+.theme-traditional h3 {
+  color: #3a2e1f;
+  letter-spacing: 0.3px;
+}
+
+.theme-traditional h1.text-primary-700 {
+  color: #483826;
+}
+
+.theme-traditional .app-header {
+  background-image: url("data:image/svg+xml,%3Csvg width='200' height='20' viewBox='0 0 200 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,0 L200,0 L200,5 C150,15 50,15 0,5 L0,0 Z' fill='%23c9b18d' opacity='0.2'/%3E%3C/svg%3E");
+  background-position: bottom;
+  background-repeat: repeat-x;
+  border-bottom: 1px solid #c9b18d;
+}
+
+/* Theme-traditional form elements */
+.theme-traditional .form-input,
+.theme-traditional .form-select {
+  border: 1px solid #c9b18d;
+  background-color: #f9f5eb;
+  color: #483826;
+  border-radius: 4px;
+}
+
+.theme-traditional .form-input:focus,
+.theme-traditional .form-select:focus {
+  border-color: #a34730;
+  box-shadow: 0 0 0 3px rgba(163, 71, 48, 0.2);
+  outline: none;
+}
+
+/* Links in traditional theme */
+.theme-traditional a {
+  color: #a34730;
+  text-decoration: none;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.theme-traditional a:hover {
+  color: #8a3a28;
+  border-bottom-color: #8a3a28;
+}
+
+.theme-traditional a.underline {
+  text-decoration: none;
+  border-bottom: 1px solid rgba(163, 71, 48, 0.3);
+}
+
+.theme-traditional a.underline:hover {
+  border-bottom-color: #a34730;
+}
+
+.theme-traditional .bg-white,
+.theme-traditional .bg-neutral-50,
+.theme-traditional .bg-neutral-100 {
+  background-color: var(--bg-primary);
+}
+
+.theme-traditional .rounded-xl,
+.theme-traditional .rounded-lg {
+  position: relative;
+}
+
+.theme-traditional .rounded-xl::after,
+.theme-traditional .rounded-lg::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper-texture'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23paper-texture)' opacity='0.02'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* App Theme Selector */
+.app-theme-selector {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 0.5rem 1rem;
+}
+
+.theme-selector-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.theme-select {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.theme-traditional .theme-select {
+  border-radius: 4px;
+  background-color: var(--bg-secondary);
+  border: 1px solid #c9b18d;
+}
+
+/* Keep only the Go board specific styles, UI styles are now in Tailwind */
+
+/* Board styles */
+.board {
+  background-color: #E6BE7E;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 
+    0 8px 16px -4px rgba(0, 0, 0, 0.1),
+    0 4px 8px -2px rgba(0, 0, 0, 0.06);
+  position: relative;
+  display: grid;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Board theme variants */
+.board-theme-default {
+  background-color: #E6BE7E;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.15' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, #E6BE7E, #D6A75E);
+  box-shadow: 
+    0 12px 24px -6px rgba(0, 0, 0, 0.15),
+    0 6px 12px -3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #C9A36D;
+}
+
+.board-theme-wood-3d {
+  background-color: #7d4e28;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='wood'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.03' numOctaves='5' stitchTiles='stitch' seed='10'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.7 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23wood)' opacity='0.15'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.1' numOctaves='3' seed='5'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23grain)' opacity='0.07'/%3E%3C/svg%3E"),
+    radial-gradient(circle at 50% 50%, #7d4e28, #5d3c18);
+  box-shadow: 
+    0 16px 32px -8px rgba(0, 0, 0, 0.3),
+    0 8px 16px -4px rgba(0, 0, 0, 0.2),
+    inset 0 0 20px rgba(255, 235, 205, 0.1);
+  border: 1px solid #4e3010;
+}
+
+.board-theme-universe {
+  background: linear-gradient(to bottom, #0C0E1A, #121630);
+  box-shadow: 
+    0 16px 32px -8px rgba(0, 0, 0, 0.4),
+    0 8px 16px -4px rgba(0, 0, 0, 0.3),
+    inset 0 0 40px rgba(134, 187, 255, 0.1);
+  border: 1px solid rgba(134, 187, 255, 0.2);
+}
+
+.board-grid {
+  display: grid;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.board-intersection {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Board intersection grid lines */
+.board-intersection::before,
+.board-intersection::after {
+  content: '';
+  position: absolute;
+  background-color: #000000;
+  transition: none;
+  z-index: 1;
+}
+
+.board-intersection::before {
+  width: 100%;
+  height: 1px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.board-intersection::after {
+  width: 1px;
+  height: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Theme-specific grid line styles */
+.board-theme-default .board-intersection::before,
+.board-theme-default .board-intersection::after {
+  background-color: #000000;
+}
+
+.board-theme-wood-3d .board-intersection::before,
+.board-theme-wood-3d .board-intersection::after {
+  background-color: #000000;
+}
+
+.board-theme-universe .board-intersection::before,
+.board-theme-universe .board-intersection::after {
+  background-color: #FFFFFF;
+}
+
+/* Edge line styles */
+.top-edge::after {
+  height: 50%;
+  top: 50%;
+}
+
+.bottom-edge::after {
+  height: 50%;
+  bottom: 50%;
+}
+
+.left-edge::before {
+  width: 50%;
+  left: 50%;
+}
+
+.right-edge::before {
+  width: 50%;
+  right: 50%;
+}
+
+/* Board edge line enhancements */
+.board-intersection.top-edge::after,
+.board-intersection.bottom-edge::after,
+.board-intersection.left-edge::before,
+.board-intersection.right-edge::before {
+  background-color: #000000;
+}
+
+/* Theme-specific edge line styles */
+.board-theme-wood-3d .board-intersection.top-edge::after,
+.board-theme-wood-3d .board-intersection.bottom-edge::after,
+.board-theme-wood-3d .board-intersection.left-edge::before,
+.board-theme-wood-3d .board-intersection.right-edge::before {
+  background-color: #000000;
+}
+
+.board-theme-universe .board-intersection.top-edge::after,
+.board-theme-universe .board-intersection.bottom-edge::after,
+.board-theme-universe .board-intersection.left-edge::before,
+.board-theme-universe .board-intersection.right-edge::before {
+  background-color: #FFFFFF;
+}
+
+/* Star point theme variants */
+.board-theme-default .star-point {
+  background-color: black;
+}
+
+.board-theme-wood-3d .star-point {
+  background-color: #111;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.7), inset 0 0 2px rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+}
+
+.board-theme-universe .star-point {
+  background-color: #86BBFF;
+  box-shadow: 0 0 6px #86BBFF, 0 0 12px rgba(134, 187, 255, 0.6);
+}
+
+.star-point-9 {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+.star-point-13 {
+  width: 0.45rem;
+  height: 0.45rem;
+}
+
+.star-point-15 {
+  width: 0.4rem;
+  height: 0.4rem;
+}
+
+.star-point-19 {
+  width: 0.35rem;
+  height: 0.35rem;
+}
+
+.star-point-21 {
+  width: 0.3rem;
+  height: 0.3rem;
+}
+
+.stone {
+  position: absolute;
+  border-radius: 9999px;
+  z-index: 10;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  height: 90%;
+  top: 5%;
+  left: 5%;
+}
+
+/* Stone theme variants */
+.board-theme-default .stone-black {
+  background-color: black;
+  color: white;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+}
+
+.board-theme-default .stone-white {
+  background: white;
+  color: black;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.8);
+}
+
+.board-theme-wood-3d .stone-black {
+  background: radial-gradient(circle at 35% 35%, #444, #000);
+  color: white;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), inset 0 0 5px rgba(100, 100, 100, 0.3);
+  border: 1px solid #222;
+}
+
+.board-theme-wood-3d .stone-white {
+  background: radial-gradient(circle at 35% 35%, #fff, #fff);
+  color: black;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.board-theme-universe .stone-black {
+  background: radial-gradient(circle at 30% 30%, #111, #000);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8), inset 0 0 5px rgba(0, 0, 50, 0.8);
+  border: 1px solid #333;
+}
+
+.board-theme-universe .stone-white {
+  background: radial-gradient(circle at 30% 30%, #fff, #fff);
+  box-shadow: 0 0 10px rgba(180, 180, 255, 0.8), inset 0 0 5px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.last-move {
+  box-shadow: 0 0 0 3px #ef4444;
+}
+
+.board-theme-universe .last-move {
+  box-shadow: 0 0 0 3px #ef4444, 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+.stone-hover {
+  opacity: 0.5;
+}
+
+.dead-stone {
+  position: relative;
+  opacity: 0.35 !important;
+  filter: grayscale(100%);
+  transition: all 0.2s ease-in-out;
+}
+
+/* KO marker styling */
+@keyframes pulse-ko {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+}
+
+.ko-marker svg {
+  animation: pulse-ko 1.5s infinite;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+}
+
+/* Responsive board sizes */
+@media (max-width: 480px) {
+  .board-grid {
+    max-width: 95vw;
+  }
+
+  .stone .last-move-dot {
+    width: calc(min(30%, 2.5vw)) !important;
+    height: calc(min(30%, 2.5vw)) !important;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .board-grid {
+    max-width: 90vw;
+  }
+
+  .stone .last-move-dot {
+    width: calc(min(30%, 2vw)) !important;
+    height: calc(min(30%, 2vw)) !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .board-grid {
+    max-width: 800px;
+  }
+
+  .stone .last-move-dot {
+    width: calc(min(30%, 1.8vw)) !important;
+    height: calc(min(30%, 1.8vw)) !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .board-grid {
+    max-width: 900px;
+  }
+
+  .stone .last-move-dot {
+    width: calc(min(30%, 1.6vw)) !important;
+    height: calc(min(30%, 1.6vw)) !important;
+  }
+}
+
+/* Territory markers */
+.territory-marker {
+  position: absolute;
+  border-radius: 9999px;
+  z-index: 5;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.territory-black {
+  background-color: black;
+  opacity: 0.5;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.territory-white {
+  background-color: transparent;
+  border: none;
+  position: relative;
+}
+
+.territory-white::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 35%;
+  height: 35%;
+  background-color: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Board and grid classes */
+.board {
+  background-color: #E6BE7E;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 
+    0 8px 16px -4px rgba(0, 0, 0, 0.1),
+    0 4px 8px -2px rgba(0, 0, 0, 0.06);
+  position: relative;
+  display: grid;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Board size specific grid settings */
+.board-9 {
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  grid-template-rows: repeat(9, minmax(0, 1fr));
+}
+
+.board-13 {
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+  grid-template-rows: repeat(13, minmax(0, 1fr));
+}
+
+.board-15 {
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  grid-template-rows: repeat(15, minmax(0, 1fr));
+}
+
+.board-19 {
+  grid-template-columns: repeat(19, minmax(0, 1fr));
+  grid-template-rows: repeat(19, minmax(0, 1fr));
+}
+
+.board-21 {
+  grid-template-columns: repeat(21, minmax(0, 1fr));
+  grid-template-rows: repeat(21, minmax(0, 1fr));
+}
+
+/* Edge classes for the board grid */
+.top-edge::after {
+  top: 50%;
+}
+
+.bottom-edge::after {
+  bottom: 50%;
+}
+
+.left-edge::before {
+  left: 50%;
+}
+
+.right-edge::before {
+  right: 50%;
+}
+
+/* Handicap point styles */
+.valid-handicap-point {
+  cursor: pointer;
+  position: relative;
+}
+
+.handicap-point-indicator {
+  position: absolute;
+  border-radius: 9999px;
+  border: 2px dashed #4B5563;
+  opacity: 0.6;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Control button styling for wood theme */
+.board-theme-wood-3d .control-button {
+  background: linear-gradient(to bottom, #9c6b3c, #7c4a1b);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid #5a3611;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease-in-out;
+}
+
+.board-theme-wood-3d .control-button:hover {
+  background: linear-gradient(to bottom, #b07c45, #8d561f);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.board-theme-wood-3d .control-button:active {
+  background: linear-gradient(to bottom, #7c4a1b, #9c6b3c);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.board-theme-light-wood-3d {
+  background-color: #E6BE7E;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='wood'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.03' numOctaves='5' stitchTiles='stitch' seed='15'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.7 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23wood)' opacity='0.12'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.1' numOctaves='3' seed='8'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23grain)' opacity='0.06'/%3E%3C/svg%3E"),
+    linear-gradient(90deg, rgba(200, 160, 90, 0.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(180, 140, 70, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, #E6BE7E, #D6A75E);
+  box-shadow: 0 10px 16px -4px rgba(0, 0, 0, 0.3), 0 6px 8px -3px rgba(0, 0, 0, 0.2), inset 0 0 20px rgba(255, 248, 230, 0.2);
+  border: 1px solid #C9A36D;
+}
+
+.board-theme-light-wood-3d .board-intersection::before,
+.board-theme-light-wood-3d .board-intersection::after {
+  background-color: rgba(30, 15, 5, 0.85);
+  opacity: 0.9;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+.board-theme-light-wood-3d .star-point {
+  background-color: #111;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5), inset 0 0 2px rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.7);
+}
+
+.board-theme-light-wood-3d .stone-black {
+  background: radial-gradient(circle at 35% 35%, #444, #000);
+  color: white;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), inset 0 0 5px rgba(100, 100, 100, 0.3);
+  border: 1px solid #222;
+}
+
+.board-theme-light-wood-3d .stone-white {
+  background: radial-gradient(circle at 35% 35%, #fff, #fff);
+  color: black;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.board-theme-light-wood-3d .board-size-indicator {
+  background-color: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.board-theme-light-wood-3d .control-button {
+  background: linear-gradient(to bottom, #E6BE7E, #D6A75E);
+  color: rgba(60, 30, 15, 0.95);
+  border: 1px solid #C9A36D;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease-in-out;
+}
+
+.board-theme-light-wood-3d .control-button:hover {
+  background: linear-gradient(to bottom, #f1ca8a, #e1b26a);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.board-theme-light-wood-3d .control-button:active {
+  background: linear-gradient(to bottom, #D6A75E, #E6BE7E);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Traditional theme with enhanced board elements */
+.theme-traditional .board-bg {
+  border: 1px solid #c9b18d;
+  box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.theme-traditional .board-theme-light-wood-3d {
+  background-color: #E1BB76;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='wood'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='5' stitchTiles='stitch' seed='15'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.7 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23wood)' opacity='0.12'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8 0.1' numOctaves='3' seed='8'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23grain)' opacity='0.06'/%3E%3C/svg%3E"),
+    linear-gradient(90deg, rgba(200, 160, 90, 0.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(180, 140, 70, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, #E1BB76, #D6A75E);
+  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.25), 0 4px 8px -2px rgba(0, 0, 0, 0.15), inset 0 0 20px rgba(255, 248, 230, 0.2);
+  border: 1px solid #C9A36D;
+}
+
+/* Traditional Go stones */
+.theme-traditional .board-theme-light-wood-3d .stone-black {
+  background: radial-gradient(circle at 35% 35%, #333, #000);
+  color: white;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.7), inset 0 0 5px rgba(100, 100, 100, 0.3);
+  border: 1px solid #222;
+}
+
+.theme-traditional .board-theme-light-wood-3d .stone-white {
+  background: radial-gradient(circle at 35% 35%, #fff, #e9e9e9);
+  color: black;
+  border: 1px solid #aaa;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.theme-traditional .board-theme-light-wood-3d .board-intersection::before,
+.theme-traditional .board-theme-light-wood-3d .board-intersection::after {
+  background-color: rgba(30, 15, 5, 0.8);
+  opacity: 0.85;
+}
+
+.theme-traditional .board-theme-light-wood-3d .star-point {
+  background-color: #111;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.7);
+}
+
+/* Traditional theme board controls */
+.theme-traditional .board-theme-light-wood-3d .control-button {
+  background: linear-gradient(to bottom, #a34730, #8a3a28);
+  color: rgba(255, 245, 235, 0.95);
+  border: 1px solid #93402b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease-in-out;
+  border-radius: 4px;
+}
+
+.theme-traditional .board-theme-light-wood-3d .control-button:hover {
+  background: linear-gradient(to bottom, #b55941, #a34730);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.theme-traditional .board-theme-light-wood-3d .control-button:active {
+  background: linear-gradient(to bottom, #8a3a28, #a34730);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Additional board theme styles */
+.theme-traditional .board-theme-default {
+  background-color: #E1BB76;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.15' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E"),
+    linear-gradient(90deg, rgba(200, 160, 90, 0.07) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(150, 110, 60, 0.07) 1px, transparent 1px),
+    linear-gradient(135deg, #E1BB76, #D6A75E);
+  box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.2);
+  border: 1px solid #C9A36D;
+}
+
+/* Theme-aware component styles */
+.app-header {
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.app-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.app-button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+}
+
+.app-button:hover {
+  background-color: var(--button-hover);
+}
+
+/* Board theme container in toolbar */
+.theme-modern .board-theme-container {
+  position: relative;
+  z-index: 100;
+}
+
+.theme-modern .board-theme-dropdown {
+  position: absolute;
+  width: 300px;
+  right: 0;
+  z-index: 9999;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-modern .board-theme-option {
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.theme-modern .board-theme-option:hover {
+  background-color: var(--button-secondary-hover);
+}
+
+.theme-modern .board-theme-option.selected {
+  background-color: var(--accent-color);
+  color: var(--text-primary);
+}
+
+.theme-modern .board-theme-option-description {
+  color: var(--text-secondary);
+}
+
+/* Fix white background in board theme selector */
+.theme-modern .p-4.bg-white.rounded-lg.shadow {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.theme-modern .text-lg.font-semibold.mb-4,
+.theme-modern .font-medium {
+  color: var(--text-primary);
+}
+
+.theme-modern .text-neutral-600,
+.theme-modern .text-neutral-500 {
+  color: var(--text-secondary);
+}
+
+.theme-modern .border-neutral-200 {
+  border-color: var(--border-color);
+}
+
+.theme-modern .hover\:border-primary-300:hover {
+  border-color: var(--accent-color);
+}
+
+.theme-modern .bg-primary-50 {
+  background-color: rgba(93, 93, 255, 0.15);
+}
+
+.theme-modern .text-primary-800 {
+  color: var(--text-primary);
+}
+
+.theme-modern .hover\:bg-neutral-100:hover {
+  background-color: var(--button-secondary-hover);
+}
+
+/* Modern theme buttons */
+.theme-modern .btn,
+.theme-modern button {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  font-family: var(--font-main);
+  letter-spacing: 0.3px;
+  position: relative;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.theme-modern .btn-primary,
+.theme-modern .btn-success,
+.theme-modern .bg-primary-600 {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.theme-modern .btn-primary:hover,
+.theme-modern .btn-success:hover, 
+.theme-modern .bg-primary-600:hover {
+  background-color: var(--button-hover);
+  transform: translateY(-1px);
+}
+
+.theme-modern .btn-secondary,
+.theme-modern .bg-neutral-200 {
+  background-color: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-modern .btn-secondary:hover,
+.theme-modern .bg-neutral-200:hover {
+  background-color: var(--button-secondary-hover);
+  transform: translateY(-1px);
+}
+
+/* Modern card styling */
+.theme-modern .card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-modern .bg-white, 
+.theme-modern .bg-neutral-100 {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Form elements in modern theme */
+.theme-modern .form-input,
+.theme-modern .form-select {
+  background-color: var(--button-secondary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  color: var(--text-primary);
+}
+
+.theme-modern .form-input:focus,
+.theme-modern .form-select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(93, 93, 255, 0.2);
+  outline: none;
+}
+
+.theme-modern .form-select option {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 8px;
+}
+
+/* Game UI specific elements */
+.theme-modern .game-info-panel {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Improve text styling */
+.theme-modern h1, 
+.theme-modern h2, 
+.theme-modern h3 {
+  color: var(--text-primary);
+  letter-spacing: 0.3px;
+}
+
+.theme-modern h1.text-primary-700 {
+  color: var(--text-primary);
+}
+
+/* Fix Board Theme dropdown in modern theme */
+.theme-modern .board-theme-button {
+  background-color: var(--button-secondary-bg);
+  border: 1px solid var(--border-color);
+  color: var(--button-secondary-text);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.theme-modern .board-theme-dropdown {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-modern .board-theme-option {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.theme-modern .board-theme-option:hover {
+  background-color: var(--bg-secondary);
+}
+
+.theme-modern .board-theme-option.selected {
+  background-color: var(--accent-color);
+  color: var(--text-primary);
+}
+
+.theme-modern .board-theme-option-description {
+  color: var(--text-secondary);
+}
+
+/* Scoring phase styling */
+.theme-modern .bg-yellow-50 {
+  background-color: rgba(255, 252, 232, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-modern .bg-red-50 {
+  background-color: rgba(254, 242, 242, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-modern .bg-green-50 {
+  background-color: rgba(240, 253, 244, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-modern .bg-blue-50 {
+  background-color: rgba(240, 249, 255, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-modern .bg-indigo-50 {
+  background-color: rgba(240, 245, 255, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Links in modern theme */
+.theme-modern a {
+  color: #8080ff;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+  opacity: 0.9;
+}
+
+.theme-modern a:hover {
+  color: #9090ff;
+  border-bottom-color: #9090ff;
+  opacity: 1;
+}
+
+/* App theme selector styling */
+.theme-modern .app-theme-selector {
+  background-color: var(--button-secondary-bg);
+  border-radius: 8px;
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  color: var(--text-primary);
+}
+
+.theme-modern .theme-label {
+  color: var(--text-primary);
+  opacity: 0.9;
+}
+
+.theme-modern .theme-select {
+  background-color: var(--button-secondary-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-modern .theme-select:hover {
+  background-color: var(--button-secondary-hover);
+  border-color: var(--accent-color);
+}
+
+.theme-modern .theme-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(93, 93, 255, 0.2);
+}
+
+.theme-modern .theme-select option {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 8px;
+}
+
+/* GameInfo component in modern theme */
+.theme-modern .game-info {
+  background-color: var(--card-bg) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--card-shadow) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.theme-modern .player-card {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease;
+}
+
+.theme-modern .player-card-active {
+  background-color: rgba(240, 240, 240, 0.7) !important;
+  border-left: 3px solid var(--accent-color) !important;
+}
+
+.theme-modern .game-status {
+  background-color: rgba(245, 245, 245, 0.5) !important;
+}
+
+.theme-modern .time-control {
+  background-color: rgba(245, 245, 245, 0.5) !important;
+  border-radius: 8px !important;
+  padding: 8px !important;
+  margin-top: 8px !important;
+}
+
+.theme-modern .game-type-badge {
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+/* Chat bubble in modern theme */
+.theme-modern .floating-chat-bubble {
+  background-color: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--card-shadow) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.theme-modern .chat-message {
+  background-color: rgba(245, 245, 245, 0.5) !important;
+  border-radius: 8px !important;
+  margin-bottom: 8px !important;
+  padding: 8px !important;
+}
+
+.theme-modern .chat-input {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  padding: 8px !important;
+}
+
+.theme-modern .chat-send-button {
+  background-color: var(--button-bg) !important;
+  color: var(--button-text) !important;
+  border-radius: 8px !important;
+}
+
+/* Game board in modern theme */
+.theme-modern .board-bg {
+  border: 1px solid var(--border-color);
+  box-shadow: var(--card-shadow);
+}
+
+/* Style adjustments for different board sizes */
+.theme-modern .board-theme-button {
+  padding: 8px 12px;
+}
+
+/* Main app container background - add noise and gradient */
+.theme-modern .min-h-screen {
+  background-color: #12121a;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"),
+    radial-gradient(circle at 0% 0%, rgba(93, 93, 255, 0.15), transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(255, 93, 93, 0.1), transparent 50%),
+    linear-gradient(135deg, rgba(18, 18, 24, 0.95), rgba(22, 22, 30, 0.9), rgba(28, 28, 36, 0.95));
+  min-height: 100vh;
+}
+
+/* Add subtle shadow to theme toggle */
+.theme-modern .app-theme-selector {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Enhanced game board styling */
+.theme-modern .board-bg {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(220, 220, 220, 0.5);
+}
+
+/* Enhance hover effects on buttons */
+.theme-modern .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.theme-modern .btn:active {
+  transform: translateY(0);
+}
+
+/* Add subtle animations to cards */
+.theme-modern .card,
+.theme-modern .game-info {
+  transition: all 0.3s ease;
+}
+
+.theme-modern .card:hover,
+.theme-modern .game-info:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Go stone visualization enhancements */
+.theme-modern .stone-black {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.theme-modern .stone-white {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Notification banners */
+.theme-modern .bg-yellow-50,
+.theme-modern .bg-red-50,
+.theme-modern .bg-green-50,
+.theme-modern .bg-blue-50,
+.theme-modern .bg-indigo-50 {
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Loading and error screens */
+.theme-modern .flex.flex-col.items-center.justify-center.min-h-screen {
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"),
+    radial-gradient(135deg, rgba(245, 245, 245, 0.9), rgba(235, 235, 235, 0.8), rgba(250, 250, 250, 0.9));
+}
+
+/* Improve mobile responsiveness */
+@media (max-width: 640px) {
+  .theme-modern .card,
+  .theme-modern .game-info {
+    padding: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  .theme-modern .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Star point (hoshi) base styles */
+.star-point {
+  position: absolute;
+  background-color: black;
+  border-radius: 9999px;
+  z-index: 5; /* Above grid lines (1) but below stones (10) */
+}

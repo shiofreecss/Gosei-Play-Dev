@@ -1,0 +1,99 @@
+.timeout-alert {
+  margin: 20px 0;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-left: 5px solid #f44336;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.timeout-alert.byoyomi-timeout {
+  border-left-color: #ff9800;
+}
+
+.timeout-alert.black {
+  background-color: #f5f5f5;
+}
+
+.timeout-alert.white {
+  background-color: #fafafa;
+}
+
+.timeout-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.timeout-icon {
+  font-size: 24px;
+}
+
+.timeout-title {
+  margin: 0;
+  font-size: 18px;
+  color: #d32f2f;
+}
+
+.timeout-content {
+  padding: 5px 0;
+}
+
+.timeout-message {
+  font-weight: 500;
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.timeout-details {
+  margin: 5px 0;
+  color: #757575;
+  font-size: 14px;
+}
+
+.timeout-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.winner-label {
+  font-weight: 500;
+}
+
+.winner-color {
+  font-weight: 600;
+}
+
+.winner-color.black {
+  color: #212121;
+}
+
+.winner-color.white {
+  color: #757575;
+}
+
+/* Animation */
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.timeout-alert {
+  animation: slideIn 0.3s ease-out;
+} 

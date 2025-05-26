@@ -1,0 +1,118 @@
+.player-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background-color: #f5f5f5;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 180px;
+}
+
+.player-time.active {
+  border: 2px solid #4285f4;
+  background-color: #e8f0fe;
+}
+
+.player-time.black {
+  color: #333;
+}
+
+.player-time.white {
+  color: #666;
+}
+
+.time-display {
+  width: 100%;
+  text-align: center;
+}
+
+.time-label, .byoyomi-indicator {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #757575;
+  margin-bottom: 2px;
+}
+
+.time-value {
+  font-size: 24px;
+  font-weight: bold;
+  font-family: 'Roboto Mono', monospace;
+}
+
+/* Byoyomi styles */
+.byoyomi-indicator {
+  color: #ff9800;
+  font-weight: 500;
+}
+
+.periods-left {
+  font-size: 11px;
+  color: #757575;
+  margin-bottom: 4px;
+}
+
+/* Time warning styles */
+.time-value.warning {
+  color: #ff9800;
+}
+
+.time-value.danger {
+  color: #f44336;
+  animation: pulse 1s infinite;
+}
+
+/* Reset-pulse animation when move is made in byoyomi */
+.time-value.reset-pulse {
+  animation: resetPulse 1s ease-out;
+}
+
+@keyframes resetPulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+    color: #4caf50;
+    text-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .player-time {
+    max-width: 150px;
+  }
+  
+  .time-value {
+    font-size: 20px;
+  }
+  
+  .time-label, .byoyomi-indicator {
+    font-size: 10px;
+  }
+  
+  .periods-left {
+    font-size: 9px;
+  }
+} 
