@@ -1,5 +1,5 @@
 /* App Theme Styles */
-/* Modern Theme (Default) */
+/* Modern Theme (Default - Dark Mode) */
 .theme-modern {
   --bg-primary: rgba(18, 18, 24, 0.95);
   --bg-secondary: rgba(28, 28, 36, 0.8);
@@ -28,9 +28,40 @@
     radial-gradient(circle at 0% 100%, rgba(255, 93, 93, 0.1), transparent 70%);
 }
 
-/* Modern theme panel styling */
+/* Modern Theme Light Mode */
+.theme-modern-light {
+  --bg-primary: rgba(248, 250, 252, 0.95);
+  --bg-secondary: rgba(241, 245, 249, 0.8);
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --accent-color: #5d5dff;
+  --border-color: rgba(148, 163, 184, 0.3);
+  --header-bg: rgba(255, 255, 255, 0.9);
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --button-bg: rgba(93, 93, 255, 0.9);
+  --button-text: #ffffff;
+  --button-hover: rgba(111, 111, 255, 1);
+  --button-secondary-bg: rgba(241, 245, 249, 0.9);
+  --button-secondary-text: #374151;
+  --button-secondary-hover: rgba(226, 232, 240, 0.9);
+  --panel-bg: rgba(255, 255, 255, 0.9);
+  --panel-border: rgba(148, 163, 184, 0.2);
+  --font-main: 'Inter', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise-light'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise-light)' opacity='0.02'/%3E%3C/svg%3E"),
+    radial-gradient(circle at 50% 0%, rgba(93, 93, 255, 0.05), transparent 70%),
+    radial-gradient(circle at 0% 100%, rgba(255, 93, 93, 0.03), transparent 70%);
+}
+
+/* Modern theme panel styling - works for both dark and light */
 .theme-modern .bg-neutral-50,
-.theme-modern .bg-white {
+.theme-modern .bg-white,
+.theme-modern-light .bg-neutral-50,
+.theme-modern-light .bg-white {
   background-color: var(--card-bg);
   color: var(--text-primary);
   backdrop-filter: blur(10px);
@@ -38,29 +69,40 @@
   border: 1px solid var(--border-color);
 }
 
-.theme-modern .border-neutral-200 {
+.theme-modern .border-neutral-200,
+.theme-modern-light .border-neutral-200 {
   border-color: var(--border-color);
 }
 
 .theme-modern .text-neutral-900,
 .theme-modern .text-neutral-800,
-.theme-modern .text-neutral-700 {
+.theme-modern .text-neutral-700,
+.theme-modern-light .text-neutral-900,
+.theme-modern-light .text-neutral-800,
+.theme-modern-light .text-neutral-700 {
   color: var(--text-primary);
 }
 
 .theme-modern .text-neutral-600,
-.theme-modern .text-neutral-500 {
+.theme-modern .text-neutral-500,
+.theme-modern-light .text-neutral-600,
+.theme-modern-light .text-neutral-500 {
   color: var(--text-secondary);
 }
 
-.theme-modern .prose {
+.theme-modern .prose,
+.theme-modern-light .prose {
   color: var(--text-primary);
 }
 
 .theme-modern .prose h1,
 .theme-modern .prose h2,
 .theme-modern .prose h3,
-.theme-modern .prose h4 {
+.theme-modern .prose h4,
+.theme-modern-light .prose h1,
+.theme-modern-light .prose h2,
+.theme-modern-light .prose h3,
+.theme-modern-light .prose h4 {
   color: var(--text-primary);
   font-weight: 600;
   letter-spacing: -0.025em;
@@ -68,19 +110,25 @@
 
 .theme-modern .prose p,
 .theme-modern .prose ul,
-.theme-modern .prose ol {
+.theme-modern .prose ol,
+.theme-modern-light .prose p,
+.theme-modern-light .prose ul,
+.theme-modern-light .prose ol {
   color: var(--text-primary);
   opacity: 0.9;
   line-height: 1.7;
 }
 
 .theme-modern .prose strong,
-.theme-modern .font-medium {
+.theme-modern .font-medium,
+.theme-modern-light .prose strong,
+.theme-modern-light .font-medium {
   color: var(--text-primary);
   font-weight: 500;
 }
 
-.theme-modern .form-input {
+.theme-modern .form-input,
+.theme-modern-light .form-input {
   background-color: var(--button-secondary-bg);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
@@ -89,13 +137,33 @@
   -webkit-backdrop-filter: blur(5px);
 }
 
-.theme-modern .form-input::placeholder {
+.theme-modern .form-input::placeholder,
+.theme-modern-light .form-input::placeholder {
   color: var(--text-secondary);
   opacity: 0.7;
 }
 
-.theme-modern .shadow-card {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+/* Add form-select styling to match form-input */
+.theme-modern .form-select,
+.theme-modern-light .form-select {
+  background-color: var(--button-secondary-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.theme-modern .form-select:focus,
+.theme-modern-light .form-select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(93, 93, 255, 0.2);
+  outline: none;
+}
+
+.theme-modern .shadow-card,
+.theme-modern-light .shadow-card {
+  box-shadow: var(--card-shadow);
 }
 
 .theme-modern .prose {
@@ -189,7 +257,8 @@
 }
 
 /* Add modern connection status styling */
-.theme-modern .connection-status-panel {
+.theme-modern .connection-status-panel,
+.theme-modern-light .connection-status-panel {
   background-color: var(--card-bg) !important;
   border: 1px solid var(--border-color) !important;
   box-shadow: var(--card-shadow) !important;
@@ -197,19 +266,23 @@
   -webkit-backdrop-filter: blur(10px) !important;
 }
 
-.theme-modern .connection-status-text {
+.theme-modern .connection-status-text,
+.theme-modern-light .connection-status-text {
   color: var(--text-primary) !important;
 }
 
-.theme-modern .connection-status-refresh {
+.theme-modern .connection-status-refresh,
+.theme-modern-light .connection-status-refresh {
   color: var(--accent-color) !important;
 }
 
-.theme-modern .connection-status-refresh:hover {
+.theme-modern .connection-status-refresh:hover,
+.theme-modern-light .connection-status-refresh:hover {
   opacity: 0.8 !important;
 }
 
-.theme-modern .connection-status-timestamp {
+.theme-modern .connection-status-timestamp,
+.theme-modern-light .connection-status-timestamp {
   color: var(--text-secondary) !important;
 }
 
@@ -1083,7 +1156,8 @@
   z-index: 100;
 }
 
-.theme-modern .board-theme-dropdown {
+.theme-modern .board-theme-dropdown,
+.theme-modern-light .board-theme-dropdown {
   position: absolute;
   width: 300px;
   right: 0;
@@ -1096,21 +1170,25 @@
   -webkit-backdrop-filter: blur(10px);
 }
 
-.theme-modern .board-theme-option {
+.theme-modern .board-theme-option,
+.theme-modern-light .board-theme-option {
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary);
 }
 
-.theme-modern .board-theme-option:hover {
+.theme-modern .board-theme-option:hover,
+.theme-modern-light .board-theme-option:hover {
   background-color: var(--button-secondary-hover);
 }
 
-.theme-modern .board-theme-option.selected {
+.theme-modern .board-theme-option.selected,
+.theme-modern-light .board-theme-option.selected {
   background-color: var(--accent-color);
   color: var(--text-primary);
 }
 
-.theme-modern .board-theme-option-description {
+.theme-modern .board-theme-option-description,
+.theme-modern-light .board-theme-option-description {
   color: var(--text-secondary);
 }
 
@@ -1153,7 +1231,9 @@
 
 /* Modern theme buttons */
 .theme-modern .btn,
-.theme-modern button {
+.theme-modern button,
+.theme-modern-light .btn,
+.theme-modern-light button {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.2s ease;
@@ -1164,9 +1244,18 @@
   -webkit-backdrop-filter: blur(5px);
 }
 
+/* Light mode specific button border */
+.theme-modern-light .btn,
+.theme-modern-light button {
+  border: 1px solid var(--border-color);
+}
+
 .theme-modern .btn-primary,
 .theme-modern .btn-success,
-.theme-modern .bg-primary-600 {
+.theme-modern .bg-primary-600,
+.theme-modern-light .btn-primary,
+.theme-modern-light .btn-success,
+.theme-modern-light .bg-primary-600 {
   background-color: var(--button-bg);
   color: var(--button-text);
   border: none;
@@ -1176,26 +1265,40 @@
 
 .theme-modern .btn-primary:hover,
 .theme-modern .btn-success:hover, 
-.theme-modern .bg-primary-600:hover {
+.theme-modern .bg-primary-600:hover,
+.theme-modern-light .btn-primary:hover,
+.theme-modern-light .btn-success:hover, 
+.theme-modern-light .bg-primary-600:hover {
   background-color: var(--button-hover);
   transform: translateY(-1px);
 }
 
 .theme-modern .btn-secondary,
-.theme-modern .bg-neutral-200 {
+.theme-modern .bg-neutral-200,
+.theme-modern-light .btn-secondary,
+.theme-modern-light .bg-neutral-200 {
   background-color: var(--button-secondary-bg);
   color: var(--button-secondary-text);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Light mode specific secondary button border */
+.theme-modern-light .btn-secondary,
+.theme-modern-light .bg-neutral-200 {
+  border: 1px solid var(--border-color);
+}
+
 .theme-modern .btn-secondary:hover,
-.theme-modern .bg-neutral-200:hover {
+.theme-modern .bg-neutral-200:hover,
+.theme-modern-light .btn-secondary:hover,
+.theme-modern-light .bg-neutral-200:hover {
   background-color: var(--button-secondary-hover);
   transform: translateY(-1px);
 }
 
 /* Modern card styling */
-.theme-modern .card {
+.theme-modern .card,
+.theme-modern-light .card {
   background-color: var(--card-bg);
   border-radius: 12px;
   box-shadow: var(--card-shadow);
@@ -1205,7 +1308,9 @@
 }
 
 .theme-modern .bg-white, 
-.theme-modern .bg-neutral-100 {
+.theme-modern .bg-neutral-100,
+.theme-modern-light .bg-white, 
+.theme-modern-light .bg-neutral-100 {
   background-color: var(--card-bg);
   color: var(--text-primary);
   backdrop-filter: blur(10px);
@@ -1214,17 +1319,17 @@
 
 /* Form elements in modern theme */
 .theme-modern .form-input,
-.theme-modern .form-select {
+.theme-modern-light .form-input {
   background-color: var(--button-secondary-bg);
   border: 1px solid var(--border-color);
+  color: var(--text-primary);
   border-radius: 8px;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
-  color: var(--text-primary);
 }
 
 .theme-modern .form-input:focus,
-.theme-modern .form-select:focus {
+.theme-modern-light .form-input:focus {
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(93, 93, 255, 0.2);
   outline: none;
@@ -1553,4 +1658,75 @@
   background-color: black;
   border-radius: 9999px;
   z-index: 5; /* Above grid lines (1) but below stones (10) */
+}
+
+/* Theme Toggle Button */
+.theme-toggle-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  background-color: var(--button-secondary-bg);
+  color: var(--text-primary);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-toggle-button:hover {
+  background-color: var(--button-secondary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.theme-toggle-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-toggle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--accent-color);
+}
+
+.theme-toggle-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Light theme specific adjustments for toggle button */
+.theme-modern-light .theme-toggle-button {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.theme-modern-light .theme-toggle-button:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .theme-toggle-button {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+    gap: 0.375rem;
+  }
+  
+  .theme-toggle-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .theme-toggle-text {
+    font-size: 0.75rem;
+  }
 }

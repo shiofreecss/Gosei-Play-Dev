@@ -5,6 +5,7 @@ import { GameOptions, ColorPreference, ScoringRule, GameType } from '../types/go
 import ConnectionStatus from '../components/ConnectionStatus';
 import BoardSizePreview from '../components/go-board/BoardSizePreview';
 import GoseiLogo from '../components/GoseiLogo';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 
 // Define keys for localStorage
 const STORAGE_KEYS = {
@@ -803,7 +804,12 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-neutral-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <header className="text-center mb-12">
+        <header className="text-center mb-12 relative">
+          {/* Theme toggle button positioned at top right */}
+          <div className="absolute top-0 right-0">
+            <ThemeToggleButton />
+          </div>
+          
           <div className="flex items-center justify-center gap-3 mb-2">
             <GoseiLogo size={48} />
             <h1 className="text-4xl font-bold text-primary-700">Gosei Play</h1>

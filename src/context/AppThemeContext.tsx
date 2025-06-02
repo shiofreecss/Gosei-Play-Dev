@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Define the available app themes
-export type AppTheme = 'modern';
+export type AppTheme = 'modern' | 'modern-light';
 
 // Theme context interface
 interface AppThemeContextType {
   currentTheme: AppTheme;
   setTheme: (theme: AppTheme) => void;
+  toggleTheme: () => void;
+  isDarkMode: boolean;
   availableThemes: { id: AppTheme; name: string; description: string }[];
 }
 
@@ -14,40 +16,69 @@ interface AppThemeContextType {
 const AppThemeContext = createContext<AppThemeContextType>({
   currentTheme: 'modern',
   setTheme: () => {},
+  toggleTheme: () => {},
+  isDarkMode: true,
   availableThemes: [
-    { id: 'modern', name: 'Modern', description: 'Clean modern interface with light colors' },
+    { id: 'modern', name: 'Dark Mode', description: 'Modern dark interface' },
+    { id: 'modern-light', name: 'Light Mode', description: 'Modern light interface' },
   ],
 });
 
 // Provider component
 export const AppThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Initialize theme to modern only
-  const [currentTheme] = useState<AppTheme>('modern');
+  // Initialize theme from localStorage or use dark mode as default
+  const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => {
+    try {
+      const savedTheme = localStorage.getItem('gosei-app-theme');
+      return (savedTheme as AppTheme) || 'modern';
+    } catch (error) {
+      console.error('Error loading theme from localStorage:', error);
+      return 'modern';
+    }
+  });
 
-  // Available themes definition - only modern
+  // Available themes definition
   const availableThemes = [
-    { id: 'modern' as AppTheme, name: 'Modern', description: 'Clean modern interface with light colors' },
+    { id: 'modern' as AppTheme, name: 'Dark Mode', description: 'Modern dark interface' },
+    { id: 'modern-light' as AppTheme, name: 'Light Mode', description: 'Modern light interface' },
   ];
+
+  // Computed property for dark mode
+  const isDarkMode = currentTheme === 'modern';
 
   // Update theme and save to localStorage
   const setTheme = (theme: AppTheme) => {
-    // Since we only have modern theme, this is now a no-op
-    localStorage.setItem('gosei-app-theme', theme);
-    document.body.classList.remove('theme-traditional', 'theme-minimalist');
-    document.body.classList.add('theme-modern');
+    setCurrentTheme(theme);
+    try {
+      localStorage.setItem('gosei-app-theme', theme);
+    } catch (error) {
+      console.error('Error saving theme to localStorage:', error);
+    }
+    
+    // Remove all theme classes and add the new one
+    document.body.classList.remove('theme-modern', 'theme-modern-light', 'theme-traditional', 'theme-minimalist');
+    document.body.classList.add(`theme-${theme}`);
   };
 
-  // Apply modern theme class on initial load
+  // Toggle between dark and light mode
+  const toggleTheme = () => {
+    const newTheme = currentTheme === 'modern' ? 'modern-light' : 'modern';
+    setTheme(newTheme);
+  };
+
+  // Apply theme class on initial load and when theme changes
   useEffect(() => {
-    document.body.classList.remove('theme-traditional', 'theme-minimalist');
-    document.body.classList.add('theme-modern');
-  }, []);
+    document.body.classList.remove('theme-modern', 'theme-modern-light', 'theme-traditional', 'theme-minimalist');
+    document.body.classList.add(`theme-${currentTheme}`);
+  }, [currentTheme]);
 
   return (
     <AppThemeContext.Provider
       value={{
         currentTheme,
         setTheme,
+        toggleTheme,
+        isDarkMode,
         availableThemes,
       }}
     >
