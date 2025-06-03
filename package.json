@@ -1,6 +1,6 @@
 {
   "name": "gosei-play",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "private": true,
   "dependencies": {
     "@headlessui/react": "^2.2.1",
