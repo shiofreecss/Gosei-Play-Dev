@@ -578,185 +578,111 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Timer tick event to update remaining time (now only for display sync)
+  // Timer tick event to update remaining time with improved synchronization
   socket.on('timerTick', ({ gameId }) => {
-    log(`⏱️ TIMER TICK received for game ${gameId}`);
     const gameState = activeGames.get(gameId);
     
-    // Only send current time state for display sync, don't deduct time here
-    // Time deduction now happens when moves are actually made
     if (gameState && gameState.status === 'playing') {
-      // Send current time state to all players for display synchronization
-      gameState.players.forEach(player => {
-        io.to(gameId).emit('timeUpdate', {
-          gameId,
-          playerId: player.id,
-          color: player.color,
-          timeRemaining: player.timeRemaining,
-          byoYomiPeriodsLeft: player.byoYomiPeriodsLeft,
-          byoYomiTimeLeft: player.byoYomiTimeLeft,
-          isInByoYomi: player.isInByoYomi
-        });
-      });
-      
-      // Periodic full state sync
       const now = Date.now();
-      const lastSync = gameState.lastFullStateSync || 0;
-      if (now - lastSync >= 5000) { // Sync every 5 seconds
-        gameState.lastFullStateSync = now;
-        broadcastGameUpdate(gameId, gameState);
-      }
       
-      return; // Exit early, don't run the old timer logic
-    }
-    
-    // Keep the old logic for blitz games or as fallback
-    if (gameState && gameState.status === 'playing' && 
-        ((gameState.timePerMove && gameState.timePerMove > 0) || 
-         (gameState.timeControl && gameState.timeControl.timeControl > 0)) && 
-        gameState.lastMoveTime) {
-      const now = Date.now();
-      const elapsedTime = Math.floor((now - gameState.lastMoveTime) / 1000);
-      log(`⏰ TIMER CALCULATION - Elapsed: ${elapsedTime}s, LastMove: ${new Date(gameState.lastMoveTime).toISOString()}, Now: ${new Date(now).toISOString()}`);
+      // Send server timestamp with every update for synchronization
+      const serverTimestamp = now;
       
-      // CRITICAL FIX: Don't reset lastMoveTime on every tick - only reset it when we actually update the time
-      // gameState.lastMoveTime = now; // This was causing the bug!
-      
-      // Update time for current player only
+      // Update time for current player if there's active timing
       const currentPlayer = gameState.players.find(p => p.color === gameState.currentTurn);
-      if (currentPlayer) {
-        log(`⏰ BEFORE UPDATE - Player ${currentPlayer.color}: Main=${currentPlayer.timeRemaining}s, InByoYomi=${currentPlayer.isInByoYomi}`);
-      }
-      if (currentPlayer && currentPlayer.timeRemaining !== undefined) {
+      
+      if (currentPlayer && gameState.lastMoveTime) {
+        const elapsedTime = Math.floor((now - gameState.lastMoveTime) / 1000);
         
-        // Handle blitz game timing
-        if (gameState.gameType === 'blitz' && gameState.timePerMove) {
-          // For blitz games, count down time per move
-          const remainingTime = Math.max(0, currentPlayer.timeRemaining - elapsedTime);
-          currentPlayer.timeRemaining = remainingTime;
-          gameState.lastMoveTime = now; // Reset timer after updating
+        // Calculate accurate current time state without modifying stored values
+        let currentTimeRemaining = currentPlayer.timeRemaining;
+        let currentByoYomiTime = currentPlayer.byoYomiTimeLeft;
+        let currentByoYomiPeriods = currentPlayer.byoYomiPeriodsLeft;
+        let currentIsInByoYomi = currentPlayer.isInByoYomi;
+        
+        if (currentPlayer.isInByoYomi && gameState.timeControl.byoYomiPeriods > 0) {
+          // In byo-yomi: calculate current byo-yomi time
+          currentByoYomiTime = Math.max(0, currentPlayer.byoYomiTimeLeft - elapsedTime);
           
-          // Send time updates for both players
-          gameState.players.forEach(player => {
-            io.to(gameId).emit('timeUpdate', {
-              gameId,
-              playerId: player.id,
-              color: player.color,
-              timeRemaining: player.color === gameState.currentTurn ? 
-                remainingTime : player.timeRemaining
-            });
-          });
-          
-          // Check for time per move timeout
-          if (remainingTime <= 0) {
-            log(`Player ${currentPlayer.id} (${currentPlayer.color}) ran out of time in blitz mode`);
-            handlePlayerTimeout(gameState, currentPlayer);
-          }
-        }
-        // Handle byo-yomi timing
-        else if (currentPlayer.isInByoYomi && gameState.timeControl.byoYomiPeriods > 0) {
-          // Player is in byo-yomi, count down byo-yomi time
-          const newByoYomiTime = Math.max(0, currentPlayer.byoYomiTimeLeft - elapsedTime);
-          currentPlayer.byoYomiTimeLeft = newByoYomiTime;
-          gameState.lastMoveTime = now; // Reset timer after updating
-          
-          // Send time updates for both players
-          gameState.players.forEach(player => {
-            io.to(gameId).emit('timeUpdate', {
-              gameId,
-              playerId: player.id,
-              color: player.color,
-              timeRemaining: player.timeRemaining,
-              byoYomiPeriodsLeft: player.byoYomiPeriodsLeft,
-              byoYomiTimeLeft: player.color === gameState.currentTurn ? newByoYomiTime : player.byoYomiTimeLeft,
-              isInByoYomi: player.isInByoYomi
-            });
-          });
-          
-          // Check if byo-yomi period expired
-          if (newByoYomiTime <= 0) {
-            const periodsLeft = (currentPlayer.byoYomiPeriodsLeft || 0) - 1;
-            
-            if (periodsLeft > 0) {
-              // Start next byo-yomi period
-              currentPlayer.byoYomiPeriodsLeft = periodsLeft;
-              currentPlayer.byoYomiTimeLeft = gameState.timeControl.byoYomiTime;
-              
-              log(`⏳ BYO-YOMI PERIOD USED: Player ${currentPlayer.id} (${currentPlayer.color}) used one byo-yomi period. ${periodsLeft} periods remaining.`);
-              
-              // Broadcast byo-yomi period used
-              io.to(gameId).emit('byoYomiPeriodUsed', {
-                gameId,
-                playerId: currentPlayer.id,
-                color: currentPlayer.color,
-                periodsLeft: periodsLeft
-              });
-            } else {
-              // No more byo-yomi periods, player times out
-              log(`Player ${currentPlayer.id} (${currentPlayer.color}) ran out of byo-yomi periods`);
-              handlePlayerTimeout(gameState, currentPlayer);
-            }
+          // Check if current period would be expired
+          if (currentByoYomiTime <= 0 && currentByoYomiPeriods > 1) {
+            // Would use a period
+            const periodsToUse = Math.floor(Math.abs(currentByoYomiTime) / gameState.timeControl.byoYomiTime) + 1;
+            currentByoYomiPeriods = Math.max(0, currentByoYomiPeriods - periodsToUse);
+            currentByoYomiTime = gameState.timeControl.byoYomiTime;
+          } else if (currentByoYomiTime <= 0 && currentByoYomiPeriods <= 1) {
+            // Would timeout
+            currentByoYomiTime = 0;
+            currentByoYomiPeriods = 0;
           }
         } else {
-          // Player is in main time, count down main time
-          const remainingTime = Math.max(0, currentPlayer.timeRemaining - elapsedTime);
-          currentPlayer.timeRemaining = remainingTime;
-          gameState.lastMoveTime = now; // Reset timer after updating
-          log(`⏰ MAIN TIME UPDATE - Player ${currentPlayer.color}: ${remainingTime}s remaining (elapsed: ${elapsedTime}s)`);
+          // In main time: calculate current main time
+          currentTimeRemaining = Math.max(0, currentPlayer.timeRemaining - elapsedTime);
           
-          // Send time updates for both players
-          gameState.players.forEach(player => {
-            io.to(gameId).emit('timeUpdate', {
-              gameId,
-              playerId: player.id,
-              color: player.color,
-              timeRemaining: player.color === gameState.currentTurn ? 
-                remainingTime : player.timeRemaining,
-              byoYomiPeriodsLeft: player.byoYomiPeriodsLeft,
-              byoYomiTimeLeft: player.byoYomiTimeLeft,
-              isInByoYomi: player.isInByoYomi
-            });
-          });
-          
-          // Check for main time timeout
-          if (remainingTime <= 0) {
-            // Check if player has byo-yomi periods available
-            if (gameState.timeControl && gameState.timeControl.byoYomiPeriods > 0) {
-              // Switch to byo-yomi
-              currentPlayer.isInByoYomi = true;
-              currentPlayer.byoYomiPeriodsLeft = gameState.timeControl.byoYomiPeriods;
-              currentPlayer.byoYomiTimeLeft = gameState.timeControl.byoYomiTime;
-              
-              log(`🚨 ENTERING BYO-YOMI: Player ${currentPlayer.id} (${currentPlayer.color}) entered byo-yomi with ${gameState.timeControl.byoYomiPeriods} periods of ${gameState.timeControl.byoYomiTime}s each`);
-              
-              // Broadcast byo-yomi start
-              io.to(gameId).emit('byoYomiStarted', {
-                gameId,
-                playerId: currentPlayer.id,
-                color: currentPlayer.color,
-                periodsLeft: gameState.timeControl.byoYomiPeriods,
-                timePerPeriod: gameState.timeControl.byoYomiTime
-              });
+          // Check if would enter byo-yomi
+          if (currentTimeRemaining <= 0 && gameState.timeControl.byoYomiPeriods > 0) {
+            const overage = elapsedTime - currentPlayer.timeRemaining;
+            const periodsConsumed = Math.floor(overage / gameState.timeControl.byoYomiTime);
+            currentByoYomiPeriods = Math.max(0, gameState.timeControl.byoYomiPeriods - periodsConsumed);
+            currentIsInByoYomi = true;
+            currentTimeRemaining = 0;
+            
+            if (currentByoYomiPeriods > 0) {
+              currentByoYomiTime = gameState.timeControl.byoYomiTime;
             } else {
-              // No byo-yomi available, player times out
-              log(`⏰ TIMEOUT: Player ${currentPlayer.id} (${currentPlayer.color}) has no byo-yomi periods available`);
-              handlePlayerTimeout(gameState, currentPlayer);
+              currentByoYomiTime = 0;
             }
           }
         }
+        
+        // Send real-time time updates with server timestamp for all players
+        gameState.players.forEach(player => {
+          const isCurrentTurn = player.color === gameState.currentTurn;
+          
+          io.to(gameId).emit('timeUpdate', {
+            gameId,
+            playerId: player.id,
+            color: player.color,
+            timeRemaining: isCurrentTurn ? currentTimeRemaining : player.timeRemaining,
+            byoYomiPeriodsLeft: isCurrentTurn ? currentByoYomiPeriods : player.byoYomiPeriodsLeft,
+            byoYomiTimeLeft: isCurrentTurn ? currentByoYomiTime : player.byoYomiTimeLeft,
+            isInByoYomi: isCurrentTurn ? currentIsInByoYomi : player.isInByoYomi,
+            serverTimestamp: serverTimestamp, // Add server timestamp for sync
+            lastMoveTime: gameState.lastMoveTime // Add for client drift calculation
+          });
+        });
+        
+        // Check for timeout conditions more accurately
+        if (currentIsInByoYomi && currentByoYomiPeriods <= 0 && currentByoYomiTime <= 0) {
+          log(`💀 REAL-TIME TIMEOUT DETECTED - Player ${currentPlayer.color} ran out of time`);
+          handlePlayerTimeout(gameState, currentPlayer);
+          return;
+        } else if (!currentIsInByoYomi && currentTimeRemaining <= 0 && gameState.timeControl.byoYomiPeriods <= 0) {
+          log(`💀 REAL-TIME TIMEOUT DETECTED - Player ${currentPlayer.color} ran out of main time with no byo-yomi`);
+          handlePlayerTimeout(gameState, currentPlayer);
+          return;
+        }
+      } else {
+        // No active timing, just send current state with timestamp
+        gameState.players.forEach(player => {
+          io.to(gameId).emit('timeUpdate', {
+            gameId,
+            playerId: player.id,
+            color: player.color,
+            timeRemaining: player.timeRemaining,
+            byoYomiPeriodsLeft: player.byoYomiPeriodsLeft,
+            byoYomiTimeLeft: player.byoYomiTimeLeft,
+            isInByoYomi: player.isInByoYomi,
+            serverTimestamp: serverTimestamp,
+            lastMoveTime: gameState.lastMoveTime
+          });
+        });
       }
       
-      // Periodic full state sync and timer status logging
+      // Reduced sync interval for better responsiveness
       const lastSync = gameState.lastFullStateSync || 0;
-      if (now - lastSync >= 5000) { // Sync every 5 seconds
+      if (now - lastSync >= 2000) { // Sync every 2 seconds instead of 5
         gameState.lastFullStateSync = now;
-        
-        // Log current timer status for debugging
-        const currentPlayerForLog = gameState.players.find(p => p.color === gameState.currentTurn);
-        if (currentPlayerForLog) {
-          log(`⏰ TIMER STATUS - ${currentPlayerForLog.color}: Main=${currentPlayerForLog.timeRemaining}s, InByoYomi=${currentPlayerForLog.isInByoYomi}, ByoYomiLeft=${currentPlayerForLog.byoYomiTimeLeft}s, Periods=${currentPlayerForLog.byoYomiPeriodsLeft}`);
-        }
-        
         broadcastGameUpdate(gameId, gameState);
       }
     }

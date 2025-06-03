@@ -382,12 +382,28 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         });
         
         // Handle timer updates
-        newSocket.on('timeUpdate', (timeData: { playerId: string; color: StoneColor; timeRemaining: number; byoYomiPeriodsLeft?: number; byoYomiTimeLeft?: number; isInByoYomi?: boolean }) => {
+        newSocket.on('timeUpdate', (timeData: { 
+          playerId: string; 
+          color: StoneColor; 
+          timeRemaining: number; 
+          byoYomiPeriodsLeft?: number; 
+          byoYomiTimeLeft?: number; 
+          isInByoYomi?: boolean;
+          serverTimestamp?: number;
+          lastMoveTime?: number;
+        }) => {
           console.log(`Time update for player ${timeData.playerId} (${timeData.color}): ${timeData.timeRemaining}s remaining`);
           
           // Add more detailed logging for byo-yomi time updates
           if (timeData.isInByoYomi) {
             console.log(`Byo-yomi time update: ${timeData.byoYomiTimeLeft}s remaining in current period, ${timeData.byoYomiPeriodsLeft} periods left`);
+          }
+          
+          // Log server synchronization data
+          if (timeData.serverTimestamp && timeData.lastMoveTime) {
+            const now = Date.now();
+            const serverAge = now - timeData.serverTimestamp;
+            console.log(`Server sync: timestamp age ${serverAge}ms, last move: ${new Date(timeData.lastMoveTime).toISOString()}`);
           }
           
           // Update the player's time in the game state directly
@@ -660,14 +676,14 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   useEffect(() => {
     if (state.socket && state.gameState?.status === 'playing' && 
         ((state.gameState.timeControl?.timePerMove ?? 0) > 0 || (state.gameState.timePerMove ?? 0) > 0)) {
-      // Send timer ticks more frequently for better accuracy
+      // Send timer ticks less frequently since we now have better server synchronization
       const timerInterval = setInterval(() => {
         if (state.gameState?.status === 'playing' && state.socket) {
           state.socket.emit('timerTick', {
             gameId: state.gameState.id
           });
         }
-      }, 500); // Update twice per second for smoother countdown
+      }, 2000); // Reduced from 500ms to 2000ms for less server load
       
       return () => clearInterval(timerInterval);
     }
@@ -677,12 +693,28 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   useEffect(() => {
     if (state.socket) {
       // Handle time updates
-      state.socket.on('timeUpdate', (timeData: { playerId: string; color: StoneColor; timeRemaining: number; byoYomiPeriodsLeft?: number; byoYomiTimeLeft?: number; isInByoYomi?: boolean }) => {
+      state.socket.on('timeUpdate', (timeData: { 
+        playerId: string; 
+        color: StoneColor; 
+        timeRemaining: number; 
+        byoYomiPeriodsLeft?: number; 
+        byoYomiTimeLeft?: number; 
+        isInByoYomi?: boolean;
+        serverTimestamp?: number;
+        lastMoveTime?: number;
+      }) => {
         console.log(`Time update for player ${timeData.playerId} (${timeData.color}): ${timeData.timeRemaining}s remaining`);
         
         // Add more detailed logging for byo-yomi time updates
         if (timeData.isInByoYomi) {
           console.log(`Byo-yomi time update: ${timeData.byoYomiTimeLeft}s remaining in current period, ${timeData.byoYomiPeriodsLeft} periods left`);
+        }
+        
+        // Log server synchronization data
+        if (timeData.serverTimestamp && timeData.lastMoveTime) {
+          const now = Date.now();
+          const serverAge = now - timeData.serverTimestamp;
+          console.log(`Server sync: timestamp age ${serverAge}ms, last move: ${new Date(timeData.lastMoveTime).toISOString()}`);
         }
         
         // Update the player's time in the game state directly
