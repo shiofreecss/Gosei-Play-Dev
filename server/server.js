@@ -647,8 +647,8 @@ io.on('connection', (socket) => {
             byoYomiPeriodsLeft: isCurrentTurn ? currentByoYomiPeriods : player.byoYomiPeriodsLeft,
             byoYomiTimeLeft: isCurrentTurn ? currentByoYomiTime : player.byoYomiTimeLeft,
             isInByoYomi: isCurrentTurn ? currentIsInByoYomi : player.isInByoYomi,
-            serverTimestamp: serverTimestamp, // Add server timestamp for sync
-            lastMoveTime: gameState.lastMoveTime // Add for client drift calculation
+            serverTimestamp: serverTimestamp,
+            lastMoveTime: gameState.lastMoveTime
           });
         });
         
@@ -687,6 +687,82 @@ io.on('connection', (socket) => {
       }
     }
   });
+
+  // Add server-driven timer updates for active games
+  setInterval(() => {
+    // Send timer updates for all active games every 500ms
+    activeGames.forEach((gameState, gameId) => {
+      if (gameState.status === 'playing' && gameState.timeControl) {
+        const now = Date.now();
+        const currentPlayer = gameState.players.find(p => p.color === gameState.currentTurn);
+        
+        if (currentPlayer && gameState.lastMoveTime) {
+          const elapsedTime = Math.floor((now - gameState.lastMoveTime) / 1000);
+          
+          // Calculate accurate current time state
+          let currentTimeRemaining = currentPlayer.timeRemaining;
+          let currentByoYomiTime = currentPlayer.byoYomiTimeLeft;
+          let currentByoYomiPeriods = currentPlayer.byoYomiPeriodsLeft;
+          let currentIsInByoYomi = currentPlayer.isInByoYomi;
+          
+          if (currentPlayer.isInByoYomi && gameState.timeControl.byoYomiPeriods > 0) {
+            currentByoYomiTime = Math.max(0, currentPlayer.byoYomiTimeLeft - elapsedTime);
+            
+            if (currentByoYomiTime <= 0 && currentByoYomiPeriods > 1) {
+              const periodsToUse = Math.floor(Math.abs(currentByoYomiTime) / gameState.timeControl.byoYomiTime) + 1;
+              currentByoYomiPeriods = Math.max(0, currentByoYomiPeriods - periodsToUse);
+              currentByoYomiTime = gameState.timeControl.byoYomiTime;
+            } else if (currentByoYomiTime <= 0 && currentByoYomiPeriods <= 1) {
+              currentByoYomiTime = 0;
+              currentByoYomiPeriods = 0;
+            }
+          } else {
+            currentTimeRemaining = Math.max(0, currentPlayer.timeRemaining - elapsedTime);
+            
+            if (currentTimeRemaining <= 0 && gameState.timeControl.byoYomiPeriods > 0) {
+              const overage = elapsedTime - currentPlayer.timeRemaining;
+              const periodsConsumed = Math.floor(overage / gameState.timeControl.byoYomiTime);
+              currentByoYomiPeriods = Math.max(0, gameState.timeControl.byoYomiPeriods - periodsConsumed);
+              currentIsInByoYomi = true;
+              currentTimeRemaining = 0;
+              
+              if (currentByoYomiPeriods > 0) {
+                currentByoYomiTime = gameState.timeControl.byoYomiTime;
+              } else {
+                currentByoYomiTime = 0;
+              }
+            }
+          }
+          
+          // Send updates to all players
+          gameState.players.forEach(player => {
+            const isCurrentTurn = player.color === gameState.currentTurn;
+            
+            io.to(gameId).emit('timeUpdate', {
+              gameId,
+              playerId: player.id,
+              color: player.color,
+              timeRemaining: isCurrentTurn ? currentTimeRemaining : player.timeRemaining,
+              byoYomiPeriodsLeft: isCurrentTurn ? currentByoYomiPeriods : player.byoYomiPeriodsLeft,
+              byoYomiTimeLeft: isCurrentTurn ? currentByoYomiTime : player.byoYomiTimeLeft,
+              isInByoYomi: isCurrentTurn ? currentIsInByoYomi : player.isInByoYomi,
+              serverTimestamp: now,
+              lastMoveTime: gameState.lastMoveTime
+            });
+          });
+          
+          // Check for timeout
+          if (currentIsInByoYomi && currentByoYomiPeriods <= 0 && currentByoYomiTime <= 0) {
+            log(`💀 SERVER TIMEOUT DETECTED - Player ${currentPlayer.color} ran out of time`);
+            handlePlayerTimeout(gameState, currentPlayer);
+          } else if (!currentIsInByoYomi && currentTimeRemaining <= 0 && gameState.timeControl.byoYomiPeriods <= 0) {
+            log(`💀 SERVER TIMEOUT DETECTED - Player ${currentPlayer.color} ran out of main time with no byo-yomi`);
+            handlePlayerTimeout(gameState, currentPlayer);
+          }
+        }
+      }
+    });
+  }, 500); // Server sends updates every 500ms
 
   // Handle a pass
   socket.on('passTurn', ({ gameId, color, playerId, endGame }) => {

@@ -12,44 +12,30 @@ const TimeDisplay = ({
   socket, 
   gameId 
 }) => {
-  const [clientTime, setClientTime] = useState({
+  // Client state now ONLY stores what server tells us - no local calculations
+  const [displayTime, setDisplayTime] = useState({
     timeRemaining,
     isInByoYomi,
     byoYomiPeriodsLeft,
     byoYomiTimeLeft
   });
   
-  const [lastServerUpdate, setLastServerUpdate] = useState(Date.now());
-  const [serverTimestamp, setServerTimestamp] = useState(Date.now());
-  const [lastMoveTime, setLastMoveTime] = useState(Date.now());
   const [justMoved, setJustMoved] = useState(false);
   const prevByoYomiTimeRef = useRef(byoYomiTimeLeft);
   
-  // Listen for server time updates with timestamps
+  // Listen for server time updates - ONLY source of time information
   useEffect(() => {
     if (!socket) return;
     
     const handleTimeUpdate = (data) => {
       if (data.color === color) {
-        const now = Date.now();
-        
-        // Update client state with server values
-        setClientTime({
+        // CRITICAL: Use ONLY server-provided values, no client calculation
+        setDisplayTime({
           timeRemaining: data.timeRemaining,
           isInByoYomi: data.isInByoYomi,
           byoYomiPeriodsLeft: data.byoYomiPeriodsLeft,
           byoYomiTimeLeft: data.byoYomiTimeLeft
         });
-        
-        // Store server synchronization data
-        if (data.serverTimestamp) {
-          setServerTimestamp(data.serverTimestamp);
-          setLastServerUpdate(now);
-        }
-        
-        if (data.lastMoveTime) {
-          setLastMoveTime(data.lastMoveTime);
-        }
       }
     };
     
@@ -60,97 +46,38 @@ const TimeDisplay = ({
     };
   }, [socket, color]);
   
-  // Update the client-side timer with server synchronization
-  useEffect(() => {
-    let timer;
-    
-    // Only run the timer for the current player
-    if (isCurrentPlayer) {
-      timer = setInterval(() => {
-        const now = Date.now();
-        
-        // Calculate drift between client and server
-        const timeSinceServerUpdate = now - lastServerUpdate;
-        const serverNow = serverTimestamp + timeSinceServerUpdate;
-        
-        // Calculate elapsed time since last move using server time
-        const elapsedTime = Math.floor((serverNow - lastMoveTime) / 1000);
-        
-        setClientTime(prevTime => {
-          // Use server-synchronized time calculation
-          if (prevTime.isInByoYomi) {
-            // In byo-yomi, count down from server values
-            const serverByoYomiTime = Math.max(0, byoYomiTimeLeft - elapsedTime);
-            
-            return {
-              ...prevTime,
-              byoYomiTimeLeft: serverByoYomiTime
-            };
-          } else {
-            // In main time, count down from server values
-            const serverMainTime = Math.max(0, timeRemaining - elapsedTime);
-            
-            return {
-              ...prevTime,
-              timeRemaining: serverMainTime
-            };
-          }
-        });
-        
-        // Send timer tick to server less frequently to reduce network load
-        if (Math.floor(now / 2000) !== Math.floor((now - 1000) / 2000)) {
-          if (socket && gameId) {
-            socket.emit('timerTick', { gameId });
-          }
-        }
-      }, 200); // Update more frequently for smoother display
-    }
-    
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [isCurrentPlayer, socket, gameId, lastServerUpdate, serverTimestamp, lastMoveTime, timeRemaining, byoYomiTimeLeft]);
+  // REMOVED: All client-side timer countdown logic - server is now the authority
   
-  // Check for byoyomi time reset (when server sends new values)
+  // Only keep the visual reset detection for animation
   useEffect(() => {
-    // Enhanced reset detection with multiple scenarios
     let resetDetected = false;
     
-    // Scenario 1: Time increased significantly (normal reset)
+    // Detect byo-yomi resets for visual feedback only
     if (byoYomiTimeLeft > prevByoYomiTimeRef.current + 5) {
       resetDetected = true;
-      console.log(`🎯 BYO-YOMI RESET DETECTED (significant increase) for ${color}: ${prevByoYomiTimeRef.current}s → ${byoYomiTimeLeft}s`);
-    }
-    // Scenario 2: Time reset to full period time from lower value  
-    else if (byoYomiTimeLeft >= 25 && prevByoYomiTimeRef.current < 25) {
+      console.log(`🎯 BYO-YOMI RESET DETECTED for ${color}: ${prevByoYomiTimeRef.current}s → ${byoYomiTimeLeft}s`);
+    } else if (byoYomiTimeLeft >= 25 && prevByoYomiTimeRef.current < 25) {
       resetDetected = true;
       console.log(`🎯 BYO-YOMI RESET DETECTED (full reset) for ${color}: ${prevByoYomiTimeRef.current}s → ${byoYomiTimeLeft}s`);
-    }
-    // Scenario 3: Any significant upward change
-    else if (byoYomiTimeLeft > prevByoYomiTimeRef.current + 2) {
+    } else if (byoYomiTimeLeft > prevByoYomiTimeRef.current + 2) {
       resetDetected = true;
       console.log(`🎯 BYO-YOMI RESET DETECTED (upward change) for ${color}: ${prevByoYomiTimeRef.current}s → ${byoYomiTimeLeft}s`);
     }
     
     if (resetDetected) {
       setJustMoved(true);
-      
-      // Clear the justMoved flag after animation completes
       const timeout = setTimeout(() => {
         setJustMoved(false);
       }, 1000);
       
-      // Update the ref for the next comparison
       prevByoYomiTimeRef.current = byoYomiTimeLeft;
-      
       return () => clearTimeout(timeout);
     }
     
-    // Update the ref for the next comparison
     prevByoYomiTimeRef.current = byoYomiTimeLeft;
     
-    // Update local state with new values from props
-    setClientTime({
+    // Update display with server-provided values
+    setDisplayTime({
       timeRemaining,
       isInByoYomi,
       byoYomiPeriodsLeft,
@@ -160,28 +87,28 @@ const TimeDisplay = ({
   
   // Determine color styling
   const getTimeColor = () => {
-    if (clientTime.isInByoYomi) {
+    if (displayTime.isInByoYomi) {
       if (justReset || justMoved) return '#4caf50'; // Green when just reset
-      return clientTime.byoYomiTimeLeft < 5 ? '#f44336' : '#ff9800'; // Red when < 5s, orange otherwise
+      return displayTime.byoYomiTimeLeft < 5 ? '#f44336' : '#ff9800'; // Red when < 5s, orange otherwise
     } else {
-      return clientTime.timeRemaining < 30 ? '#f44336' : 'inherit';
+      return displayTime.timeRemaining < 30 ? '#f44336' : 'inherit';
     }
   };
   
   // Get appropriate display text
   const getTimeDisplay = () => {
-    if (clientTime.isInByoYomi) {
+    if (displayTime.isInByoYomi) {
       return (
         <div className="time-display">
           <div className="byoyomi-indicator">
-            BY {clientTime.byoYomiPeriodsLeft}×{formatTime(clientTime.byoYomiTimeLeft)}
+            BY {displayTime.byoYomiPeriodsLeft}×{formatTime(displayTime.byoYomiTimeLeft)}
           </div>
-          <div className="periods-left">{clientTime.byoYomiPeriodsLeft} periods left</div>
+          <div className="periods-left">{displayTime.byoYomiPeriodsLeft} periods left</div>
           <div 
             className={`time-value text-base sm:text-lg font-semibold font-mono ${justReset || justMoved ? 'reset-pulse' : ''}`} 
             style={{ color: getTimeColor() }}
           >
-            {formatTime(clientTime.byoYomiTimeLeft)}
+            {formatTime(displayTime.byoYomiTimeLeft)}
           </div>
         </div>
       );
@@ -193,7 +120,7 @@ const TimeDisplay = ({
             className="time-value text-base sm:text-lg font-semibold text-gray-400 font-mono" 
             style={{ color: getTimeColor() }}
           >
-            {formatTime(clientTime.timeRemaining)}
+            {formatTime(displayTime.timeRemaining)}
           </div>
         </div>
       );
