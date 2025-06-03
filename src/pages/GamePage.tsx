@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { GoBoard, GameInfo } from '../components/go-board';
 import GameError from '../components/GameError';
 import BoardThemeButton from '../components/BoardThemeButton';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 import ConnectionStatus from '../components/ConnectionStatus';
 import { useGame } from '../context/GameContext';
 import { Position, GameMove, GameState } from '../types/go';
@@ -515,6 +516,11 @@ const GamePage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-100 p-4">
+        {/* Theme Toggle Button - positioned in top right */}
+        <div className="absolute top-4 right-4">
+          <ThemeToggleButton />
+        </div>
+        
         <div className="card max-w-md w-full text-center">
           <h2 className="text-2xl font-bold mb-4">Loading Game...</h2>
           <p>Please wait while we set up the game.</p>
@@ -527,6 +533,11 @@ const GamePage: React.FC = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-100 p-4">
+        {/* Theme Toggle Button - positioned in top right */}
+        <div className="absolute top-4 right-4">
+          <ThemeToggleButton />
+        </div>
+        
         <div className="card max-w-md w-full">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
           <p className="mb-4">{error}</p>
@@ -545,6 +556,11 @@ const GamePage: React.FC = () => {
   if (showJoinForm && !currentPlayer) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-100 p-4">
+        {/* Theme Toggle Button - positioned in top right */}
+        <div className="absolute top-4 right-4">
+          <ThemeToggleButton />
+        </div>
+        
         <div className="card max-w-md w-full">
           <h2 className="text-2xl font-bold mb-4">Join Game</h2>
           <p className="mb-4">
@@ -590,6 +606,11 @@ const GamePage: React.FC = () => {
   if (!gameState) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-100 p-4">
+        {/* Theme Toggle Button - positioned in top right */}
+        <div className="absolute top-4 right-4">
+          <ThemeToggleButton />
+        </div>
+        
         <div className="card max-w-md w-full text-center">
           <h2 className="text-2xl font-bold mb-4">Game Not Found</h2>
           <p className="mb-4">We couldn't find the requested game.</p>
@@ -622,6 +643,11 @@ const GamePage: React.FC = () => {
           <div className="flex items-center gap-3">
             <GoseiLogo size={40} />
             <h1 className="text-2xl sm:text-3xl font-bold text-primary-700">Gosei Play</h1>
+          </div>
+          
+          {/* Theme Toggle Button - positioned on the right */}
+          <div className="flex items-center">
+            <ThemeToggleButton />
           </div>
         </div>
         

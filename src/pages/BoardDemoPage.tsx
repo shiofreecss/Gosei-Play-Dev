@@ -6,6 +6,7 @@ import GoBoard from '../components/go-board/GoBoard';
 import { Board, Position, StoneColor, Stone } from '../types/go';
 import { useBoardTheme } from '../context/BoardThemeContext';
 import BoardThemeSelector from '../components/BoardThemeSelector';
+import ThemeToggleButton from '../components/ThemeToggleButton';
 import RulesSidebar from '../components/RulesSidebar';
 
 // Helper functions for capturing logic
@@ -197,7 +198,12 @@ const BoardDemoPage: React.FC = () => {
     <div className="min-h-screen bg-neutral-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <header className="text-center mb-8">
+        <header className="text-center mb-8 relative">
+          {/* Theme Toggle Button - positioned in top right */}
+          <div className="absolute top-0 right-0">
+            <ThemeToggleButton />
+          </div>
+          
           <div className="flex items-center justify-center gap-3 mb-2">
             <GoseiLogo size={48} />
             <h1 className="text-4xl font-bold text-primary-700">
