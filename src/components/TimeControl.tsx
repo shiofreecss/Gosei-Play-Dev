@@ -362,67 +362,64 @@ const TimeControl: React.FC<TimeControlProps> = ({
     ) {
       colorClass = 'text-orange-500';
     }
-    // Normal color
+    // Normal color - use theme-aware classes
     else {
-      colorClass = isActive ? 'text-gray-200' : 'text-gray-400';
+      colorClass = isActive ? 'text-neutral-900' : 'text-neutral-600';
     }
     
     return `${textSizeClass} ${fontWeightClass} ${colorClass} font-mono`;
   };
 
-  const clockCardStyle = (isActive: boolean) => {
-    const colors = {
-      background: isActive ? '#1a1a2e' : '#0f0f1a',
-      border: isActive ? '#4a4a82' : 'transparent',
-    };
+  const getClockCardClasses = (isActive: boolean) => {
+    // Base classes for the timer card
+    let baseClasses = 'flex flex-col items-center justify-center rounded-md relative overflow-hidden';
     
-    // Responsive padding based on device
-    const padding = isMobile ? '0.5rem' : isTablet ? '0.625rem' : '0.75rem';
+    // Responsive padding and sizing
+    let sizeClasses = '';
+    if (isMobile) {
+      sizeClasses = 'p-2 min-h-[80px]';
+    } else if (isTablet) {
+      sizeClasses = 'p-2.5 min-h-[100px]';
+    } else {
+      sizeClasses = 'p-3 min-h-[120px]';
+    }
     
-    return {
-      display: 'flex',
-      flexDirection: 'column' as const,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding,
-      backgroundColor: colors.background,
-      borderRadius: '0.375rem',
-      flex: 1,
-      border: `3px solid ${colors.border}`,
-      position: 'relative' as const,
-      overflow: 'hidden' as const,
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      minHeight: isMobile ? '80px' : isTablet ? '100px' : '120px'
-    };
+    // Theme and state classes
+    let stateClasses = '';
+    if (isActive) {
+      stateClasses = 'bg-neutral-100 border-2 border-blue-500 shadow-lg';
+    } else {
+      stateClasses = 'bg-neutral-50 border-2 border-transparent shadow-md';
+    }
+    
+    return `${baseClasses} ${sizeClasses} ${stateClasses} flex-1`;
   };
 
-  // Time pressure indicator animation
-  const getTimePressureStyle = (timeState: TimeState) => {
+  // Time pressure indicator classes
+  const getTimePressureClasses = (timeState: TimeState) => {
     if (
       (timePerMove > 0 && timeState.timePerMoveLeft !== undefined && timeState.timePerMoveLeft <= 10) ||
       (timeState.mainTime > 0 && timeState.mainTime <= 30) ||
       (timeState.isByoYomi && timeState.byoYomiTimeLeft <= 10)
     ) {
-      return {
-        animation: 'pulse 1s ease-in-out infinite',
-        background: 'linear-gradient(45deg, rgba(220, 38, 38, 0.2) 0%, transparent 100%)'
-      };
+      return 'absolute inset-0 animate-pulse bg-gradient-to-br from-red-200/30 to-transparent';
     }
-    return {};
+    return 'absolute inset-0';
   };
 
   return (
     <div className={`flex mt-4 ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-4'}`}>
-      <div style={clockCardStyle(currentTurn === 'black')}>
-        <div className="absolute inset-0" style={getTimePressureStyle(blackTime)} />
-        <div className={`rounded-full bg-black border-2 border-gray-600 ${
+      {/* Black Player Timer */}
+      <div className={getClockCardClasses(currentTurn === 'black')}>
+        <div className={getTimePressureClasses(blackTime)} />
+        <div className={`rounded-full bg-black border-2 border-neutral-400 ${
           isMobile ? 'w-3 h-3 mb-1' : isTablet ? 'w-4 h-4 mb-1' : 'w-5 h-5 mb-2'
         }`}></div>
         <div className={getTimeStyle(blackTime, currentTurn === 'black')}>
           {getTimeDisplay(blackTime)}
         </div>
         {blackTime.isByoYomi && byoYomiPeriods > 0 && (
-          <div className={`text-gray-400 mt-1 font-mono text-center ${
+          <div className={`text-neutral-500 mt-1 font-mono text-center ${
             isMobile ? 'text-xs leading-tight' : isTablet ? 'text-sm' : 'text-sm'
           }`}>
             {blackTime.byoYomiPeriodsLeft} periods left
@@ -430,16 +427,17 @@ const TimeControl: React.FC<TimeControlProps> = ({
         )}
       </div>
       
-      <div style={clockCardStyle(currentTurn === 'white')}>
-        <div className="absolute inset-0" style={getTimePressureStyle(whiteTime)} />
-        <div className={`rounded-full bg-white border-2 border-gray-300 ${
+      {/* White Player Timer */}
+      <div className={getClockCardClasses(currentTurn === 'white')}>
+        <div className={getTimePressureClasses(whiteTime)} />
+        <div className={`rounded-full bg-white border-2 border-neutral-400 shadow-sm ${
           isMobile ? 'w-3 h-3 mb-1' : isTablet ? 'w-4 h-4 mb-1' : 'w-5 h-5 mb-2'
         }`}></div>
         <div className={getTimeStyle(whiteTime, currentTurn === 'white')}>
           {getTimeDisplay(whiteTime)}
         </div>
         {whiteTime.isByoYomi && byoYomiPeriods > 0 && (
-          <div className={`text-gray-400 mt-1 font-mono text-center ${
+          <div className={`text-neutral-500 mt-1 font-mono text-center ${
             isMobile ? 'text-xs leading-tight' : isTablet ? 'text-sm' : 'text-sm'
           }`}>
             {whiteTime.byoYomiPeriodsLeft} periods left

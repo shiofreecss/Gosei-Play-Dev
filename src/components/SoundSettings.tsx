@@ -15,7 +15,7 @@ const SoundSettings: React.FC = () => {
       className={`px-2 py-1 rounded text-xs ${
         stoneSoundEnabled 
           ? 'bg-green-600 text-white' 
-          : 'bg-gray-600 text-gray-300'
+          : 'bg-neutral-400 text-neutral-700'
       }`}
     >
       {stoneSoundEnabled ? 'ON' : 'OFF'}
