@@ -316,10 +316,8 @@ const GameInfo: React.FC<GameInfoProps> = ({
             whiteIsInByoYomi={whitePlayer?.isInByoYomi}
             onTimeout={(color) => {
               console.log(`Player ${color} has timed out`);
-              // Handle timeout by forfeiting the game for the timed-out player
-              if (onResign && currentPlayer?.color === color) {
-                onResign();
-              }
+              // Server will handle timeout and emit playerTimeout event with proper W+T or B+T result
+              // Do not call onResign() here as that would incorrectly set W+R or B+R
             }}
           />
         </div>
