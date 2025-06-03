@@ -269,6 +269,12 @@ const HomePage: React.FC = () => {
         if ('timePerMove' in value) {
           newState.timePerMove = value.timePerMove;
         }
+        
+        // Auto-behavior: When Byo-yomi Periods is set to 0 (No byo-yomi), 
+        // automatically set Byo-yomi Time to 0 (Not used)
+        if ('byoYomiPeriods' in value && value.byoYomiPeriods === 0) {
+          (value as any).byoYomiTime = 0;
+        }
       }
       
       // If updating direct timeControl or timePerMove, sync the timeControlOptions
@@ -285,6 +291,16 @@ const HomePage: React.FC = () => {
           ...prev.timeControlOptions,
           timePerMove: value
         };
+        
+        // Auto-behavior: When Time per Move is set to any value > 0,
+        // automatically set Byo-yomi Periods to 0 (No byo-yomi)
+        if (value > 0) {
+          newState.timeControlOptions = {
+            ...newState.timeControlOptions,
+            byoYomiPeriods: 0,
+            byoYomiTime: 0  // Also set time to 0 when disabling periods
+          };
+        }
         
         // Auto-change game type based on Time per Move value
         if (value === 0) {
