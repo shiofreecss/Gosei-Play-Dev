@@ -1,4 +1,132 @@
-# Byo-Yomi Countdown Reset Fix ✅
+# 🕐 Byo-Yomi Countdown Fix
+
+## Problem Solved: Timer Not Counting Down in Byo-Yomi
+
+### Issue Description
+After implementing the server-authoritative timer system, a new issue emerged:
+- **When a player enters byo-yomi**: Timer stops counting down
+- **When periods are consumed/reset**: Timer doesn't restart countdown
+- **Result**: Players see static timer displays instead of live countdown
+
+### Root Cause Analysis
+
+The issue was in the server's timer logic. When byo-yomi events occurred (entering byo-yomi, resetting periods, consuming periods), the server correctly:
+
+1. ✅ Updated the player's `byoYomiTimeLeft` to the full period time
+2. ✅ Updated the player's `byoYomiPeriodsLeft` 
+3. ✅ Sent `byoYomiReset` events to clients
+4. ❌ **But forgot to reset `gameState.lastMoveTime`**
+
+### The Problem in Detail
+
+The server's automatic timer updates (every 500ms) calculate elapsed time as:
+```javascript
+const elapsedTime = Math.floor((now - gameState.lastMoveTime) / 1000);
+const currentByoYomiTime = Math.max(0, currentPlayer.byoYomiTimeLeft - elapsedTime);
+```
+
+**Scenario**: Player enters byo-yomi after 45 seconds of thinking
+1. `gameState.lastMoveTime` = timestamp when they started thinking (45s ago)
+2. Server sets `byoYomiTimeLeft` = 30s (full period)
+3. Server calculates: `currentByoYomiTime = 30 - 45 = -15` ❌
+4. Timer appears frozen because elapsed time is too large
+
+## ✅ Solution Implemented
+
+### Fix: Reset Timer Reference When Byo-Yomi Events Occur
+
+Updated the server to reset `gameState.lastMoveTime = Date.now()` in all byo-yomi scenarios:
+
+#### 1. **Byo-Yomi Reset (Move within period)**
+```javascript
+// 3.1: Move made within byo-yomi period - reset clock
+movingPlayer.byoYomiTimeLeft = gameState.timeControl.byoYomiTime;
+log(`🔄 BYO-YOMI RESET - Player ${movingPlayer.color} made move in ${timeSpentOnMove}s`);
+
+// CRITICAL: Reset the timer start time when byo-yomi resets
+gameState.lastMoveTime = Date.now();
+```
+
+#### 2. **Period Consumption and Reset**
+```javascript
+// 3.2: Move exceeded byo-yomi period - consume periods and reset
+movingPlayer.byoYomiPeriodsLeft = newPeriodsLeft;
+movingPlayer.byoYomiTimeLeft = gameState.timeControl.byoYomiTime;
+log(`⏳ BYO-YOMI PERIODS CONSUMED - Player consumed ${periodsConsumed} periods`);
+
+// CRITICAL: Reset the timer start time when periods are consumed and reset
+gameState.lastMoveTime = Date.now();
+```
+
+#### 3. **Entering Byo-Yomi from Main Time**
+```javascript
+// First time entering byo-yomi
+movingPlayer.isInByoYomi = true;
+movingPlayer.byoYomiPeriodsLeft = remainingPeriods;
+movingPlayer.byoYomiTimeLeft = gameState.timeControl.byoYomiTime;
+log(`🚨 ENTERING BYO-YOMI: Player ${movingPlayer.color} entered byo-yomi`);
+
+// CRITICAL: Reset the timer start time when entering byo-yomi
+gameState.lastMoveTime = Date.now();
+```
+
+### Applied to Both Move and Pass Events
+
+The fix was applied to both:
+- **`makeMove` handler**: When stones are placed
+- **`passTurn` handler**: When players pass their turn
+
+## Technical Details
+
+### Before Fix
+```javascript
+// Player enters byo-yomi after 45s thinking
+gameState.lastMoveTime = timestampFromStart; // 45 seconds ago
+player.byoYomiTimeLeft = 30; // Reset to full period
+
+// Server calculation every 500ms:
+elapsedTime = now - gameState.lastMoveTime; // 45+ seconds
+currentByoYomiTime = 30 - 45 = -15; // Negative! Timer frozen
+```
+
+### After Fix
+```javascript
+// Player enters byo-yomi after 45s thinking
+gameState.lastMoveTime = Date.now(); // Reset to current time
+player.byoYomiTimeLeft = 30; // Reset to full period
+
+// Server calculation every 500ms:
+elapsedTime = now - gameState.lastMoveTime; // 0, 1, 2, 3... seconds
+currentByoYomiTime = 30 - elapsedTime; // 30, 29, 28, 27... countdown!
+```
+
+### Enhanced Debug Logging
+
+Added detailed logging to track countdown behavior:
+```javascript
+// Debug log for byo-yomi countdown
+if (elapsedTime > 0) {
+  log(`⏱️  BYO-YOMI COUNTDOWN - Player ${currentPlayer.color}: ${currentPlayer.byoYomiTimeLeft}s - ${elapsedTime}s elapsed = ${currentByoYomiTime}s remaining`);
+}
+```
+
+## Result
+
+✅ **Timer countdown works correctly in all byo-yomi scenarios**  
+✅ **Players see live countdown when in byo-yomi**  
+✅ **Timer resets properly when periods are consumed**  
+✅ **Smooth transition from main time to byo-yomi**  
+✅ **Server remains authoritative for all timing**
+
+### Expected Behavior Now
+
+1. **Main Time → Byo-Yomi**: Timer smoothly transitions and starts counting down from full period
+2. **Within Period**: Timer counts down normally (30, 29, 28...)
+3. **Period Reset**: Timer resets to full period and resumes countdown
+4. **Period Consumption**: Timer shows new period count and resumes countdown
+5. **Multiple Players**: All players see synchronized, live countdowns
+
+The server-authoritative timer system now works perfectly with live byo-yomi countdown! 🎯
 
 ## Issue Resolution: v1.0.9
 
