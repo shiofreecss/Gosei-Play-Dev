@@ -250,6 +250,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
               <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 mb-1 sm:mb-2">
                 <span className={`font-semibold text-neutral-900 ${isTablet ? 'text-xl' : 'text-sm sm:text-lg'} truncate max-w-[90px] sm:max-w-full`}>
                   {blackPlayer?.username || 'Waiting for opponent'}
+                  {blackPlayer && currentPlayer && blackPlayer.id === currentPlayer.id && ' (me)'}
                 </span>
               </div>
               <div className={`${isTablet ? 'text-base' : 'text-xs sm:text-base'} text-neutral-700 mt-0.5 sm:mt-1.5 font-medium bg-neutral-200 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md`}>
@@ -273,6 +274,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
               <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 mb-1 sm:mb-2">
                 <span className={`font-semibold text-neutral-900 ${isTablet ? 'text-xl' : 'text-sm sm:text-lg'} truncate max-w-[90px] sm:max-w-full`}>
                   {whitePlayer?.username || 'Waiting for opponent'}
+                  {whitePlayer && currentPlayer && whitePlayer.id === currentPlayer.id && ' (me)'}
                 </span>
               </div>
               <div className={`${isTablet ? 'text-base' : 'text-xs sm:text-base'} text-neutral-700 mt-0.5 sm:mt-1.5 font-medium bg-neutral-200 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md`}>
@@ -284,7 +286,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
       </div>
       
       {/* Timer component */}
-      {gameState.timeControl && gameState.timeControl.timeControl > 0 && (
+      {gameState.timeControl && (gameState.timeControl.timeControl > 0 || gameState.gameType === 'blitz' || (gameState.timePerMove && gameState.timePerMove > 0)) && (
         <div className="mt-3 mb-4">
           <TimeControl
             timeControl={gameState.timeControl.timeControl}

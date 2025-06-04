@@ -976,6 +976,16 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     const gameId = uuidv4(); // Generate unique game ID
     const gameCode = generateGameCode();
     
+    // Determine game type based on settings
+    let gameType: GameType;
+    if (timePerMove > 0) {
+      gameType = 'blitz';
+    } else if (handicap > 0) {
+      gameType = 'handicap';
+    } else {
+      gameType = 'even';
+    }
+    
     // Create new game state
     const gameState: GameState = {
       id: gameId,
@@ -1002,8 +1012,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         fischerTime
       },
       komi: adjustedKomi,
-      gameType: handicap > 0 ? 'handicap' : 'even',
-      handicap: handicap
+      gameType: gameType,
+      handicap: handicap,
+      timePerMove: timePerMove // Add timePerMove field to gameState
     };
     
     // Send the game data to the server

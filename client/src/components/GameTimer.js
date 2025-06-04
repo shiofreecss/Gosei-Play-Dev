@@ -177,7 +177,7 @@ const GameTimer = ({ gameState, socket }) => {
     };
   }, [socket, gameState, lastReset]);
 
-  if (!gameState || !gameState.timeControl) {
+  if (!gameState || (!gameState.timeControl && !(gameState.gameType === 'blitz' && gameState.timePerMove))) {
     return null;
   }
 

@@ -111,16 +111,18 @@ const TimeControl: React.FC<TimeControlProps> = ({
     if (blackTimeRemaining !== undefined) {
       const isInByoYomi = blackIsInByoYomi || (blackTimeRemaining <= 0 && byoYomiPeriods > 0);
       setBlackTime({
-        mainTime: isInByoYomi ? 0 : blackTimeRemaining,
+        mainTime: timePerMove > 0 ? blackTimeRemaining : (isInByoYomi ? 0 : blackTimeRemaining), // For blitz, use timeRemaining directly
         byoYomiPeriodsLeft: blackByoYomiPeriodsLeft !== undefined ? blackByoYomiPeriodsLeft : byoYomiPeriods,
         byoYomiTimeLeft: blackByoYomiTimeLeft !== undefined ? blackByoYomiTimeLeft : byoYomiTime,
-        isByoYomi: isInByoYomi,
-        timePerMoveLeft: timePerMove > 0 ? timePerMove : undefined
+        isByoYomi: timePerMove > 0 ? false : isInByoYomi, // Blitz games don't use byo-yomi
+        timePerMoveLeft: timePerMove > 0 ? blackTimeRemaining : undefined
       });
-      console.log(`Syncing black time with server: ${blackTimeRemaining} seconds remaining, byo-yomi: ${isInByoYomi}`);
+      console.log(`Syncing black time with server: ${blackTimeRemaining} seconds remaining, blitz: ${timePerMove > 0}, byo-yomi: ${timePerMove > 0 ? false : isInByoYomi}`);
       
-      // Add detailed logging for byo-yomi updates
-      if (isInByoYomi) {
+      // Add detailed logging for time updates
+      if (timePerMove > 0) {
+        console.log(`Black blitz time: ${blackTimeRemaining}s remaining for current move`);
+      } else if (isInByoYomi) {
         console.log(`Black byo-yomi details: ${blackByoYomiTimeLeft}s left in current period, ${blackByoYomiPeriodsLeft} periods remaining`);
       }
     }
@@ -128,16 +130,18 @@ const TimeControl: React.FC<TimeControlProps> = ({
     if (whiteTimeRemaining !== undefined) {
       const isInByoYomi = whiteIsInByoYomi || (whiteTimeRemaining <= 0 && byoYomiPeriods > 0);
       setWhiteTime({
-        mainTime: isInByoYomi ? 0 : whiteTimeRemaining,
+        mainTime: timePerMove > 0 ? whiteTimeRemaining : (isInByoYomi ? 0 : whiteTimeRemaining), // For blitz, use timeRemaining directly
         byoYomiPeriodsLeft: whiteByoYomiPeriodsLeft !== undefined ? whiteByoYomiPeriodsLeft : byoYomiPeriods,
         byoYomiTimeLeft: whiteByoYomiTimeLeft !== undefined ? whiteByoYomiTimeLeft : byoYomiTime,
-        isByoYomi: isInByoYomi,
-        timePerMoveLeft: timePerMove > 0 ? timePerMove : undefined
+        isByoYomi: timePerMove > 0 ? false : isInByoYomi, // Blitz games don't use byo-yomi
+        timePerMoveLeft: timePerMove > 0 ? whiteTimeRemaining : undefined
       });
-      console.log(`Syncing white time with server: ${whiteTimeRemaining} seconds remaining, byo-yomi: ${isInByoYomi}`);
+      console.log(`Syncing white time with server: ${whiteTimeRemaining} seconds remaining, blitz: ${timePerMove > 0}, byo-yomi: ${timePerMove > 0 ? false : isInByoYomi}`);
       
-      // Add detailed logging for byo-yomi updates
-      if (isInByoYomi) {
+      // Add detailed logging for time updates
+      if (timePerMove > 0) {
+        console.log(`White blitz time: ${whiteTimeRemaining}s remaining for current move`);
+      } else if (isInByoYomi) {
         console.log(`White byo-yomi details: ${whiteByoYomiTimeLeft}s left in current period, ${whiteByoYomiPeriodsLeft} periods remaining`);
       }
     }
@@ -156,21 +160,25 @@ const TimeControl: React.FC<TimeControlProps> = ({
     }
   }, [isPlaying, blackTimeRemaining, whiteTimeRemaining]);
 
-  // Reset the time per move when the turn changes
+  // Reset the time per move when the turn changes for blitz games
   useEffect(() => {
-    if (timePerMove > 0) {
-      setBlackTime(prev => ({
-        ...prev,
-        timePerMoveLeft: currentTurn === 'black' ? timePerMove : prev.timePerMoveLeft
-      }));
-      
-      setWhiteTime(prev => ({
-        ...prev,
-        timePerMoveLeft: currentTurn === 'white' ? timePerMove : prev.timePerMoveLeft
-      }));
+    if (timePerMove > 0 && initializedRef.current) {
+      // Reset the timer for the current player to full timePerMove
+      if (currentTurn === 'black') {
+        setBlackTime(prev => ({
+          ...prev,
+          mainTime: timePerMove // Reset to full time per move
+        }));
+      } else {
+        setWhiteTime(prev => ({
+          ...prev,
+          mainTime: timePerMove // Reset to full time per move
+        }));
+      }
       
       // Reset the lastTurnChangeRef when the turn changes
       lastTurnChangeRef.current = Date.now();
+      lastUpdateTimeRef.current = Date.now();
     }
   }, [currentTurn, timePerMove]);
 
@@ -210,77 +218,81 @@ const TimeControl: React.FC<TimeControlProps> = ({
           setTimeState(prev => {
             let newState = { ...prev };
 
-            // Handle time per move if it's set
-            if (timePerMove > 0 && prev.timePerMoveLeft !== undefined) {
-              newState.timePerMoveLeft = Math.max(0, prev.timePerMoveLeft - elapsedSeconds);
-              
-              // Play warning sound at specific thresholds for time per move
-              if (
-                (newState.timePerMoveLeft <= 10 && prev.timePerMoveLeft > 10) || // 10 seconds
-                (newState.timePerMoveLeft <= 5 && prev.timePerMoveLeft > 5)     // 5 seconds
-              ) {
-                playTimeWarning();
+            // Handle blitz games with timePerMove
+            if (timePerMove > 0) {
+              // For blitz games, count down mainTime (which represents time remaining for current move)
+              if (prev.mainTime > 0) {
+                newState.mainTime = Math.max(0, prev.mainTime - elapsedSeconds);
+                
+                // Play warning sound at specific thresholds for blitz
+                if (
+                  (newState.mainTime <= 10 && prev.mainTime > 10) || // 10 seconds
+                  (newState.mainTime <= 5 && prev.mainTime > 5)     // 5 seconds
+                ) {
+                  playTimeWarning();
+                }
+                
+                // If blitz time runs out, trigger timeout
+                if (newState.mainTime === 0) {
+                  console.log(`⚡ BLITZ TIMEOUT - Player ${currentTurn} ran out of time`);
+                  onTimeout(currentTurn);
+                  return newState;
+                }
               }
-              
-              // If time per move runs out, trigger the timeout
-              if (newState.timePerMoveLeft === 0) {
-                onTimeout(currentTurn);
-                return newState;
-              }
-            }
+            } else {
+              // Handle standard games with main time and byo-yomi
+              if (prev.mainTime > 0) {
+                newState.mainTime = Math.max(0, prev.mainTime - elapsedSeconds);
+                
+                // Play warning sound at specific thresholds
+                if (
+                  (newState.mainTime <= 60 && prev.mainTime > 60) || // 1 minute
+                  (newState.mainTime <= 30 && prev.mainTime > 30) || // 30 seconds
+                  (newState.mainTime <= 10 && prev.mainTime > 10)    // 10 seconds
+                ) {
+                  playTimeWarning();
+                }
 
-            // Handle main time
-            if (prev.mainTime > 0) {
-              newState.mainTime = Math.max(0, prev.mainTime - elapsedSeconds);
-              
-              // Play warning sound at specific thresholds
-              if (
-                (newState.mainTime <= 60 && prev.mainTime > 60) || // 1 minute
-                (newState.mainTime <= 30 && prev.mainTime > 30) || // 30 seconds
-                (newState.mainTime <= 10 && prev.mainTime > 10)    // 10 seconds
-              ) {
-                playTimeWarning();
-              }
-
-              // If main time runs out, switch to byo-yomi if available
-              if (newState.mainTime === 0 && byoYomiPeriods > 0) {
-                newState.isByoYomi = true;
-                newState.byoYomiPeriodsLeft = byoYomiPeriods;
-                newState.byoYomiTimeLeft = byoYomiTime;
-                playTimeWarning(); // Signal byo-yomi start
-              } else if (newState.mainTime === 0 && byoYomiPeriods === 0) {
-                // If no byo-yomi periods, timeout
-                onTimeout(currentTurn);
-              }
-            }
-            // Handle byo-yomi time
-            else if (prev.isByoYomi && byoYomiPeriods > 0) {
-              newState.byoYomiTimeLeft = Math.max(0, prev.byoYomiTimeLeft - elapsedSeconds);
-              
-              // Play warning sound in byo-yomi
-              if (
-                (newState.byoYomiTimeLeft <= 10 && prev.byoYomiTimeLeft > 10) || // 10 seconds
-                (newState.byoYomiTimeLeft <= 5 && prev.byoYomiTimeLeft > 5)     // 5 seconds
-              ) {
-                playTimeWarning();
-              }
-
-              // If byo-yomi period runs out
-              if (newState.byoYomiTimeLeft === 0) {
-                if (newState.byoYomiPeriodsLeft > 1) {
-                  newState.byoYomiPeriodsLeft = prev.byoYomiPeriodsLeft - 1;
+                // If main time runs out, switch to byo-yomi if available
+                if (newState.mainTime === 0 && byoYomiPeriods > 0) {
+                  newState.isByoYomi = true;
+                  newState.byoYomiPeriodsLeft = byoYomiPeriods;
                   newState.byoYomiTimeLeft = byoYomiTime;
-                  playTimeWarning(); // Signal new period
-                } else {
-                  // No periods left, time's up
-                  newState.byoYomiPeriodsLeft = 0;
+                  playTimeWarning(); // Signal byo-yomi start
+                } else if (newState.mainTime === 0 && byoYomiPeriods === 0) {
+                  // If no byo-yomi periods, timeout
                   onTimeout(currentTurn);
                 }
               }
-            }
-            // Time's up
-            else if (!prev.isByoYomi || (prev.isByoYomi && prev.byoYomiPeriodsLeft === 0)) {
-              onTimeout(currentTurn);
+              // Handle byo-yomi time
+              else if (prev.isByoYomi && byoYomiPeriods > 0) {
+                newState.byoYomiTimeLeft = Math.max(0, prev.byoYomiTimeLeft - elapsedSeconds);
+                
+                // Play warning sound in byo-yomi
+                if (
+                  (newState.byoYomiTimeLeft <= 10 && prev.byoYomiTimeLeft > 10) || // 10 seconds
+                  (newState.byoYomiTimeLeft <= 5 && prev.byoYomiTimeLeft > 5)     // 5 seconds
+                ) {
+                  playTimeWarning();
+                }
+
+                // If byo-yomi period runs out
+                if (newState.byoYomiTimeLeft === 0) {
+                  if (newState.byoYomiPeriodsLeft > 1) {
+                    newState.byoYomiPeriodsLeft = prev.byoYomiPeriodsLeft - 1;
+                    newState.byoYomiTimeLeft = byoYomiTime;
+                    playTimeWarning(); // Signal new period
+                  } else {
+                    // No periods left, time's up
+                    newState.byoYomiPeriodsLeft = 0;
+                    onTimeout(currentTurn);
+                  }
+                }
+              }
+              // Time's up
+              else if (!prev.isByoYomi || (prev.isByoYomi && prev.byoYomiPeriodsLeft === 0)) {
+                onTimeout(currentTurn);
+              }
             }
 
             return newState;
@@ -317,10 +329,9 @@ const TimeControl: React.FC<TimeControlProps> = ({
   };
 
   const getTimeDisplay = (timeState: TimeState): string => {
-    // If time per move is active and less than main time, show it instead
-    if (timePerMove > 0 && timeState.timePerMoveLeft !== undefined && 
-        (timeState.timePerMoveLeft < timeState.mainTime || timeState.mainTime <= 0)) {
-      return `${formatTime(timeState.timePerMoveLeft)} ⏱️`;
+    // For blitz games with timePerMove > 0, show the actual time remaining from server
+    if (timePerMove > 0) {
+      return `${formatTime(timeState.mainTime)} ⏱️`;
     }
     
     if (timeState.mainTime > 0) {
@@ -344,8 +355,8 @@ const TimeControl: React.FC<TimeControlProps> = ({
       textSizeClass = 'text-xl md:text-2xl';
     }
     
-    // Check time per move first if it's active
-    if (timePerMove > 0 && timeState.timePerMoveLeft !== undefined && timeState.timePerMoveLeft <= 10) {
+    // Check for blitz games first - use mainTime for blitz warnings
+    if (timePerMove > 0 && timeState.mainTime <= 10) {
       colorClass = 'text-red-600';
     }
     // Critical time warning (red)
@@ -398,7 +409,7 @@ const TimeControl: React.FC<TimeControlProps> = ({
   // Time pressure indicator classes
   const getTimePressureClasses = (timeState: TimeState) => {
     if (
-      (timePerMove > 0 && timeState.timePerMoveLeft !== undefined && timeState.timePerMoveLeft <= 10) ||
+      (timePerMove > 0 && timeState.mainTime <= 10) ||
       (timeState.mainTime > 0 && timeState.mainTime <= 30) ||
       (timeState.isByoYomi && timeState.byoYomiTimeLeft <= 10)
     ) {
