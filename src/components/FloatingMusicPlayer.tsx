@@ -22,16 +22,6 @@ const musicTracks = [
 let globalIsPlaying = false;
 let globalTrackIndex = 0;
 
-// Brown colors for the music player
-const BROWN = {
-  main: '#8B4513',      // SaddleBrown - main button color
-  hover: '#A0522D',     // Sienna - hover button color
-  light: '#DEB887',     // BurlyWood - light brown for backgrounds
-  dark: '#654321',      // Dark brown for accents
-  lightest: '#F5DEB3',  // Wheat - lightest brown for selected items
-  text: '#3E2723'       // Very dark brown for text
-};
-
 const FloatingMusicPlayer: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(globalIsPlaying);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(globalTrackIndex);
@@ -168,21 +158,23 @@ const FloatingMusicPlayer: React.FC = () => {
 
   return (
     <div className="fixed bottom-8 right-8 z-40" ref={playerRef}>
-      {/* Floating music panel */}
+      {/* Floating music panel - theme-aware styling */}
       <div className={`${
-        isExpanded ? 'bg-neutral-800/90 rounded-lg shadow-lg p-4 w-72 border border-neutral-700' : 'w-14 h-14'
+        isExpanded 
+          ? 'bg-white border border-slate-200 rounded-xl shadow-lg p-4 w-72 floating-music-panel' 
+          : 'w-14 h-14'
       } transition-all duration-200`}>
         
         {/* Collapsed view - just the music icon */}
         {!isExpanded && (
           <button
             onClick={() => setIsExpanded(true)}
-            className="w-full h-full flex items-center justify-center rounded-lg bg-neutral-800/90 text-white shadow-lg border border-neutral-700 transition-all duration-200 hover:bg-neutral-800 hover:scale-105 focus:outline-none"
+            className="w-full h-full flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300 shadow-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-slate-300 floating-music-button"
             title="Music Player"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
               <path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13c0-1.104 1.12-2 2.5-2s2.5.896 2.5 2zm9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2z"/>
-              <path fill-rule="evenodd" d="M14 11V2h1v9h-1zM6 3v10H5V3h1z"/>
+              <path fillRule="evenodd" d="M14 11V2h1v9h-1zM6 3v10H5V3h1z"/>
               <path d="M5 2.905a1 1 0 0 1 .9-.995l8-.8a1 1 0 0 1 1.1.995V3L5 4V2.905z"/>
             </svg>
           </button>
@@ -191,11 +183,12 @@ const FloatingMusicPlayer: React.FC = () => {
         {/* Expanded view - full player */}
         {isExpanded && (
           <div className="flex flex-col">
+            {/* Header */}
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-medium text-white">Music Player</h3>
+              <h3 className="font-semibold text-slate-800 music-player-title">Music Player</h3>
               <button 
                 onClick={() => setIsExpanded(false)}
-                className="text-neutral-400 hover:text-white transition-colors"
+                className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded music-close-button"
                 title="Minimize"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -206,7 +199,7 @@ const FloatingMusicPlayer: React.FC = () => {
             
             {/* Current track info */}
             <div className="text-center mb-4">
-              <div className="text-sm font-semibold text-white truncate">
+              <div className="text-sm font-semibold text-slate-700 truncate music-track-name">
                 {musicTracks[currentTrackIndex].name}
               </div>
             </div>
@@ -215,7 +208,7 @@ const FloatingMusicPlayer: React.FC = () => {
             <div className="flex items-center justify-center gap-4 mb-4">
               <button
                 onClick={previousTrack}
-                className="w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
+                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors rounded music-control-button"
                 title="Previous Track"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -225,7 +218,7 @@ const FloatingMusicPlayer: React.FC = () => {
               
               <button
                 onClick={togglePlay}
-                className="w-12 h-12 rounded-lg flex items-center justify-center shadow transition-colors bg-neutral-700 hover:bg-neutral-600 text-white"
+                className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm transition-all duration-200 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 music-play-button"
                 title={isPlaying ? 'Pause' : 'Play'}
               >
                 {isPlaying ? (
@@ -242,7 +235,7 @@ const FloatingMusicPlayer: React.FC = () => {
               
               <button
                 onClick={nextTrack}
-                className="w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-white transition-colors"
+                className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors rounded music-control-button"
                 title="Next Track"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -253,7 +246,7 @@ const FloatingMusicPlayer: React.FC = () => {
             
             {/* Volume control */}
             <div className="flex items-center gap-2 mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400 music-volume-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
               </svg>
               
@@ -264,25 +257,25 @@ const FloatingMusicPlayer: React.FC = () => {
                 step="0.01" 
                 value={volume} 
                 onChange={handleVolumeChange}
-                className="w-full h-2 bg-neutral-700 rounded-lg appearance-none cursor-pointer"
+                className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer music-volume-slider"
               />
               
-              <span className="text-xs text-neutral-400">
+              <span className="text-xs text-slate-500 music-volume-text">
                 {Math.round(volume * 100)}%
               </span>
             </div>
             
             {/* Track selection */}
             <div className="space-y-1">
-              <p className="text-xs text-neutral-400 mb-1">Select Track:</p>
+              <p className="text-xs text-slate-500 mb-2 music-track-label">Select Track:</p>
               {musicTracks.map((track, index) => (
                 <button
                   key={index}
                   onClick={() => changeTrack(index)}
-                  className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all duration-200 music-track-button ${
                     currentTrackIndex === index 
-                      ? 'bg-neutral-700 text-white' 
-                      : 'text-neutral-300 hover:bg-neutral-700/50'
+                      ? 'bg-slate-100 text-slate-800 border border-slate-200 shadow-sm music-track-active' 
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'
                   }`}
                 >
                   {track.name}

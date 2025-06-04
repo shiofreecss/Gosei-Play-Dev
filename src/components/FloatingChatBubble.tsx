@@ -17,16 +17,6 @@ interface FloatingChatBubbleProps {
   messages?: ChatMessage[];
 }
 
-// Brown colors for the chat bubble - matching music player
-const BROWN = {
-  main: '#8B4513',      // SaddleBrown - main button color
-  hover: '#A0522D',     // Sienna - hover button color
-  light: '#DEB887',     // BurlyWood - light brown for backgrounds
-  dark: '#654321',      // Dark brown for accents
-  lightest: '#F5DEB3',  // Wheat - lightest brown for selected items
-  text: '#3E2723'       // Very dark brown for text
-};
-
 const FloatingChatBubble: React.FC<FloatingChatBubbleProps> = ({
   gameId,
   currentPlayerId,
@@ -84,9 +74,9 @@ const FloatingChatBubble: React.FC<FloatingChatBubbleProps> = ({
 
   return (
     <div className="fixed bottom-24 right-8 z-50" ref={chatRef}>
-      {/* Chat floating button */}
+      {/* Chat floating button - theme-aware styling */}
       <button 
-        className="w-14 h-14 rounded-lg bg-neutral-800/90 text-white flex items-center justify-center cursor-pointer shadow-lg border border-neutral-700 transition-all duration-200 hover:bg-neutral-800 hover:scale-105 focus:outline-none relative"
+        className="w-14 h-14 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300 flex items-center justify-center cursor-pointer shadow-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-slate-300 relative floating-chat-button"
         onClick={() => setIsOpen(!isOpen)}
         title={isOpen ? "Close chat" : "Open chat"}
       >
@@ -100,13 +90,13 @@ const FloatingChatBubble: React.FC<FloatingChatBubbleProps> = ({
           </svg>
         )}
         {unreadCount > 0 && !isOpen && (
-          <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold border-2 border-neutral-800 animate-bounce">
+          <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold border-2 border-white animate-bounce unread-badge">
             {unreadCount > 99 ? '99+' : unreadCount}
           </div>
         )}
       </button>
 
-      {/* Chat container */}
+      {/* Chat container - theme-aware styling */}
       <div className={`floating-chat-bubble absolute bottom-20 right-0 w-[350px] rounded-xl overflow-hidden shadow-lg transition-all duration-300 ${isOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-5'}`}>
         <ChatBox
           gameId={gameId}

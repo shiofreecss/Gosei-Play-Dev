@@ -1907,3 +1907,272 @@
   transform: translateY(0) !important;
   transition-duration: 0.1s !important;
 }
+
+/* Professional Floating Chat Component - Light and Dark Mode Support */
+.floating-chat-button {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Dark mode floating chat button */
+.theme-modern .floating-chat-button {
+  background-color: rgba(45, 45, 60, 0.9) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(82, 82, 120, 0.4) !important;
+}
+
+.theme-modern .floating-chat-button:hover {
+  background-color: rgba(60, 60, 80, 0.95) !important;
+  border-color: rgba(93, 93, 255, 0.6) !important;
+}
+
+/* Light mode unread badge border */
+.theme-modern-light .unread-badge {
+  border-color: var(--card-bg) !important;
+}
+
+.theme-modern .unread-badge {
+  border-color: rgba(45, 45, 60, 0.9) !important;
+}
+
+/* Chat Box Container - Theme Aware */
+.theme-modern .chatbox-container,
+.theme-modern-light .chatbox-container {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Chat Box Header */
+.theme-modern .chatbox-header,
+.theme-modern-light .chatbox-header {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Chat Box Messages Container */
+.theme-modern .chatbox-messages,
+.theme-modern-light .chatbox-messages {
+  background-color: rgba(248, 250, 252, 0.3) !important;
+}
+
+.theme-modern .chatbox-messages {
+  background-color: rgba(28, 28, 36, 0.3) !important;
+}
+
+/* Empty state message */
+.theme-modern .chatbox-messages .text-slate-500,
+.theme-modern-light .chatbox-messages .text-slate-500 {
+  color: var(--text-secondary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Username styling */
+.theme-modern .chatbox-messages .text-slate-600,
+.theme-modern-light .chatbox-messages .text-slate-600 {
+  color: var(--text-secondary) !important;
+}
+
+/* Message bubbles - other user */
+.theme-modern .chatbox-messages .bg-white,
+.theme-modern-light .chatbox-messages .bg-white {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Message bubbles - current user (keep blue for distinction) */
+.theme-modern .chatbox-messages .bg-blue-600,
+.theme-modern-light .chatbox-messages .bg-blue-600 {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+/* Timestamp styling */
+.theme-modern .chatbox-messages .text-slate-400,
+.theme-modern-light .chatbox-messages .text-slate-400 {
+  color: var(--text-secondary) !important;
+}
+
+/* Chat Input Container */
+.theme-modern .chatbox-input,
+.theme-modern-light .chatbox-input {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Text Input */
+.theme-modern .chatbox-input textarea,
+.theme-modern-light .chatbox-input textarea {
+  background-color: var(--button-secondary-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.theme-modern .chatbox-input textarea::placeholder,
+.theme-modern-light .chatbox-input textarea::placeholder {
+  color: var(--text-secondary) !important;
+}
+
+.theme-modern .chatbox-input textarea:focus,
+.theme-modern-light .chatbox-input textarea:focus {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 0 2px rgba(93, 93, 255, 0.2) !important;
+}
+
+/* Send Button - keep blue for consistency */
+.theme-modern .chatbox-input .bg-blue-600,
+.theme-modern-light .chatbox-input .bg-blue-600 {
+  background-color: #3b82f6 !important;
+}
+
+.theme-modern .chatbox-input .hover\:bg-blue-700:hover,
+.theme-modern-light .chatbox-input .hover\:bg-blue-700:hover {
+  background-color: #2563eb !important;
+}
+
+/* Disabled send button */
+.theme-modern .chatbox-input .bg-slate-200,
+.theme-modern-light .chatbox-input .bg-slate-200 {
+  background-color: var(--button-secondary-bg) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Professional Floating Music Player - Light and Dark Mode Support */
+.floating-music-button {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Dark mode floating music button */
+.theme-modern .floating-music-button {
+  background-color: rgba(45, 45, 60, 0.9) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(82, 82, 120, 0.4) !important;
+}
+
+.theme-modern .floating-music-button:hover {
+  background-color: rgba(60, 60, 80, 0.95) !important;
+  border-color: rgba(93, 93, 255, 0.6) !important;
+}
+
+/* Music Panel Container - Theme Aware */
+.theme-modern .floating-music-panel,
+.theme-modern-light .floating-music-panel {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Music Player Title */
+.theme-modern .music-player-title,
+.theme-modern-light .music-player-title {
+  color: var(--text-primary) !important;
+}
+
+/* Music Close Button */
+.theme-modern .music-close-button,
+.theme-modern-light .music-close-button {
+  color: var(--text-secondary) !important;
+}
+
+.theme-modern .music-close-button:hover,
+.theme-modern-light .music-close-button:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Music Track Name */
+.theme-modern .music-track-name,
+.theme-modern-light .music-track-name {
+  color: var(--text-primary) !important;
+}
+
+/* Music Control Buttons */
+.theme-modern .music-control-button,
+.theme-modern-light .music-control-button {
+  color: var(--text-secondary) !important;
+}
+
+.theme-modern .music-control-button:hover,
+.theme-modern-light .music-control-button:hover {
+  color: var(--text-primary) !important;
+}
+
+/* Music Play Button */
+.theme-modern .music-play-button,
+.theme-modern-light .music-play-button {
+  background-color: var(--button-secondary-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.theme-modern .music-play-button:hover,
+.theme-modern-light .music-play-button:hover {
+  background-color: var(--button-secondary-hover) !important;
+  transform: translateY(-1px);
+}
+
+/* Volume Icon and Text */
+.theme-modern .music-volume-icon,
+.theme-modern .music-volume-text,
+.theme-modern-light .music-volume-icon,
+.theme-modern-light .music-volume-text {
+  color: var(--text-secondary) !important;
+}
+
+/* Volume Slider */
+.theme-modern .music-volume-slider,
+.theme-modern-light .music-volume-slider {
+  background-color: var(--button-secondary-bg) !important;
+}
+
+/* Track Label */
+.theme-modern .music-track-label,
+.theme-modern-light .music-track-label {
+  color: var(--text-secondary) !important;
+}
+
+/* Track Selection Buttons */
+.theme-modern .music-track-button,
+.theme-modern-light .music-track-button {
+  color: var(--text-secondary) !important;
+}
+
+.theme-modern .music-track-button:hover,
+.theme-modern-light .music-track-button:hover {
+  background-color: var(--button-secondary-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Active Track Button */
+.theme-modern .music-track-active,
+.theme-modern-light .music-track-active {
+  background-color: var(--button-secondary-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Dark mode specific overrides for music player */
+.theme-modern .floating-music-panel {
+  background-color: rgba(45, 45, 60, 0.9) !important;
+  border-color: rgba(82, 82, 120, 0.4) !important;
+}
+
+.theme-modern .music-volume-slider {
+  background-color: rgba(60, 60, 80, 0.6) !important;
+}
+
+.theme-modern .music-track-button:hover {
+  background-color: rgba(60, 60, 80, 0.6) !important;
+}
+
+.theme-modern .music-track-active {
+  background-color: rgba(60, 60, 80, 0.8) !important;
+  border-color: rgba(93, 93, 255, 0.4) !important;
+}
