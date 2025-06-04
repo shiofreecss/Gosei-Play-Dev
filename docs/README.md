@@ -2,15 +2,31 @@
 
 A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js. Play Go online with friends around the world with advanced time controls, multiple board sizes, and intelligent game type management.
 
-## Current Version: v1.0.9 🎯
+## Current Version: v1.1.0 🎯
 
-**Latest Update**: Complete Byo-Yomi Timer Synchronization - Professional-grade server-authoritative timing system with automatic period management and perfect client synchronization.
+**Latest Update**: Play Again Feature - Seamlessly start new games with the same opponent while preserving all game settings and providing smooth state transitions.
 
-**Status**: Production Ready ✅ | **Last Updated**: March 6, 2025
+**Status**: Production Ready ✅ | **Last Updated**: June 4, 2025
 
-## 🏆 Major Achievement: Complete Timer System Overhaul
+## 🎮 New in v1.1.0: Play Again Feature ✅
 
-### ✅ All Timer Issues Resolved (v1.0.9)
+### ✅ Seamless Game Continuation
+- **One-Click Restart**: Request "play again" directly from the game completion modal
+- **Settings Preservation**: Maintains all original game settings (time controls, board size, handicap, scoring rules)
+- **Automatic Navigation**: Smooth transition to new game when opponent accepts
+- **Real-time Communication**: Instant notifications for play again requests and responses
+- **Professional UX**: Loading states, animations, and clear status feedback
+
+### ✅ Complete Technical Implementation
+- **UUID-Based Game IDs**: Proper game identification system (no more timestamp IDs)
+- **State Synchronization**: Flawless game state management across clients
+- **Handicap Support**: Full support for handicap games with proper stone placement
+- **localStorage Management**: Clean data handling and persistence
+- **Error Resilience**: Comprehensive error handling and recovery
+
+## 🏆 Major Achievement: Complete Timer System Overhaul (v1.0.9)
+
+### ✅ All Timer Issues Resolved
 - **Server-Authoritative Timing**: Complete elimination of client-server desynchronization
 - **Automatic Byo-Yomi Entry**: Players seamlessly transition from main time to byo-yomi
 - **Automatic Period Consumption**: Periods consumed automatically when expired
@@ -19,6 +35,14 @@ A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js.
 - **Zero Manual Intervention**: Everything works automatically
 
 ## Features
+
+### 🔄 Play Again System
+- **Instant Requests**: Send play again requests from the game completion modal
+- **Smart Acceptance**: Accept or decline opponent's play again requests
+- **Setting Preservation**: All game configurations maintained in new game
+- **Seamless Transition**: Automatic navigation to new game when ready
+- **Loading Feedback**: Professional loading states with animations
+- **Error Handling**: Robust error recovery and user feedback
 
 ### ⏱️ Professional-Grade Time Controls
 - **Server-Authoritative Timing**: All calculations performed on server for perfect synchronization
