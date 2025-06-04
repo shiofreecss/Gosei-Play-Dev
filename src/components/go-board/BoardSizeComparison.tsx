@@ -15,14 +15,14 @@ const BoardSizeComparison: React.FC<BoardSizeComparisonProps> = ({ onSizeSelect 
   ];
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow-lg">
+    <div className="p-6 app-card rounded-xl shadow-lg">
       <h2 className="text-2xl font-bold mb-6">Board Size Comparison</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {boardSizes.map(({ size, name, description, category }) => (
           <div 
             key={size} 
-            className="bg-neutral-50 rounded-lg p-4 border border-neutral-200 cursor-pointer hover:border-primary-500 hover:shadow-md transition-all duration-200"
+            className="app-card rounded-lg p-4 border border-neutral-200 cursor-pointer hover:border-primary-500 hover:shadow-md transition-all duration-200"
             onClick={() => onSizeSelect(size)}
           >
             <div className="flex items-start gap-4">
@@ -37,7 +37,7 @@ const BoardSizeComparison: React.FC<BoardSizeComparisonProps> = ({ onSizeSelect 
         ))}
       </div>
 
-      <div className="mt-8 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
+      <div className="mt-8 p-4 app-card rounded-lg border border-neutral-200">
         <h3 className="text-lg font-semibold mb-2">About Board Sizes</h3>
         <p className="text-neutral-600 text-sm">
           Go board sizes affect gameplay complexity and duration. Smaller boards are perfect for learning and quick games,
