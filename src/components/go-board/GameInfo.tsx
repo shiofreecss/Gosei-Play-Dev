@@ -6,6 +6,7 @@ import PlayerAvatar from '../PlayerAvatar';
 import BoardThemeButton from '../BoardThemeButton';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import ConfirmationModal from '../ConfirmationModal';
+import { useAppTheme } from '../../context/AppThemeContext';
 
 // Helper function to check if a move is a pass
 function isPassMove(move: GameMove): move is { pass: true, color: StoneColor } {
@@ -58,6 +59,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
   onCancelScoring
 }) => {
   const { isMobile, isTablet, isDesktop } = useDeviceDetect();
+  const { isDarkMode } = useAppTheme();
   const { players, currentTurn, status, capturedStones, history, score, deadStones, undoRequest, board } = gameState;
   
   // State for confirmation modals
@@ -248,6 +250,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
               <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 mb-1 sm:mb-2">
                 <span className={`font-semibold text-neutral-900 ${isTablet ? 'text-xl' : 'text-sm sm:text-lg'} truncate max-w-[90px] sm:max-w-full`}>
                   {blackPlayer?.username || 'Waiting for opponent'}
+                  {blackPlayer && currentPlayer && blackPlayer.id === currentPlayer.id && ' (me)'}
                 </span>
               </div>
               <div className={`${isTablet ? 'text-base' : 'text-xs sm:text-base'} text-neutral-700 mt-0.5 sm:mt-1.5 font-medium bg-neutral-200 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md`}>
@@ -271,6 +274,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
               <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 mb-1 sm:mb-2">
                 <span className={`font-semibold text-neutral-900 ${isTablet ? 'text-xl' : 'text-sm sm:text-lg'} truncate max-w-[90px] sm:max-w-full`}>
                   {whitePlayer?.username || 'Waiting for opponent'}
+                  {whitePlayer && currentPlayer && whitePlayer.id === currentPlayer.id && ' (me)'}
                 </span>
               </div>
               <div className={`${isTablet ? 'text-base' : 'text-xs sm:text-base'} text-neutral-700 mt-0.5 sm:mt-1.5 font-medium bg-neutral-200 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md`}>
@@ -282,7 +286,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
       </div>
       
       {/* Timer component */}
-      {gameState.timeControl && gameState.timeControl.timeControl > 0 && (
+      {gameState.timeControl && (gameState.timeControl.timeControl > 0 || gameState.gameType === 'blitz' || (gameState.timePerMove && gameState.timePerMove > 0)) && (
         <div className="mt-3 mb-4">
           <TimeControl
             timeControl={gameState.timeControl.timeControl}
@@ -432,20 +436,24 @@ const GameInfo: React.FC<GameInfoProps> = ({
         </div>
 
         {/* Settings */}
-        <div className={`p-2 ${isTablet ? 'p-4' : 'sm:p-3'} bg-neutral-50 rounded-md`}>
-          <h3 className={`${isTablet ? 'text-lg' : 'text-sm sm:text-base'} font-semibold mb-1 sm:mb-2 text-neutral-800`}>
+        <div className={`p-2 ${isTablet ? 'p-4' : 'sm:p-3'} rounded-md ${
+          isDarkMode ? 'bg-neutral-800/80' : 'bg-neutral-50'
+        }`}>
+          <h3 className={`${isTablet ? 'text-lg' : 'text-sm sm:text-base'} font-semibold mb-1 sm:mb-2 ${
+            isDarkMode ? 'text-white' : 'text-neutral-800'
+          }`}>
             Settings
           </h3>
           <div className={`space-y-1 ${isTablet ? 'space-y-2' : 'sm:space-y-2'}`}>
             {/* Stone Sound Setting */}
             <div className={`flex items-center justify-between text-xs ${isTablet ? 'text-base' : ''}`}>
-              <span className={`text-neutral-600 ${isTablet ? 'text-base' : ''}`}>Stone Sound</span>
+              <span className={`${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'} ${isTablet ? 'text-base' : ''}`}>Stone Sound</span>
               <SoundSettings />
             </div>
             
             {/* Auto Save Setting */}
             <div className={`flex items-center justify-between text-xs ${isTablet ? 'text-base' : ''}`}>
-              <span className={`text-neutral-600 ${isTablet ? 'text-base' : ''}`}>Auto Save</span>
+              <span className={`${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'} ${isTablet ? 'text-base' : ''}`}>Auto Save</span>
               <button
                 onClick={onToggleAutoSave}
                 className={`px-1.5 ${isTablet ? 'px-2' : ''} py-0.5 ${isTablet ? 'py-1' : ''} rounded text-xs ${
@@ -461,7 +469,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
             {/* Manual Save Button - only show when auto-save is off */}
             {!autoSaveEnabled && (
               <div className={`flex items-center justify-between text-xs ${isTablet ? 'text-base' : ''}`}>
-                <span className={`text-neutral-600 ${isTablet ? 'text-base' : ''}`}>Manual Save</span>
+                <span className={`${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'} ${isTablet ? 'text-base' : ''}`}>Manual Save</span>
                 <button
                   onClick={onSaveNow}
                   className={`bg-blue-600 text-white ${isTablet ? 'px-2 py-1' : 'px-2 py-0.5'} rounded text-xs hover:bg-blue-700 ${isTablet ? '' : ''}`}
@@ -473,7 +481,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
             
             {/* Board Theme Setting */}
             <div className={`flex items-center justify-between text-xs ${isTablet ? 'text-base' : ''}`}>
-              <span className={`text-neutral-600 ${isTablet ? 'text-base' : ''}`}>Board Theme</span>
+              <span className={`${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'} ${isTablet ? 'text-base' : ''}`}>Board Theme</span>
               <BoardThemeButton />
             </div>
           </div>
@@ -482,8 +490,14 @@ const GameInfo: React.FC<GameInfoProps> = ({
 
       {/* Scoring Panel - Show only in scoring or finished state */}
       {(status === 'scoring' || status === 'finished') && (
-        <div className={`p-4 bg-neutral-50 rounded-lg mt-4 border border-neutral-200 ${isTablet ? 'text-base' : 'text-sm'}`}>
-          <h3 className={`${isTablet ? 'text-base' : 'text-sm sm:text-base'} font-semibold mb-3 text-neutral-800`}>
+        <div className={`p-4 rounded-lg mt-4 border ${isTablet ? 'text-base' : 'text-sm'} ${
+          isDarkMode 
+            ? 'bg-neutral-800/80 border-neutral-700' 
+            : 'bg-neutral-50 border-neutral-200'
+        }`}>
+          <h3 className={`${isTablet ? 'text-base' : 'text-sm sm:text-base'} font-semibold mb-3 ${
+            isDarkMode ? 'text-white' : 'text-neutral-800'
+          }`}>
             Score Breakdown
           </h3>
           
@@ -494,49 +508,51 @@ const GameInfo: React.FC<GameInfoProps> = ({
               <div className="text-center font-semibold">White</div>
               
               {/* Territory */}
-              <div className="text-neutral-600">Territory</div>
-              <div className="text-center text-neutral-900">{score.blackTerritory?.toFixed(1) || '0.0'}</div>
-              <div className="text-center text-neutral-900">{score.whiteTerritory?.toFixed(1) || '0.0'}</div>
+              <div className={isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}>Territory</div>
+              <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.blackTerritory?.toFixed(1) || '0.0'}</div>
+              <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.whiteTerritory?.toFixed(1) || '0.0'}</div>
               
               {/* Stones (for Chinese/Korean scoring) */}
               {(gameState.scoringRule === 'chinese' || gameState.scoringRule === 'korean' || gameState.scoringRule === 'aga' || gameState.scoringRule === 'ing') && (
                 <>
-                  <div className="text-neutral-600">Stones</div>
-                  <div className="text-center text-neutral-900">{score.blackStones?.toFixed(1) || '0.0'}</div>
-                  <div className="text-center text-neutral-900">{score.whiteStones?.toFixed(1) || '0.0'}</div>
+                  <div className={isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}>Stones</div>
+                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.blackStones?.toFixed(1) || '0.0'}</div>
+                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.whiteStones?.toFixed(1) || '0.0'}</div>
                 </>
               )}
               
               {/* Captures (for Japanese scoring) */}
               {(gameState.scoringRule === 'japanese' || gameState.scoringRule === 'aga' || gameState.scoringRule === 'ing') && (
                 <>
-                  <div className="text-neutral-600">Captures</div>
-                  <div className="text-center text-neutral-900">{score.blackCaptures?.toFixed(1) || capturedStones.black.toFixed(1)}</div>
-                  <div className="text-center text-neutral-900">{score.whiteCaptures?.toFixed(1) || capturedStones.white.toFixed(1)}</div>
+                  <div className={isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}>Captures</div>
+                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.blackCaptures?.toFixed(1) || capturedStones.black.toFixed(1)}</div>
+                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.whiteCaptures?.toFixed(1) || capturedStones.white.toFixed(1)}</div>
                 </>
               )}
               
               {/* Dead Stones */}
               {deadStonesByColor.black > 0 || deadStonesByColor.white > 0 ? (
                 <>
-                  <div className="text-neutral-600">Dead Stones</div>
-                  <div className="text-center text-neutral-900">{deadStonesByColor.black}</div>
-                  <div className="text-center text-neutral-900">{deadStonesByColor.white}</div>
+                  <div className={isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}>Dead Stones</div>
+                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{deadStonesByColor.black}</div>
+                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{deadStonesByColor.white}</div>
                 </>
               ) : null}
               
               {/* Komi */}
-              <div className="text-neutral-600">Komi</div>
-              <div className="text-center text-neutral-900">0.0</div>
-              <div className="text-center text-neutral-900">{score.komi?.toFixed(1) || gameState.komi.toFixed(1)}</div>
+              <div className={isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}>Komi</div>
+              <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>0.0</div>
+              <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.komi?.toFixed(1) || gameState.komi.toFixed(1)}</div>
               
               {/* Total */}
-              <div className="text-neutral-600 font-semibold">Total</div>
-              <div className="text-center text-neutral-900 font-bold text-base">{score.black.toFixed(1)}</div>
-              <div className="text-center text-neutral-900 font-bold text-base">{score.white.toFixed(1)}</div>
+              <div className={`font-semibold ${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}`}>Total</div>
+              <div className={`text-center font-bold text-base ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.black.toFixed(1)}</div>
+              <div className={`text-center font-bold text-base ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.white.toFixed(1)}</div>
             </div>
           ) : (
-            <div className={`text-center text-neutral-900 p-3 ${isTablet ? 'text-base' : 'text-sm'}`}>
+            <div className={`text-center p-3 ${isTablet ? 'text-base' : 'text-sm'} ${
+              isDarkMode ? 'text-white' : 'text-neutral-900'
+            }`}>
               <p>Calculating score...</p>
               <p className={`text-sm opacity-80 mt-2 ${isTablet ? 'text-base' : 'text-sm'}`}>Mark dead stones by clicking on them</p>
             </div>

@@ -486,6 +486,39 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             });
           }
         });
+
+        // Handle play again request
+        newSocket.on('playAgainRequest', (requestData) => {
+          console.log(`Received play again request from ${requestData.fromUsername}`);
+          // The GameCompleteModal will handle this event directly
+        });
+
+        // Handle play again response
+        newSocket.on('playAgainResponse', (responseData) => {
+          console.log(`Received play again response: ${responseData.accepted ? 'accepted' : 'declined'}`);
+          
+          if (responseData.accepted && responseData.newGameState) {
+            // Update to the new game state
+            console.log(`Starting new game: ${responseData.gameId}`);
+            
+            // Find current player in new game state
+            const newCurrentPlayer = responseData.newGameState.players.find(
+              (p: any) => p.id === state.currentPlayer?.id
+            );
+            
+            if (newCurrentPlayer) {
+              dispatch({
+                type: 'JOIN_GAME_SUCCESS',
+                payload: { 
+                  gameState: responseData.newGameState, 
+                  player: newCurrentPlayer 
+                }
+              });
+              console.log(`Successfully joined new game ${responseData.gameId}`);
+            }
+          }
+          // The GameCompleteModal will handle navigation
+        });
         
         // Handle dead stone toggle from other players
         newSocket.on('deadStoneToggled', (deadStoneData) => {
@@ -582,6 +615,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             newSocket.off('byoYomiPeriodUsed');
             newSocket.off('deadStoneToggled');
             newSocket.off('scoringCanceled');
+            newSocket.off('playAgainRequest');
+            newSocket.off('playAgainResponse');
             
             if (newSocket.connected) {
               console.log('Disconnecting socket on cleanup');
@@ -976,6 +1011,16 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     const gameId = uuidv4(); // Generate unique game ID
     const gameCode = generateGameCode();
     
+    // Determine game type based on settings
+    let gameType: GameType;
+    if (timePerMove > 0) {
+      gameType = 'blitz';
+    } else if (handicap > 0) {
+      gameType = 'handicap';
+    } else {
+      gameType = 'even';
+    }
+    
     // Create new game state
     const gameState: GameState = {
       id: gameId,
@@ -1002,8 +1047,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         fischerTime
       },
       komi: adjustedKomi,
-      gameType: handicap > 0 ? 'handicap' : 'even',
-      handicap: handicap
+      gameType: gameType,
+      handicap: handicap,
+      timePerMove: timePerMove // Add timePerMove field to gameState
     };
     
     // Send the game data to the server
