@@ -219,13 +219,28 @@ const GamePage: React.FC = () => {
     // Handle player left event
     socket.on('playerLeft', (leaveData) => {
       console.log(`Player ${leaveData.playerId} left the game`);
-      const leftPlayer = gameState?.players.find(p => p.id === leaveData.playerId);
-      if (leftPlayer && leftPlayer.id !== currentPlayer?.id) {
+      
+      // Use username from server data if available, otherwise find it in game state
+      let username = leaveData.username;
+      if (!username) {
+        const leftPlayer = gameState?.players.find(p => p.id === leaveData.playerId);
+        username = leftPlayer?.username || 'A player';
+      }
+      
+      // Only show notification if it's not the current player leaving
+      if (leaveData.playerId !== currentPlayer?.id) {
         setNotifications(prev => [...prev, {
           id: Date.now().toString(),
-          message: `${leftPlayer.username} has left the game`,
+          message: `${username} has left the game`,
           type: 'warning'
         }]);
+        
+        // Also show in the notification modal for better visibility
+        setNotification({
+          visible: true,
+          message: `${username} has left the game.`,
+          type: 'leave'
+        });
       }
     });
 
@@ -237,9 +252,10 @@ const GamePage: React.FC = () => {
         p => p.id !== currentPlayer?.id
       );
       if (disconnectedPlayer) {
+        const username = disconnectedPlayer.username || 'A player';
         setNotifications(prev => [...prev, {
           id: Date.now().toString(),
-          message: `${disconnectedPlayer.username} has disconnected from the game`,
+          message: `${username} has disconnected from the game`,
           type: 'warning'
         }]);
       }
@@ -260,20 +276,6 @@ const GamePage: React.FC = () => {
           message: message,
           type: 'resign',
           result: result
-        });
-      }
-    });
-
-    // Listen for player leaving
-    socket.on('playerLeft', (data: { playerId: string, username: string }) => {
-      console.log(`Player ${data.username} left the game`);
-      
-      // Only show notification to the opponent
-      if (currentPlayer && data.playerId !== currentPlayer.id) {
-        setNotification({
-          visible: true,
-          message: `${data.username} has left the game.`,
-          type: 'leave'
         });
       }
     });
@@ -772,7 +774,7 @@ const GamePage: React.FC = () => {
         message={notification.message}
         type={notification.type}
         result={notification.result}
-        duration={7000}
+        duration={1000}
         onClose={() => setNotification(prev => ({ ...prev, visible: false }))}
       />
     </div>

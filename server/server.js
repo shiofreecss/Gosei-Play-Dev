@@ -1216,14 +1216,26 @@ io.on('connection', (socket) => {
   socket.on('leaveGame', ({ gameId, playerId }) => {
     log(`Player ${playerId} leaving game ${gameId}`);
     
+    // Get the game state to find player username
+    const gameState = activeGames.get(gameId);
+    let username = 'A player'; // Default fallback
+    
+    if (gameState) {
+      const leavingPlayer = gameState.players.find(p => p.id === playerId);
+      if (leavingPlayer && leavingPlayer.username) {
+        username = leavingPlayer.username;
+      }
+    }
+    
     // Leave the socket room
     socket.leave(gameId);
     socketToGame.delete(socket.id);
     
-    // Notify other players
+    // Notify other players with username included
     socket.to(gameId).emit('playerLeft', {
       gameId,
-      playerId
+      playerId,
+      username
     });
     
     // Check if there are any players left in the game room
