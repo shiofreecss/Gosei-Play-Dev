@@ -15,6 +15,7 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
   const [playAgainRequestSent, setPlayAgainRequestSent] = useState(false);
   const [playAgainRequestReceived, setPlayAgainRequestReceived] = useState(false);
   const [requestFromPlayer, setRequestFromPlayer] = useState<string>('');
+  const [waitingForNewGame, setWaitingForNewGame] = useState(false);
 
   // Animation effect
   useEffect(() => {
@@ -41,8 +42,15 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
 
     const handlePlayAgainResponse = (data: { accepted: boolean; fromPlayerId: string; gameId?: string; newGameState?: any }) => {
       if (data.accepted && data.gameId) {
-        // Navigate to new game
-        navigate(`/game/${data.gameId}`);
+        // Set waiting state and let GameContext handle the state update
+        setWaitingForNewGame(true);
+        setShowPlayAgainDialog(false);
+        setPlayAgainRequestSent(false);
+        
+        // Navigate after a short delay to allow GameContext to update
+        setTimeout(() => {
+          navigate(`/game/${data.gameId}`);
+        }, 500);
       } else {
         // Request was declined, go to home page
         handleReturnHome();
@@ -58,8 +66,25 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
     };
   }, [gameState?.socket, currentPlayer, navigate]);
 
-  // Don't render if there's no game state or if game isn't finished
-  if (!gameState || gameState.status !== 'finished') {
+  // Watch for game state changes to detect when a new game starts
+  useEffect(() => {
+    if (gameState && waitingForNewGame) {
+      // Check if this is a different game (new game ID) and it's ready to play
+      if (gameState.status === 'playing' || gameState.status === 'waiting') {
+        console.log('New game detected, closing modal and navigating');
+        setWaitingForNewGame(false);
+        handleClose();
+      }
+    }
+  }, [gameState?.id, gameState?.status, waitingForNewGame]);
+
+  // Don't render if there's no game state
+  if (!gameState) {
+    return null;
+  }
+
+  // Don't render if game isn't finished (unless we're waiting for new game)
+  if (gameState.status !== 'finished' && !waitingForNewGame) {
     return null;
   }
 
@@ -125,6 +150,34 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
       setShowPlayAgainDialog(false);
     }
   };
+
+  // If waiting for new game, always show the waiting modal regardless of game status
+  if (waitingForNewGame) {
+    return (
+      <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+        {/* Backdrop */}
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        
+        {/* Modal */}
+        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
+          {/* Header */}
+          <div className="bg-green-600 dark:bg-green-800 text-white py-4 px-6">
+            <h2 className="text-xl font-bold text-center">Starting New Game...</h2>
+          </div>
+          
+          {/* Content */}
+          <div className="p-6 text-center">
+            <div className="mb-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+            </div>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              Setting up your new game...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Render play again confirmation dialog
   if (showPlayAgainDialog && playAgainRequestReceived) {
@@ -232,8 +285,11 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
           
           {/* Show status if play again request was sent */}
           {playAgainRequestSent && (
-            <div className="mb-4 p-3 bg-blue-100 text-blue-800 rounded-md text-center">
-              Waiting for opponent's response...
+            <div className="mb-4 p-3 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-md text-center">
+              <div className="flex items-center justify-center gap-2">
+                <div className="animate-pulse w-2 h-2 bg-blue-600 rounded-full"></div>
+                <span>Waiting for opponent's response...</span>
+              </div>
             </div>
           )}
           

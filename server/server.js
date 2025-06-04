@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 app.use(cors());
@@ -1535,7 +1536,7 @@ io.on('connection', (socket) => {
       if (accepted) {
         // Create a new game with the same players and settings
         const originalGame = gameState;
-        const newGameId = Date.now().toString();
+        const newGameId = uuidv4(); // Use proper UUID instead of timestamp
         const newGameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
         
         // Create new game state with same settings but reset board
@@ -1554,7 +1555,7 @@ io.on('connection', (socket) => {
             stones: []
           },
           currentTurn: 'black',
-          status: 'playing',
+          status: 'playing', // Start as playing since we have 2 players
           history: [],
           capturedStones: { black: 0, white: 0 },
           komi: originalGame.komi,
@@ -1569,14 +1570,16 @@ io.on('connection', (socket) => {
 
         // Add handicap stones if it's a handicap game
         if (newGameState.gameType === 'handicap' && newGameState.handicap > 0) {
-          // Add handicap stones logic here if needed
+          // Add handicap stones based on board size and handicap count
+          const handicapStones = getHandicapStones(newGameState.board.size, newGameState.handicap);
+          newGameState.board.stones = handicapStones;
           newGameState.currentTurn = 'white'; // White plays first in handicap games
         }
 
         // Store the new game
         activeGames.set(newGameId, newGameState);
         
-        // Move both players to the new game room
+        // Move both players to the new game room and update socketToGame mapping
         const gameRoom = io.sockets.adapter.rooms.get(gameId);
         if (gameRoom) {
           gameRoom.forEach(socketId => {
@@ -1589,17 +1592,19 @@ io.on('connection', (socket) => {
           });
         }
         
-        log(`Created new game ${newGameId} for play again request`);
+        log(`Created new game ${newGameId} (${newGameCode}) for play again request`);
         
-        // Broadcast the new game to both players
-        io.to(newGameId).emit('playAgainResponse', {
-          accepted: true,
-          gameId: newGameId,
-          newGameState: newGameState
-        });
-        
-        // Also emit the game state
-        broadcastGameUpdate(newGameId, newGameState);
+        // Broadcast the new game to both players with a slight delay to ensure socket rooms are updated
+        setTimeout(() => {
+          io.to(newGameId).emit('playAgainResponse', {
+            accepted: true,
+            gameId: newGameId,
+            newGameState: newGameState
+          });
+          
+          // Also emit the game state
+          broadcastGameUpdate(newGameId, newGameState);
+        }, 100);
         
       } else {
         // Request was declined
@@ -1625,6 +1630,82 @@ const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   log(`Socket server listening on port ${PORT}`);
 });
+
+// Helper function to get handicap stone positions
+function getHandicapStones(boardSize, handicap) {
+  if (handicap < 2 || handicap > 9) return [];
+  
+  // Standard handicap stone positions for different board sizes
+  const HANDICAP_POSITIONS = {
+    21: [
+      { x: 3, y: 3 },     // bottom left
+      { x: 17, y: 17 },   // top right
+      { x: 17, y: 3 },    // bottom right
+      { x: 3, y: 17 },    // top left
+      { x: 10, y: 10 },   // center
+      { x: 10, y: 3 },    // bottom center
+      { x: 10, y: 17 },   // top center
+      { x: 3, y: 10 },    // left center
+      { x: 17, y: 10 },   // right center
+    ],
+    19: [
+      { x: 3, y: 3 },    // bottom left
+      { x: 15, y: 15 },  // top right
+      { x: 15, y: 3 },   // bottom right
+      { x: 3, y: 15 },   // top left
+      { x: 9, y: 9 },    // center
+      { x: 9, y: 3 },    // bottom center
+      { x: 9, y: 15 },   // top center
+      { x: 3, y: 9 },    // left center
+      { x: 15, y: 9 },   // right center
+    ],
+    15: [
+      { x: 3, y: 3 },     // bottom left
+      { x: 11, y: 11 },   // top right
+      { x: 11, y: 3 },    // bottom right
+      { x: 3, y: 11 },    // top left
+      { x: 7, y: 7 },     // center
+      { x: 7, y: 3 },     // bottom center
+      { x: 7, y: 11 },    // top center
+      { x: 3, y: 7 },     // left center
+      { x: 11, y: 7 },    // right center
+    ],
+    13: [
+      { x: 3, y: 3 },    // bottom left
+      { x: 9, y: 9 },    // top right
+      { x: 9, y: 3 },    // bottom right
+      { x: 3, y: 9 },    // top left
+      { x: 6, y: 6 },    // center
+      { x: 6, y: 3 },    // bottom center
+      { x: 6, y: 9 },    // top center
+      { x: 3, y: 6 },    // left center
+      { x: 9, y: 6 },    // right center
+    ],
+    9: [
+      { x: 2, y: 2 },    // bottom left
+      { x: 6, y: 6 },    // top right
+      { x: 6, y: 2 },    // bottom right
+      { x: 2, y: 6 },    // top left
+      { x: 4, y: 4 },    // center
+      { x: 4, y: 2 },    // bottom center
+      { x: 4, y: 6 },    // top center
+      { x: 2, y: 4 },    // left center
+      { x: 6, y: 4 },    // right center
+    ]
+  };
+  
+  const positions = HANDICAP_POSITIONS[boardSize];
+  if (!positions) return [];
+  
+  // Get the handicap positions (limit to requested handicap)
+  const handicapPositions = positions.slice(0, handicap);
+  
+  // Create stones for each position
+  return handicapPositions.map(position => ({
+    position,
+    color: 'black'
+  }));
+}
 
 // Helper function to get adjacent positions
 function getAdjacentPositions(position) {

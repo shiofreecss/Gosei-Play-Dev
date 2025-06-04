@@ -290,7 +290,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
                 
                 // Also update localStorage
                 try {
-                  safelySetItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
+                  localStorage.setItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
                 } catch (e) {
                   console.warn('Failed to save corrected game state to localStorage:', e);
                 }
@@ -349,7 +349,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           
           // Save game state to localStorage for persistence
           try {
-            safelySetItem(`gosei-game-${gameState.id}`, JSON.stringify(gameState));
+            localStorage.setItem(`gosei-game-${gameState.id}`, JSON.stringify(gameState));
           } catch (e) {
             console.warn('Failed to save game state to localStorage:', e);
           }
@@ -507,14 +507,37 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             );
             
             if (newCurrentPlayer) {
+              // Clear any existing game data from localStorage for the old game
+              if (state.gameState?.id) {
+                try {
+                  localStorage.removeItem(`gosei-game-${state.gameState.id}`);
+                } catch (e) {
+                  console.warn('Failed to clear old game from localStorage:', e);
+                }
+              }
+              
+              // Update the game state with the new game
               dispatch({
                 type: 'JOIN_GAME_SUCCESS',
                 payload: { 
-                  gameState: responseData.newGameState, 
+                  gameState: {
+                    ...responseData.newGameState,
+                    socket: newSocket
+                  }, 
                   player: newCurrentPlayer 
                 }
               });
-              console.log(`Successfully joined new game ${responseData.gameId}`);
+              
+              // Save new game state to localStorage
+              try {
+                localStorage.setItem(`gosei-game-${responseData.gameId}`, JSON.stringify(responseData.newGameState));
+                localStorage.setItem('gosei-current-player', JSON.stringify(newCurrentPlayer));
+                console.log(`Successfully joined new game ${responseData.gameId}`);
+              } catch (e) {
+                console.warn('Failed to save new game to localStorage:', e);
+              }
+            } else {
+              console.error('Current player not found in new game state');
             }
           }
           // The GameCompleteModal will handle navigation
@@ -547,7 +570,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             
             // Update in localStorage as backup
             try {
-              safelySetItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
+              localStorage.setItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
             } catch (e) {
               console.warn('Failed to save updated dead stones to localStorage:', e);
             }
@@ -645,10 +668,16 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       
       // Listen for game state updates from other clients
       state.socket.on('gameState', (updatedGameState: GameState) => {
-        console.log('Received updated game state from server');
+        console.log('Received updated game state from server:', updatedGameState.id);
         
-        // Only update if we already have a game with this ID
-        if (state.gameState && state.gameState.id === updatedGameState.id) {
+        // Accept the game state if we have a current player in it (for play again scenarios)
+        // or if it's an update to our current game
+        const isCurrentGame = state.gameState && state.gameState.id === updatedGameState.id;
+        const hasCurrentPlayer = state.currentPlayer && updatedGameState.players.find(
+          p => p.id === state.currentPlayer?.id
+        );
+        
+        if (isCurrentGame || hasCurrentPlayer) {
           console.log('Updating local game state');
           
           // Preserve the current player reference
@@ -691,13 +720,28 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             };
           }
           
-          dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGameState });
+          // Preserve the socket instance
+          const gameStateWithSocket = {
+            ...updatedGameState,
+            socket: state.socket
+          };
+          
+          dispatch({ type: 'UPDATE_GAME_STATE', payload: gameStateWithSocket });
+          
+          // Save game state to localStorage for persistence
+          try {
+            localStorage.setItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
+          } catch (e) {
+            console.warn('Failed to save game state to localStorage:', e);
+          }
           
           // If there's a currentPlayer mismatch after update, fix it
           if (currentPlayer && state.currentPlayer?.id !== currentPlayer.id) {
             console.log('Fixing current player reference after game state update');
             // We'd need to add a new action type to fix just the currentPlayer
           }
+        } else {
+          console.log('Ignoring game state update for different game:', updatedGameState.id);
         }
       });
       
@@ -776,30 +820,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         }
       });
 
-      // Handle game state updates
-      state.socket.on('gameState', (gameState) => {
-        console.log('Received updated game state:', gameState.id);
-        
-        // Preserve the socket instance
-        const updatedState = {
-          ...gameState,
-          socket: state.socket
-        };
-        
-        dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedState });
-        
-        // Save game state to localStorage for persistence
-        try {
-          safelySetItem(`gosei-game-${gameState.id}`, JSON.stringify(gameState));
-        } catch (e) {
-          console.warn('Failed to save game state to localStorage:', e);
-        }
-      });
-
       // Handle timeout events
       state.socket.on('playerTimeout', (timeoutData) => {
         console.log(`Player ${timeoutData.playerId} has timed out`);
-        // Game state update will be handled by the gameState event
+        // Game state update will be handled by the main gameState event listener
       });
 
       // Clean up event listeners
@@ -807,7 +831,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       return () => {
         socket.off('timeUpdate');
         socket.off('moveMade');
-        socket.off('gameState');
         socket.off('playerTimeout');
       };
     }
@@ -893,7 +916,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             if (serverGameState) {
               // Update localStorage with server state
               try {
-                safelySetItem(`gosei-game-${serverGameState.id}`, JSON.stringify({
+                localStorage.setItem(`gosei-game-${serverGameState.id}`, JSON.stringify({
                   ...serverGameState,
                   savedAt: new Date().toISOString()
                 }));
@@ -1079,9 +1102,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     
     // Save game to localStorage for persistence
     try {
-      safelySetItem(`gosei-game-${gameId}`, JSON.stringify(gameState));
-      safelySetItem('gosei-current-game', gameId);
-      safelySetItem('gosei-player-id', playerId);
+      localStorage.setItem(`gosei-game-${gameId}`, JSON.stringify(gameState));
+      localStorage.setItem('gosei-current-game', gameId);
+      localStorage.setItem('gosei-player-id', playerId);
     } catch (e) {
       console.warn('Failed to save game to localStorage:', e);
     }
@@ -1207,18 +1230,12 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       
       // Update the game in localStorage
       try {
-        const stored = safelySetItem(`gosei-game-${updatedGameState.id}`, JSON.stringify({
+        localStorage.setItem(`gosei-game-${updatedGameState.id}`, JSON.stringify({
           ...updatedGameState,
           savedAt: new Date().toISOString()
         }));
-        if (!stored) {
-          throw new Error('Failed to save game state');
-        }
-        console.log(`Game ${updatedGameState.id} updated in localStorage`);
       } catch (e) {
-        console.error('Error saving game to localStorage:', e);
-        dispatch({ type: 'GAME_ERROR', payload: 'Failed to update the game. Please try again.' });
-        return;
+        console.error('Failed to save game state after joining:', e);
       }
       
       // If we have a socket connection, join the socket room
@@ -1323,12 +1340,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     
     // Update the game in localStorage as backup
     try {
-      const stored = safelySetItem(`gosei-game-${updatedGameState.code}`, JSON.stringify(updatedGameState));
-      if (!stored) {
-        console.error('Failed to save game state after placing stone');
-      }
+      localStorage.setItem(`gosei-game-${updatedGameState.code}`, JSON.stringify(updatedGameState));
     } catch (e) {
-      console.error('Error saving game state after placing stone:', e);
+      console.error('Failed to save game state after placing stone:', e);
     }
   };
   
@@ -1442,12 +1456,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     
     // Update the game in localStorage as backup
     try {
-      const stored = safelySetItem(`gosei-game-${updatedGameState.code}`, JSON.stringify(updatedGameState));
-      if (!stored) {
-        console.error('Failed to save game state after passing turn');
-      }
+      localStorage.setItem(`gosei-game-${updatedGameState.code}`, JSON.stringify(updatedGameState));
     } catch (e) {
-      console.error('Error saving game state after passing turn:', e);
+      console.error('Failed to save game state after passing turn:', e);
     }
   };
   
@@ -1598,12 +1609,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     
     // Update the game in localStorage as backup
     try {
-      const stored = safelySetItem(`gosei-game-${updatedGameState.code}`, JSON.stringify(updatedGameState));
-      if (!stored) {
-        console.error('Failed to save game state after resignation');
-      }
+      localStorage.setItem(`gosei-game-${updatedGameState.code}`, JSON.stringify(updatedGameState));
     } catch (e) {
-      console.error('Error saving game state after resignation:', e);
+      console.error('Failed to save game state after resignation:', e);
     }
   };
 
@@ -1731,12 +1739,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     
     // Update in localStorage as backup
     try {
-      const stored = safelySetItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
-      if (!stored) {
-        console.error('Failed to save game state after toggling dead stone');
-      }
+      localStorage.setItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
     } catch (e) {
-      console.error('Error saving game state after toggling dead stone:', e);
+      console.error('Failed to save game state after toggling dead stone:', e);
     }
   };
   
@@ -1878,12 +1883,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     
     // Update in localStorage as backup
     try {
-      const stored = safelySetItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
-      if (!stored) {
-        console.error('Failed to save game state after scoring');
-      }
+      localStorage.setItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
     } catch (e) {
-      console.error('Error saving game state after scoring:', e);
+      console.error('Failed to save game state after scoring:', e);
     }
   };
 
@@ -1944,12 +1946,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     
     // Update in localStorage as backup
     try {
-      const stored = safelySetItem(`gosei-game-${updatedGameState.code}`, JSON.stringify(updatedGameState));
-      if (!stored) {
-        console.error('Failed to save game state after undo request');
-      }
+      localStorage.setItem(`gosei-game-${updatedGameState.code}`, JSON.stringify(updatedGameState));
     } catch (e) {
-      console.error('Error saving game state after undo request:', e);
+      console.error('Failed to save game state after undo request:', e);
     }
   };
 
@@ -2080,12 +2079,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     
     // Update in localStorage
     try {
-      const stored = safelySetItem(`gosei-game-${gameState.code}`, JSON.stringify(gameState));
-      if (!stored) {
-        console.error('Failed to save game state after undo response');
-      }
+      localStorage.setItem(`gosei-game-${gameState.code}`, JSON.stringify(gameState));
     } catch (e) {
-      console.error('Error saving game state after undo response:', e);
+      console.error('Failed to save game state after undo response:', e);
     }
   };
 
@@ -2135,12 +2131,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     
     // Update in localStorage as backup
     try {
-      const stored = safelySetItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
-      if (!stored) {
-        console.error('Failed to save game state after canceling scoring');
-      }
+      localStorage.setItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
     } catch (e) {
-      console.error('Error saving game state after canceling scoring:', e);
+      console.error('Failed to save game state after canceling scoring:', e);
     }
   };
 
