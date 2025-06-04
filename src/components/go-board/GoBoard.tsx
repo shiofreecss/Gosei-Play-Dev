@@ -4,6 +4,7 @@ import { isHandicapPoint } from '../../utils/handicapUtils';
 import { playStoneSound } from '../../utils/soundUtils';
 import { useBoardTheme } from '../../context/BoardThemeContext';
 import { useGame } from '../../context/GameContext';
+import useDeviceDetect from '../../hooks/useDeviceDetect';
 
 interface GoBoardProps {
   board: Board;
@@ -33,8 +34,10 @@ const GoBoard: React.FC<GoBoardProps> = ({
   isHandicapPlacement = false,
 }) => {
   const [hoverPosition, setHoverPosition] = useState<Position | null>(null);
+  const [previewPosition, setPreviewPosition] = useState<Position | null>(null);
   const { currentTheme } = useBoardTheme();
   const { gameState } = useGame();
+  const { isMobile } = useDeviceDetect();
 
   // Get star point positions based on board size
   const getStarPoints = (size: number): Position[] => {
@@ -126,8 +129,11 @@ const GoBoard: React.FC<GoBoardProps> = ({
       if (stone && onToggleDeadStone) {
         onToggleDeadStone({ x, y });
       }
-    } else if (isPlayerTurn && isValidPlacement(x, y)) {
-      // Play stone sound when placing a stone
+    } else if (isMobile && isPlayerTurn && isValidPlacement(x, y)) {
+      // On mobile, clicking sets preview position instead of placing stone directly
+      setPreviewPosition({ x, y });
+    } else if (!isMobile && isPlayerTurn && isValidPlacement(x, y)) {
+      // On desktop, clicking places stone directly
       playStoneSound();
       onPlaceStone({ x, y });
     }
@@ -166,9 +172,58 @@ const GoBoard: React.FC<GoBoardProps> = ({
     return starPoints.some(point => point.x === x && point.y === y);
   };
 
+  // Handle touch events for mobile
+  const handleTouchStart = (e: React.TouchEvent, x: number, y: number) => {
+    e.preventDefault();
+    if (isPlayerTurn && isValidPlacement(x, y) && !isScoring) {
+      // Add haptic feedback on supported devices
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50); // Short vibration
+      }
+      setPreviewPosition({ x, y });
+    }
+  };
+
+  // Clear preview when user touches outside the board
+  const handleBoardTouchStart = (e: React.TouchEvent) => {
+    if (isMobile && (!e.target || !(e.target as HTMLElement).closest('.board-intersection'))) {
+      setPreviewPosition(null);
+    }
+  };
+
+  // Handle touch on the container to cancel preview
+  const handleContainerTouchStart = (e: React.TouchEvent) => {
+    if (isMobile && previewPosition) {
+      const target = e.target as HTMLElement;
+      // Cancel if touching outside the board or mobile controls
+      if (!target.closest('.board') && !target.closest('.mobile-stone-controls')) {
+        setPreviewPosition(null);
+      }
+    }
+  };
+
+  // Handle place button click (mobile only)
+  const handlePlaceStone = () => {
+    if (previewPosition && isPlayerTurn && isValidPlacement(previewPosition.x, previewPosition.y)) {
+      // Add haptic feedback for successful placement
+      if ('vibrate' in navigator) {
+        navigator.vibrate([50, 50, 50]); // Triple tap pattern
+      }
+      playStoneSound();
+      onPlaceStone(previewPosition);
+      setPreviewPosition(null);
+    }
+  };
+
   return (
-    <div className="go-board-container relative max-w-full overflow-auto">
-      <div className={`board board-${board.size} board-theme-${currentTheme} max-w-full`}>
+    <div 
+      className="go-board-container relative max-w-full overflow-auto"
+      onTouchStart={handleContainerTouchStart}
+    >
+      <div 
+        className={`board board-${board.size} board-theme-${currentTheme} max-w-full`}
+        onTouchStart={isMobile ? handleBoardTouchStart : undefined}
+      >
         {Array.from({ length: board.size * board.size }).map((_, index) => {
           const x = index % board.size;
           const y = Math.floor(index / board.size);
@@ -189,8 +244,11 @@ const GoBoard: React.FC<GoBoardProps> = ({
           // Check if stone is marked as dead
           const isDead = stone && isDeadStone(x, y);
           
-          // Check if this is the hover position
-          const isHovered = hoverPosition && hoverPosition.x === x && hoverPosition.y === y;
+          // Check if this is the hover position (desktop only)
+          const isHovered = !isMobile && hoverPosition && hoverPosition.x === x && hoverPosition.y === y;
+          
+          // Check if this is the preview position (mobile only)
+          const isPreview = isMobile && previewPosition && previewPosition.x === x && previewPosition.y === y;
           
           // Check territory ownership
           const territoryOwner = getTerritoryOwner(x, y);
@@ -208,8 +266,9 @@ const GoBoard: React.FC<GoBoardProps> = ({
                 isValidHandicap ? ' valid-handicap-point' : ''
               }`}
               onClick={() => handleIntersectionClick(x, y)}
-              onMouseOver={() => handleMouseOver(x, y)}
-              onMouseLeave={handleMouseLeave}
+              onMouseOver={() => !isMobile && handleMouseOver(x, y)}
+              onMouseLeave={!isMobile ? handleMouseLeave : undefined}
+              onTouchStart={(e) => isMobile && handleTouchStart(e, x, y)}
             >
               {/* Star point markers */}
               {isStarPoint(x, y) && (
@@ -253,10 +312,18 @@ const GoBoard: React.FC<GoBoardProps> = ({
                 </div>
               )}
 
-              {/* Hover indicator */}
+              {/* Desktop hover indicator */}
               {isHovered && !stone && !isScoring && (
                 <div
                   className={`stone ${currentTurn === 'black' ? 'stone-black' : 'stone-white'} stone-hover`}
+                  style={{ width: stoneSize, height: stoneSize }}
+                ></div>
+              )}
+
+              {/* Mobile preview indicator */}
+              {isPreview && !stone && !isScoring && (
+                <div
+                  className={`stone ${currentTurn === 'black' ? 'stone-black' : 'stone-white'} stone-preview`}
                   style={{ width: stoneSize, height: stoneSize }}
                 ></div>
               )}
@@ -276,26 +343,45 @@ const GoBoard: React.FC<GoBoardProps> = ({
         })}
       </div>
 
-      {/* KO position marker */}
-      {gameState?.koPosition && (
-        <div 
-          className="absolute pointer-events-none ko-marker" 
-          style={{
-            left: `${(100 / board.size) * (gameState.koPosition.x + 0.5)}%`,
-            top: `${(100 / board.size) * (gameState.koPosition.y + 0.5)}%`,
-            transform: 'translate(-50%, -50%)',
-            zIndex: 20,
-          }}
-        >
-          <svg 
-            width="30" 
-            height="30" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M6 18L18 6M6 6l12 12" stroke="#ff3333" strokeWidth="3" strokeLinecap="round" />
-          </svg>
+      {/* Mobile Place/Cancel buttons */}
+      {isMobile && isPlayerTurn && !isScoring && (
+        <div className="mobile-stone-controls mt-4 flex flex-col items-center gap-3">
+          {previewPosition ? (
+            <>
+              {/* Position indicator */}
+              <div className="preview-position-indicator text-sm font-medium">
+                {currentTurn === 'black' ? '●' : '○'} Position: {String.fromCharCode(65 + previewPosition.x)}{board.size - previewPosition.y}
+              </div>
+              
+              <div className="flex justify-center">
+                <button
+                  onClick={handlePlaceStone}
+                  className="place-stone-btn px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-md transition-colors duration-200 flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Place Stone
+                </button>
+              </div>
+              
+              {/* Touch outside to cancel instruction */}
+              <div className="cancel-instruction text-xs opacity-70">
+                Touch outside the board to cancel
+              </div>
+            </>
+          ) : (
+            <>
+              {/* No preview state */}
+              <div className="no-preview-indicator text-sm font-medium opacity-60">
+                {currentTurn === 'black' ? '●' : '○'} {currentTurn === 'black' ? 'Black' : 'White'}'s Turn
+              </div>
+              
+              <div className="touch-instruction text-xs opacity-60 text-center">
+                Touch any intersection on the board to preview your move
+              </div>
+            </>
+          )}
         </div>
       )}
 
