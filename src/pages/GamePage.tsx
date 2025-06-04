@@ -629,135 +629,146 @@ const GamePage: React.FC = () => {
 
   // Game board and UI
   return (
-    <div className="min-h-screen bg-neutral-100 relative">
-      {/* Notifications */}
-      {notifications.map(notification => (
-        <Notification
-          key={notification.id}
-          message={notification.message}
-          type={notification.type}
-          onClose={() => removeNotification(notification.id)}
-        />
-      ))}
-      
-      <div className="max-w-7xl mx-auto p-2 sm:p-4 md:p-6">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
-          {/* Logo and title - centered on mobile, left-aligned on larger screens */}
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
-            <GoseiLogo size={40} />
-            <h1 className="text-2xl sm:text-3xl font-bold text-primary-700">Gosei Play</h1>
+    <>
+      <div className="min-h-screen bg-neutral-100 relative">
+        {/* Notifications */}
+        {notifications.map(notification => (
+          <Notification
+            key={notification.id}
+            message={notification.message}
+            type={notification.type}
+            onClose={() => removeNotification(notification.id)}
+          />
+        ))}
+        
+        <div className="max-w-7xl mx-auto p-2 sm:p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
+            {/* Logo and title - centered on mobile, left-aligned on larger screens */}
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
+              <GoseiLogo size={40} />
+              <h1 className="text-2xl sm:text-3xl font-bold text-primary-700">Gosei Play</h1>
+            </div>
+            
+            {/* Theme Toggle Button - positioned on the right on larger screens, centered below on mobile */}
+            <div className="flex items-center justify-center sm:justify-end w-full sm:w-auto">
+              <ThemeToggleButton />
+            </div>
           </div>
           
-          {/* Theme Toggle Button - positioned on the right on larger screens, centered below on mobile */}
-          <div className="flex items-center justify-center sm:justify-end w-full sm:w-auto">
-            <ThemeToggleButton />
-          </div>
-        </div>
-        
-        {/* Add a small indicator when dev tools are enabled */}
-        {showDevTools && (
-          <div className="text-xs text-neutral-500 text-center mb-2">
-            Developer Tools Enabled (Ctrl+Shift+D to toggle)
-          </div>
-        )}
-        
-        {/* Mobile-first responsive grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
-          {/* Go Board - adjust to be full width on mobile and take 3/4 on larger screens */}
-          <div className="lg:col-span-3 flex flex-col items-center">
-            <div className="w-full max-w-full overflow-auto">
-              <GoBoard
-                board={gameState.board}
-                currentTurn={gameState.currentTurn}
-                onPlaceStone={(position) => {
-                  // Add debug for handicap games
-                  if (gameState.gameType === 'handicap') {
-                    console.log('Handicap game detected');
-                    console.log(`Current turn: ${gameState.currentTurn}, Player color: ${currentPlayer?.color}`);
-                    console.log(`Handicap stones on board: ${gameState.board.stones.filter(s => s.color === 'black').length}`);
-                  }
-                  handleStonePlace(position);
-                }}
-                isPlayerTurn={gameState.status === 'playing' && currentPlayer?.color === gameState.currentTurn}
-                lastMove={gameState.history.length > 0 ? 
-                  isPassMove(gameState.history[gameState.history.length - 1]) ? 
-                    undefined : gameState.history[gameState.history.length - 1] as Position 
-                  : undefined}
-                isScoring={gameState.status === 'scoring'}
-                deadStones={gameState.deadStones}
-                onToggleDeadStone={handleToggleDeadStone}
-                territory={gameState.territory}
-                showTerritory={gameState.status === 'finished' || gameState.status === 'scoring'}
+          {/* Add a small indicator when dev tools are enabled */}
+          {showDevTools && (
+            <div className="text-xs text-neutral-500 text-center mb-2">
+              Developer Tools Enabled (Ctrl+Shift+D to toggle)
+            </div>
+          )}
+          
+          {/* Mobile-first responsive grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+            {/* Go Board - adjust to be full width on mobile and take 3/4 on larger screens */}
+            <div className="lg:col-span-3 flex flex-col items-center">
+              <div className="w-full max-w-full overflow-auto">
+                <GoBoard
+                  board={gameState.board}
+                  currentTurn={gameState.currentTurn}
+                  onPlaceStone={(position) => {
+                    // Add debug for handicap games
+                    if (gameState.gameType === 'handicap') {
+                      console.log('Handicap game detected');
+                      console.log(`Current turn: ${gameState.currentTurn}, Player color: ${currentPlayer?.color}`);
+                    }
+                    handleStonePlace(position);
+                  }}
+                  isPlayerTurn={gameState.status === 'playing' && currentPlayer?.color === gameState.currentTurn}
+                  lastMove={gameState.history.length > 0 ? 
+                    isPassMove(gameState.history[gameState.history.length - 1]) ? 
+                      undefined : gameState.history[gameState.history.length - 1] as Position 
+                    : undefined}
+                  isScoring={gameState.status === 'scoring'}
+                  deadStones={gameState.deadStones}
+                  onToggleDeadStone={handleToggleDeadStone}
+                  territory={gameState.territory}
+                  showTerritory={gameState.status === 'finished' || gameState.status === 'scoring'}
+                />
+                
+                {/* Game completion buttons below board */}
+                {gameState.status === 'finished' && (
+                  <div className="mt-4 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-4">
+                    <button
+                      onClick={() => navigate('/')}
+                      className="px-4 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors font-medium"
+                    >
+                      Return Home
+                    </button>
+                    <button
+                      onClick={() => {
+                        resetGame();
+                        navigate('/');
+                      }}
+                      className="px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors font-medium"
+                    >
+                      Play Again
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Game Info Panel - Make responsive with proper width constraints */}
+            <div className="lg:col-span-1 w-full">
+              <GameInfo
+                gameState={gameState}
+                currentPlayer={currentPlayer || undefined}
+                onResign={handleResignGame}
+                onRequestUndo={handleRequestUndo}
+                onAcceptUndo={handleAcceptUndo}
+                onRejectUndo={handleRejectUndo}
+                onPassTurn={handlePassTurn}
+                onLeaveGame={handleLeaveGame}
+                onCopyGameLink={copyGameLink}
+                copied={copied}
+                autoSaveEnabled={autoSaveEnabled}
+                onToggleAutoSave={toggleAutoSave}
+                onSaveNow={saveGameNow}
+                onConfirmScore={handleConfirmScore}
+                onCancelScoring={handleCancelScoring}
               />
               
-              {/* Game completion buttons below board */}
-              {gameState.status === 'finished' && (
-                <div className="mt-4 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-4">
+              {/* Debug Controls - Only shown when dev tools are enabled */}
+              {showDevTools && (
+                <div className="mt-4 sm:mt-6">
                   <button
-                    onClick={() => navigate('/')}
-                    className="px-4 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors font-medium"
+                    onClick={handleSyncGame}
+                    className="btn bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:ring-neutral-400 w-full"
+                    disabled={syncing}
                   >
-                    Return Home
-                  </button>
-                  <button
-                    onClick={() => {
-                      resetGame();
-                      navigate('/');
-                    }}
-                    className="px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors font-medium"
-                  >
-                    Play Again
+                    {syncing ? 'Syncing...' : 'Sync Game'}
                   </button>
                 </div>
               )}
             </div>
           </div>
-
-          {/* Game Info Panel - Make responsive with proper width constraints */}
-          <div className="lg:col-span-1 w-full">
-            <GameInfo
-              gameState={gameState}
-              currentPlayer={currentPlayer || undefined}
-              onResign={handleResignGame}
-              onRequestUndo={handleRequestUndo}
-              onAcceptUndo={handleAcceptUndo}
-              onRejectUndo={handleRejectUndo}
-              onPassTurn={handlePassTurn}
-              onLeaveGame={handleLeaveGame}
-              onCopyGameLink={copyGameLink}
-              copied={copied}
-              autoSaveEnabled={autoSaveEnabled}
-              onToggleAutoSave={toggleAutoSave}
-              onSaveNow={saveGameNow}
-              onConfirmScore={handleConfirmScore}
-              onCancelScoring={handleCancelScoring}
-            />
-            
-            {/* Debug Controls - Only shown when dev tools are enabled */}
-            {showDevTools && (
-              <div className="mt-4 sm:mt-6">
-                <button
-                  onClick={handleSyncGame}
-                  className="btn bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:ring-neutral-400 w-full"
-                  disabled={syncing}
-                >
-                  {syncing ? 'Syncing...' : 'Sync Game'}
-                </button>
-              </div>
-            )}
-          </div>
         </div>
+        
+        {/* Game error messages */}
+        <GameError />
+
+        {gameState.status === 'finished' && <GameCompleteModal />}
+        
+        {/* Add connection status component */}
+        <ConnectionStatus />
+
+        {/* Game Notifications */}
+        <GameNotification
+          isVisible={notification.visible}
+          message={notification.message}
+          type={notification.type}
+          result={notification.result}
+          duration={1000}
+          onClose={() => setNotification(prev => ({ ...prev, visible: false }))}
+        />
       </div>
       
-      {/* Game error messages */}
-      <GameError />
-
-      {gameState.status === 'finished' && <GameCompleteModal />}
-      
-      {/* Add connection status component */}
-      <ConnectionStatus />
-      
-      {/* Floating Chat Bubble */}
+      {/* Floating Chat Bubble - moved outside the positioned container to fix positioning */}
       {currentPlayer && (
         <FloatingChatBubble
           gameId={gameState.id}
@@ -767,17 +778,7 @@ const GamePage: React.FC = () => {
           messages={chatMessages}
         />
       )}
-
-      {/* Game Notifications */}
-      <GameNotification
-        isVisible={notification.visible}
-        message={notification.message}
-        type={notification.type}
-        result={notification.result}
-        duration={1000}
-        onClose={() => setNotification(prev => ({ ...prev, visible: false }))}
-      />
-    </div>
+    </>
   );
 };
 

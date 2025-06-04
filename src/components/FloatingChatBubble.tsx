@@ -73,7 +73,7 @@ const FloatingChatBubble: React.FC<FloatingChatBubbleProps> = ({
   }, [isOpen]);
 
   return (
-    <div className="fixed bottom-24 right-8 z-50" ref={chatRef}>
+    <div className="fixed bottom-24 right-8 z-30" ref={chatRef}>
       {/* Chat floating button - theme-aware styling */}
       <button 
         className="w-14 h-14 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300 flex items-center justify-center cursor-pointer shadow-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-slate-300 relative floating-chat-button"
