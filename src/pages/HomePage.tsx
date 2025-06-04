@@ -822,18 +822,19 @@ const HomePage: React.FC = () => {
         {/* Header */}
         <header className="text-center mb-12 relative">
           {/* Theme toggle button positioned at top right */}
-          <div className="absolute top-0 right-0">
+          <div className="absolute top-0 right-0 md:relative md:flex md:justify-end md:mb-4">
             <ThemeToggleButton />
           </div>
           
-          <div className="flex items-center justify-center gap-3 mb-2">
+          {/* Logo and title - centered on all screens but with better mobile spacing */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-2 pt-12 md:pt-0">
             <GoseiLogo size={48} />
-            <h1 className="text-4xl font-bold text-primary-700">Gosei Play</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-primary-700">Gosei Play</h1>
           </div>
-          <p className="text-xl text-neutral-600">
+          <p className="text-lg sm:text-xl text-neutral-600">
             Play Go online with friends around the world
           </p>
-          <div className="mt-4 flex justify-center space-x-6">
+          <div className="mt-4 flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6">
             <Link to="/board-demo" className="text-primary-600 underline hover:text-primary-800 transition-colors">
               View Board Size Comparison
             </Link>

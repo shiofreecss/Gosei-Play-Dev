@@ -1729,4 +1729,181 @@
   .theme-toggle-text {
     font-size: 0.75rem;
   }
+
+  /* Center logo and title on mobile */
+  .flex.items-center.gap-3.w-full.sm\:w-auto.justify-center.sm\:justify-start {
+    justify-content: center !important;
+  }
+
+  /* Ensure proper spacing on mobile headers */
+  .text-center.mb-12.relative {
+    margin-bottom: 2rem;
+  }
+
+  /* Mobile logo and title adjustments */
+  .flex.flex-col.sm\:flex-row.items-center.justify-center {
+    gap: 0.75rem;
+  }
+
+  /* Better mobile text sizing */
+  .text-3xl.sm\:text-4xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+
+  .text-2xl.sm\:text-3xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+}
+
+/* Tablet responsive adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Ensure centered layout on tablets */
+  .flex.items-center.gap-3.w-full.sm\:w-auto.justify-center.sm\:justify-start {
+    justify-content: center !important;
+  }
+
+  /* Tablet-specific spacing */
+  .text-3xl.sm\:text-4xl {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  .text-2xl.sm\:text-3xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+}
+
+.theme-modern-light h1.text-primary-700 {
+  color: var(--text-primary);
+}
+
+/* Professional Game Action Buttons - Light and Dark Mode Support */
+.theme-modern .bg-slate-100,
+.theme-modern-light .bg-slate-100 {
+  background-color: rgba(248, 250, 252, 0.8) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.theme-modern .bg-slate-100:hover,
+.theme-modern-light .bg-slate-100:hover {
+  background-color: rgba(226, 232, 240, 0.9) !important;
+  transform: translateY(-1px);
+}
+
+.theme-modern .text-slate-700,
+.theme-modern-light .text-slate-700 {
+  color: var(--text-primary) !important;
+}
+
+.theme-modern .border-slate-200,
+.theme-modern-light .border-slate-200 {
+  border-color: rgba(226, 232, 240, 0.6) !important;
+}
+
+.theme-modern .border-slate-200:hover,
+.theme-modern-light .border-slate-200:hover {
+  border-color: rgba(148, 163, 184, 0.8) !important;
+}
+
+/* Dark mode specific overrides */
+.theme-modern .bg-slate-100 {
+  background-color: rgba(45, 45, 60, 0.7) !important;
+}
+
+.theme-modern .bg-slate-100:hover {
+  background-color: rgba(60, 60, 80, 0.8) !important;
+}
+
+.theme-modern .border-slate-200 {
+  border-color: rgba(82, 82, 120, 0.4) !important;
+}
+
+.theme-modern .border-slate-200:hover {
+  border-color: rgba(93, 93, 255, 0.6) !important;
+}
+
+/* Resign button styling - subtle red for both modes */
+.theme-modern .bg-rose-50,
+.theme-modern-light .bg-rose-50 {
+  background-color: rgba(255, 241, 242, 0.8) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.theme-modern .bg-rose-50:hover,
+.theme-modern-light .bg-rose-50:hover {
+  background-color: rgba(254, 226, 226, 0.9) !important;
+  transform: translateY(-1px);
+}
+
+.theme-modern .text-rose-700,
+.theme-modern-light .text-rose-700 {
+  color: #be123c !important;
+}
+
+.theme-modern .border-rose-200,
+.theme-modern-light .border-rose-200 {
+  border-color: rgba(254, 205, 211, 0.6) !important;
+}
+
+.theme-modern .border-rose-200:hover,
+.theme-modern-light .border-rose-200:hover {
+  border-color: rgba(251, 113, 133, 0.8) !important;
+}
+
+/* Dark mode resign button */
+.theme-modern .bg-rose-50 {
+  background-color: rgba(76, 29, 29, 0.7) !important;
+}
+
+.theme-modern .bg-rose-50:hover {
+  background-color: rgba(127, 29, 29, 0.8) !important;
+}
+
+.theme-modern .text-rose-700 {
+  color: #fca5a5 !important;
+}
+
+.theme-modern .border-rose-200 {
+  border-color: rgba(127, 29, 29, 0.4) !important;
+}
+
+.theme-modern .border-rose-200:hover {
+  border-color: rgba(239, 68, 68, 0.6) !important;
+}
+
+/* Enhanced button shadows and transitions */
+.theme-modern .shadow-sm,
+.theme-modern-light .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+.theme-modern .hover\:shadow-md:hover,
+.theme-modern-light .hover\:shadow-md:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Dark mode enhanced shadows */
+.theme-modern .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2), 0 1px 3px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.theme-modern .hover\:shadow-md:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Smooth transitions for all button states */
+.theme-modern button,
+.theme-modern-light button {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.theme-modern button:active,
+.theme-modern-light button:active {
+  transform: translateY(0) !important;
+  transition-duration: 0.1s !important;
 }

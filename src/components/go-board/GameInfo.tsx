@@ -342,7 +342,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
               isTablet 
                 ? 'text-base gap-3 px-6 py-4' 
                 : 'sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5'
-            } bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs sm:text-sm font-medium`}
+            } bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-xs sm:text-sm font-medium shadow-sm hover:shadow-md`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 ${isTablet ? 'h-4 w-4' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
@@ -357,7 +357,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
               isTablet 
                 ? 'text-base gap-4 px-6 py-4' 
                 : 'sm:gap-2 px-4 py-2.5'
-            } bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium`}
+            } bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${isTablet ? 'h-5 w-5' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -374,7 +374,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
               isTablet 
                 ? 'text-base gap-4 px-6 py-4' 
                 : 'sm:gap-2 px-4 py-2.5'
-            } bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors text-sm font-medium`}
+            } bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300 rounded-lg transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${isTablet ? 'h-5 w-5' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -389,7 +389,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
               isTablet 
                 ? 'text-base gap-4 px-6 py-4' 
                 : 'sm:gap-2 px-4 py-2.5'
-            } bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium`}
+            } bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 hover:border-rose-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${isTablet ? 'h-5 w-5' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -406,7 +406,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
               isTablet 
                 ? 'text-base gap-4 px-6 py-4' 
                 : 'sm:gap-2 px-4 py-2.5'
-            } bg-neutral-600 text-white rounded-md hover:bg-neutral-700 transition-colors text-sm font-medium`}
+            } bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300 rounded-lg transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${isTablet ? 'h-5 w-5' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

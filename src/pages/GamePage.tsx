@@ -640,13 +640,14 @@ const GamePage: React.FC = () => {
       
       <div className="max-w-7xl mx-auto p-2 sm:p-4 md:p-6">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
-          <div className="flex items-center gap-3">
+          {/* Logo and title - centered on mobile, left-aligned on larger screens */}
+          <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
             <GoseiLogo size={40} />
             <h1 className="text-2xl sm:text-3xl font-bold text-primary-700">Gosei Play</h1>
           </div>
           
-          {/* Theme Toggle Button - positioned on the right */}
-          <div className="flex items-center">
+          {/* Theme Toggle Button - positioned on the right on larger screens, centered below on mobile */}
+          <div className="flex items-center justify-center sm:justify-end w-full sm:w-auto">
             <ThemeToggleButton />
           </div>
         </div>
