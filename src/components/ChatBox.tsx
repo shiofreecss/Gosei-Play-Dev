@@ -107,11 +107,6 @@ const ChatBox: React.FC<ChatBoxProps> = ({
                   {msg.username}
                 </div>
               )}
-              {msg.playerId === currentPlayerId && (
-                <div className="font-medium text-sm mb-1 text-slate-600 text-right">
-                  {msg.username} (me)
-                </div>
-              )}
               <div 
                 className={`px-4 py-3 rounded-2xl text-sm break-words max-w-full leading-relaxed shadow-sm ${
                   msg.playerId === currentPlayerId 

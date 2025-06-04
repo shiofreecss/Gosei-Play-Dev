@@ -6,10 +6,6 @@ import ConnectionStatus from '../components/ConnectionStatus';
 import BoardSizePreview from '../components/go-board/BoardSizePreview';
 import GoseiLogo from '../components/GoseiLogo';
 import ThemeToggleButton from '../components/ThemeToggleButton';
-import { useAppTheme } from '../context/AppThemeContext';
-import useDeviceDetect from '../hooks/useDeviceDetect';
-import { validateBlitzSettings, updateBlitzTimeControls, validateGameSettings } from '../utils/gameType';
-import { validateTimePerMove, updateTimeControls } from '../utils/timeControl';
 
 // Define keys for localStorage
 const STORAGE_KEYS = {
@@ -244,29 +240,23 @@ const HomePage: React.FC = () => {
         }
       }
       
-      // If updating game type, apply proper time control settings
+      // If updating game type, set default time control settings for specific game types
       if (key === 'gameType' && typeof value === 'string') {
         const gameType = value as GameType;
-        
-        // Use utility function to update blitz time controls
-        if (gameType === 'blitz') {
-          updateBlitzTimeControls(newState);
-          // Sync with timeControlOptions
-          newState.timeControlOptions = {
-            ...prev.timeControlOptions,
-            timePerMove: newState.timePerMove || 5,
-            byoYomiPeriods: 0,
-            byoYomiTime: 0
-          };
-        } else if (gameType === 'even' || gameType === 'handicap' || gameType === 'teaching') {
-          // Set defaults for standard games
+        if (gameType === 'even' || gameType === 'handicap' || gameType === 'teaching') {
+          // Set defaults for Even Game, Handicap Game, and Teaching Game
           newState.timePerMove = 0;
           newState.timeControlOptions = {
             ...prev.timeControlOptions,
             timePerMove: 0,
             fischerTime: 0,
-            byoYomiPeriods: 5, // Default to 5 periods for standard games
-            byoYomiTime: 30    // Default to 30 seconds per period
+            byoYomiPeriods: 0
+          };
+        } else if (gameType === 'blitz') {
+          // Set defaults for Blitz Game - disable byo-yomi
+          newState.timeControlOptions = {
+            ...prev.timeControlOptions,
+            byoYomiPeriods: 0
           };
         }
       }
@@ -285,13 +275,6 @@ const HomePage: React.FC = () => {
         if ('byoYomiPeriods' in value && value.byoYomiPeriods === 0) {
           (value as any).byoYomiTime = 0;
         }
-        
-        // Validate blitz settings when byo-yomi is changed
-        if ('byoYomiPeriods' in value && newState.gameType === 'blitz' && (value as any).byoYomiPeriods > 0) {
-          console.warn('Byo-yomi is not allowed in Blitz games - automatically disabled');
-          (value as any).byoYomiPeriods = 0;
-          (value as any).byoYomiTime = 0;
-        }
       }
       
       // If updating direct timeControl or timePerMove, sync the timeControlOptions
@@ -301,76 +284,41 @@ const HomePage: React.FC = () => {
           ...prev.timeControlOptions,
           timeControl: value
         };
+      }
+      
+      if (key === 'timePerMove' && typeof value === 'number') {
+        newState.timeControlOptions = {
+          ...prev.timeControlOptions,
+          timePerMove: value
+        };
         
-        // Validate blitz settings - main time should be 0 for blitz games
-        if (newState.gameType === 'blitz' && value > 0) {
-          console.warn('Main time should be 0 for Blitz games - automatically set to 0');
+        // Auto-behavior: When Time per Move is set to any value > 0,
+        // automatically set Byo-yomi Periods to 0 (No byo-yomi)
+        if (value > 0) {
+          newState.timeControlOptions = {
+            ...newState.timeControlOptions,
+            byoYomiPeriods: 0,
+            byoYomiTime: 0  // Also set time to 0 when disabling periods
+          };
+        }
+        
+        // Auto-change game type based on Time per Move value
+        if (value === 0) {
+          // Set to Even Game and restore main time based on board size
+          newState.gameType = 'even';
+          const recommendedTime = getRecommendedTimeForBoardSize(prev.boardSize);
+          newState.timeControl = recommendedTime;
+          newState.timeControlOptions = {
+            ...newState.timeControlOptions,
+            timeControl: recommendedTime
+          };
+        } else if (value >= 5) {
+          // Set to Blitz Game and set main time to 0
+          newState.gameType = 'blitz';
           newState.timeControl = 0;
           newState.timeControlOptions = {
             ...newState.timeControlOptions,
             timeControl: 0
-          };
-        }
-      }
-      
-      if (key === 'timePerMove' && typeof value === 'number') {
-        // Use utility function to update time controls based on timePerMove
-        const tempSettings: any = {
-          ...newState,
-          timePerMove: value,
-          boardSize: prev.boardSize,
-          mainTime: newState.timeControl || 0,
-          byoYomiEnabled: false,
-          byoYomiPeriods: 0,
-          byoYomiTime: 0
-        };
-        
-        updateTimeControls(tempSettings);
-        
-        // Apply the updated settings
-        newState.gameType = tempSettings.gameType;
-        newState.timePerMove = tempSettings.timePerMove;
-        newState.timeControl = tempSettings.mainTime;
-        
-        // Sync with timeControlOptions
-        newState.timeControlOptions = {
-          ...prev.timeControlOptions,
-          timePerMove: tempSettings.timePerMove,
-          timeControl: tempSettings.mainTime,
-          byoYomiPeriods: tempSettings.byoYomiPeriods || 0,
-          byoYomiTime: tempSettings.byoYomiTime || 0
-        };
-      }
-      
-      // Final validation for blitz settings
-      if (newState.gameType === 'blitz') {
-        const validation: any = validateBlitzSettings({
-          gameType: newState.gameType,
-          timePerMove: newState.timePerMove || 0,
-          byoYomiPeriods: newState.timeControlOptions?.byoYomiPeriods || 0,
-          mainTime: newState.timeControl || 0
-        });
-        if (!validation.valid) {
-          console.warn('Blitz validation failed:', validation.error);
-          // Auto-correct invalid settings
-          const blitzSettings: any = {
-            gameType: 'blitz',
-            timePerMove: newState.timePerMove || 5,
-            mainTime: 0,
-            byoYomiEnabled: false,
-            byoYomiPeriods: 0,
-            byoYomiTime: 0
-          };
-          updateBlitzTimeControls(blitzSettings);
-          
-          newState.timeControl = 0;
-          newState.timePerMove = blitzSettings.timePerMove;
-          newState.timeControlOptions = {
-            ...newState.timeControlOptions,
-            byoYomiPeriods: 0,
-            byoYomiTime: 0,
-            timeControl: 0,
-            timePerMove: blitzSettings.timePerMove
           };
         }
       }
