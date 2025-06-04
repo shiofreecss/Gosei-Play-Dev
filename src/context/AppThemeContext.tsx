@@ -30,9 +30,18 @@ export const AppThemeProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [currentTheme, setCurrentTheme] = useState<AppTheme>(() => {
     try {
       const savedTheme = localStorage.getItem('gosei-app-theme');
-      return (savedTheme as AppTheme) || 'modern';
+      const theme = (savedTheme as AppTheme) || 'modern';
+      
+      // Apply theme class immediately to prevent light flash
+      document.body.classList.remove('theme-modern', 'theme-modern-light', 'theme-traditional', 'theme-minimalist');
+      document.body.classList.add(`theme-${theme}`);
+      
+      return theme;
     } catch (error) {
       console.error('Error loading theme from localStorage:', error);
+      // Apply default dark theme immediately
+      document.body.classList.remove('theme-modern', 'theme-modern-light', 'theme-traditional', 'theme-minimalist');
+      document.body.classList.add('theme-modern');
       return 'modern';
     }
   });
