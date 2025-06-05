@@ -6,7 +6,7 @@ const isDev = process.env.NODE_ENV === 'development';
 // Socket server URL
 export const SOCKET_URL = isDev 
   ? 'http://localhost:3001' 
-  : process.env.REACT_APP_SOCKET_URL || 'https://svr-01.gosei.xyz';
+  : process.env.REACT_APP_SOCKET_URL || 'https://gosei-svr-01.beaver.foundation';
 
 // API base URL
 export const API_BASE_URL = isDev
