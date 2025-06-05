@@ -1,6 +1,6 @@
 [build]
   base = "."
-  command = "npm run build:netlify-safe"
+  command = "npm run netlify-build"
   publish = "build"
   
 [build.environment]
@@ -8,6 +8,7 @@
   DISABLE_ESLINT_PLUGIN = "true"
   TSC_COMPILE_ON_ERROR = "true"
   ESLINT_NO_DEV_ERRORS = "true"
+  NODE_ENV = "production"
   
 [dev]
   command = "npm run start"

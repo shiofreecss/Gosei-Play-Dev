@@ -26,9 +26,9 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "build:netlify": "DISABLE_ESLINT_PLUGIN=true CI=false npm run build && npx copyfiles -u 1 \"functions/socket-server/**/*\" build/socket-server",
+    "build:netlify": "npm run netlify-build",
+    "netlify-build": "cross-env CI=false DISABLE_ESLINT_PLUGIN=true TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true npm run build && npx copyfiles -u 1 \"functions/socket-server/**/*\" build/socket-server",
     "build:netlify-safe": "DISABLE_ESLINT_PLUGIN=true CI=false TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true react-scripts build && npx copyfiles -u 1 \"functions/socket-server/**/*\" build/socket-server",
-    "build:netlify-env": "CI=false DISABLE_ESLINT_PLUGIN=true TSC_COMPILE_ON_ERROR=true ESLINT_NO_DEV_ERRORS=true react-scripts build && npx copyfiles -u 1 \"functions/socket-server/**/*\" build/socket-server",
     "test": "react-scripts test",
     "test:unit": "mocha test/**/*.js --config test/mocha.opts",
     "test:ko": "mocha test/ko-rule/*.js --config test/mocha.opts",
@@ -59,6 +59,7 @@
     "autoprefixer": "^10.4.21",
     "chai": "^4.3.7",
     "copyfiles": "^2.4.1",
+    "cross-env": "^7.0.3",
     "mocha": "^10.2.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.3.3"
