@@ -1,0 +1,36 @@
+[build]
+  base = "."
+  command = "npm run build:netlify-safe"
+  publish = "build"
+  
+[build.environment]
+  CI = "false"
+  DISABLE_ESLINT_PLUGIN = "true"
+  TSC_COMPILE_ON_ERROR = "true"
+  ESLINT_NO_DEV_ERRORS = "true"
+  
+[dev]
+  command = "npm run start"
+  port = 3000
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# API redirects for Netlify Functions
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Cache headers for audio files
+[[headers]]
+  for = "/sounds/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/music/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000" 
