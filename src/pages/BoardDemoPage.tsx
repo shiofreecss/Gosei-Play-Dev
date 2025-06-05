@@ -245,7 +245,7 @@ const BoardDemoPage: React.FC = () => {
           {selectedSize ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-                <div className="app-card p-4 rounded-xl shadow">
+                <div className="bg-white p-4 rounded-xl shadow">
                   <h2 className="text-xl font-semibold mb-2">
                     Current Theme: {currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1).replace('-', ' ')}
                   </h2>
@@ -263,12 +263,12 @@ const BoardDemoPage: React.FC = () => {
               </div>
               
               <div className="space-y-6">
-                <div className="app-card p-4 rounded-xl shadow">
+                <div className="bg-white p-4 rounded-xl shadow">
                   <h2 className="text-xl font-semibold mb-4">Theme Selection</h2>
                   <BoardThemeSelector />
                 </div>
                 
-                <div className="app-card p-4 rounded-xl shadow">
+                <div className="bg-white p-4 rounded-xl shadow">
                   <h2 className="text-xl font-semibold mb-4">Go Rules Examples</h2>
                   <div className="space-y-4">
                     <div>
@@ -288,7 +288,7 @@ const BoardDemoPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="app-card p-4 rounded-xl shadow">
+                <div className="bg-white p-4 rounded-xl shadow">
                   <h2 className="text-xl font-semibold mb-2">Instructions</h2>
                   <ul className="list-disc pl-5 space-y-2 text-neutral-700">
                     <li>Click on the board to place stones</li>

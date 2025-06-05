@@ -9,7 +9,7 @@ const RulesSidebar: React.FC<RulesSidebarProps> = ({ className = '' }) => {
   const [activeTab, setActiveTab] = useState<'basic' | 'scoring' | 'tips'>('basic');
 
   return (
-    <div className={`app-card rounded-xl shadow-lg p-6 ${className}`}>
+    <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-neutral-800">Go Rules Quick Guide</h2>
         <Link 
@@ -58,7 +58,7 @@ const RulesSidebar: React.FC<RulesSidebarProps> = ({ className = '' }) => {
       <div className="space-y-4">
         {activeTab === 'basic' && (
           <div className="space-y-3">
-            <div className="app-card p-3 rounded-lg">
+            <div className="bg-blue-50 p-3 rounded-lg">
               <h4 className="font-semibold text-blue-800 text-sm mb-1">🎯 Objective</h4>
               <p className="text-blue-700 text-xs">
                 Control more territory than your opponent by placing stones and capturing enemy groups.
@@ -103,7 +103,7 @@ const RulesSidebar: React.FC<RulesSidebarProps> = ({ className = '' }) => {
 
         {activeTab === 'scoring' && (
           <div className="space-y-3">
-            <div className="app-card p-3 rounded-lg">
+            <div className="bg-green-50 p-3 rounded-lg">
               <h4 className="font-semibold text-green-800 text-sm mb-1">🏆 How to Win</h4>
               <p className="text-green-700 text-xs">
                 Player with the most points wins!
@@ -127,7 +127,7 @@ const RulesSidebar: React.FC<RulesSidebarProps> = ({ className = '' }) => {
               </div>
             </div>
             
-            <div className="app-card p-3 rounded-lg">
+            <div className="bg-yellow-50 p-3 rounded-lg">
               <h4 className="font-semibold text-yellow-800 text-sm mb-1">💡 Territory</h4>
               <p className="text-yellow-700 text-xs">
                 Empty intersections completely surrounded by your stones count as your territory.
@@ -138,7 +138,7 @@ const RulesSidebar: React.FC<RulesSidebarProps> = ({ className = '' }) => {
 
         {activeTab === 'tips' && (
           <div className="space-y-3">
-            <div className="app-card p-3 rounded-lg">
+            <div className="bg-amber-50 p-3 rounded-lg">
               <h4 className="font-semibold text-amber-800 text-sm mb-1">🎲 For Beginners</h4>
               <p className="text-amber-700 text-xs">
                 Start with 9×9 boards for quick games and learning!
@@ -167,7 +167,7 @@ const RulesSidebar: React.FC<RulesSidebarProps> = ({ className = '' }) => {
               </div>
             </div>
             
-            <div className="app-card p-3 rounded-lg">
+            <div className="bg-teal-50 p-3 rounded-lg">
               <h4 className="font-semibold text-teal-800 text-sm mb-1">⭐ Pro Tip</h4>
               <p className="text-teal-700 text-xs">
                 Look for star points (hoshi) - they're good opening moves!
@@ -188,7 +188,7 @@ const RulesSidebar: React.FC<RulesSidebarProps> = ({ className = '' }) => {
           </Link>
           <Link
             to="/rules"
-            className="text-center px-3 py-2 app-card text-neutral-700 text-sm rounded-lg hover:bg-neutral-200 transition-colors"
+            className="text-center px-3 py-2 bg-neutral-100 text-neutral-700 text-sm rounded-lg hover:bg-neutral-200 transition-colors"
           >
             Read Complete Rules
           </Link>

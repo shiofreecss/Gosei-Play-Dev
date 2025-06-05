@@ -11,7 +11,7 @@ interface RulesSectionProps {
 }
 
 const RulesSection: React.FC<RulesSectionProps> = ({ title, children, isOpen, onToggle }) => (
-  <div className="border border-neutral-200 rounded-lg overflow-hidden app-card">
+  <div className="border border-neutral-200 rounded-lg overflow-hidden">
     <button
       onClick={onToggle}
       className="w-full px-6 py-4 bg-neutral-50 hover:bg-neutral-100 text-left flex items-center justify-between transition-colors"
@@ -93,7 +93,7 @@ const RulesPage: React.FC = () => {
                 Go is an ancient board game for two players that originated in China over 4,000 years ago. 
                 It's known as <strong>Weiqi</strong> in Chinese, <strong>Baduk</strong> in Korean, and <strong>Go</strong> in Japanese.
               </p>
-              <div className="app-card p-4 rounded-lg">
+              <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-blue-800 mb-2">Objective</h4>
                 <p className="text-blue-700">
                   Control more territory than your opponent by placing stones and capturing enemy groups.
@@ -110,26 +110,26 @@ const RulesPage: React.FC = () => {
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="app-card p-4 rounded-lg">
+                <div className="bg-green-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-green-800 mb-2">1. Placing Stones</h4>
                   <p className="text-green-700">
                     Players alternate placing black and white stones on line intersections.
                     Black always plays first.
                   </p>
                 </div>
-                <div className="app-card p-4 rounded-lg">
+                <div className="bg-purple-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-purple-800 mb-2">2. No Moving</h4>
                   <p className="text-purple-700">
                     Once placed, stones cannot be moved. They can only be captured and removed.
                   </p>
                 </div>
-                <div className="app-card p-4 rounded-lg">
+                <div className="bg-orange-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-orange-800 mb-2">3. Passing</h4>
                   <p className="text-orange-700">
                     Players can pass their turn. When both players pass consecutively, the game ends.
                   </p>
                 </div>
-                <div className="app-card p-4 rounded-lg">
+                <div className="bg-red-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-red-800 mb-2">4. No Suicide</h4>
                   <p className="text-red-700">
                     You cannot place a stone that would have no liberties unless it captures enemy stones.
@@ -149,7 +149,7 @@ const RulesPage: React.FC = () => {
               <p className="text-neutral-700">
                 Stones are captured when they have no empty adjacent intersections (liberties).
               </p>
-              <div className="app-card p-4 rounded-lg">
+              <div className="bg-yellow-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-yellow-800 mb-2">Liberties</h4>
                 <ul className="list-disc pl-5 space-y-1 text-yellow-700">
                   <li>Each empty intersection adjacent to a stone is a <strong>liberty</strong></li>
@@ -158,7 +158,7 @@ const RulesPage: React.FC = () => {
                   <li>Diagonally adjacent stones are not connected</li>
                 </ul>
               </div>
-              <div className="app-card p-4 rounded-lg">
+              <div className="bg-red-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-red-800 mb-2">Capture Process</h4>
                 <ol className="list-decimal pl-5 space-y-1 text-red-700">
                   <li>Place a stone that removes the last liberty of an enemy group</li>
@@ -180,7 +180,7 @@ const RulesPage: React.FC = () => {
               <p className="text-neutral-700">
                 The Ko rule prevents infinite loops of capture and recapture.
               </p>
-              <div className="app-card p-4 rounded-lg">
+              <div className="bg-indigo-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-indigo-800 mb-2">Ko Situation</h4>
                 <ul className="list-disc pl-5 space-y-1 text-indigo-700">
                   <li>When a single stone captures a single stone</li>
@@ -189,7 +189,7 @@ const RulesPage: React.FC = () => {
                   <li>They must play elsewhere first, then can recapture if the position is still available</li>
                 </ul>
               </div>
-              <div className="app-card p-4 rounded-lg">
+              <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-blue-800 mb-2">Purpose</h4>
                 <p className="text-blue-700">
                   This rule prevents games from continuing indefinitely and adds strategic depth to corner and edge fights.
@@ -205,7 +205,7 @@ const RulesPage: React.FC = () => {
             onToggle={() => toggleSection('scoring')}
           >
             <div className="space-y-4">
-              <div className="app-card p-4 rounded-lg">
+              <div className="bg-green-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-green-800 mb-2">Territory</h4>
                 <ul className="list-disc pl-5 space-y-1 text-green-700">
                   <li>Empty intersections completely surrounded by one color</li>
@@ -213,7 +213,7 @@ const RulesPage: React.FC = () => {
                   <li>Each empty intersection in your territory = 1 point</li>
                 </ul>
               </div>
-              <div className="app-card p-4 rounded-lg">
+              <div className="bg-purple-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-purple-800 mb-2">Final Score</h4>
                 <ul className="list-disc pl-5 space-y-1 text-purple-700">
                   <li><strong>Territory points:</strong> Empty intersections you control</li>
@@ -233,17 +233,17 @@ const RulesPage: React.FC = () => {
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="app-card p-4 rounded-lg">
+                <div className="bg-emerald-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-emerald-800">9×9 Board</h4>
                   <p className="text-emerald-700 text-sm mt-1">Quick games (20-30 min)</p>
                   <p className="text-emerald-600 text-xs mt-2">Perfect for beginners</p>
                 </div>
-                <div className="app-card p-4 rounded-lg">
+                <div className="bg-blue-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-blue-800">13×13 Board</h4>
                   <p className="text-blue-700 text-sm mt-1">Medium games (45-60 min)</p>
                   <p className="text-blue-600 text-xs mt-2">Good for intermediate players</p>
                 </div>
-                <div className="app-card p-4 rounded-lg">
+                <div className="bg-purple-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-purple-800">19×19 Board</h4>
                   <p className="text-purple-700 text-sm mt-1">Full games (90-120 min)</p>
                   <p className="text-purple-600 text-xs mt-2">Tournament standard</p>
@@ -271,7 +271,7 @@ const RulesPage: React.FC = () => {
           >
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="app-card p-4 rounded-lg">
+                <div className="bg-amber-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-amber-800 mb-2">Opening (Fuseki)</h4>
                   <ul className="list-disc pl-5 space-y-1 text-amber-700 text-sm">
                     <li>Play in corners first - they're easier to secure</li>
@@ -279,7 +279,7 @@ const RulesPage: React.FC = () => {
                     <li>Look for star points (marked intersections)</li>
                   </ul>
                 </div>
-                <div className="app-card p-4 rounded-lg">
+                <div className="bg-teal-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-teal-800 mb-2">Middle Game</h4>
                   <ul className="list-disc pl-5 space-y-1 text-teal-700 text-sm">
                     <li>Connect your stones to form strong groups</li>
@@ -287,7 +287,7 @@ const RulesPage: React.FC = () => {
                     <li>Build territory while maintaining balance</li>
                   </ul>
                 </div>
-                <div className="app-card p-4 rounded-lg">
+                <div className="bg-rose-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-rose-800 mb-2">Endgame (Yose)</h4>
                   <ul className="list-disc pl-5 space-y-1 text-rose-700 text-sm">
                     <li>Secure your territory boundaries</li>
@@ -295,7 +295,7 @@ const RulesPage: React.FC = () => {
                     <li>Count territory to assess the position</li>
                   </ul>
                 </div>
-                <div className="app-card p-4 rounded-lg">
+                <div className="bg-cyan-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-cyan-800 mb-2">General Advice</h4>
                   <ul className="list-disc pl-5 space-y-1 text-cyan-700 text-sm">
                     <li>Think before you play - stones can't be moved</li>
@@ -308,7 +308,7 @@ const RulesPage: React.FC = () => {
           </RulesSection>
 
           {/* Quick Reference */}
-          <div className="app-card p-6 rounded-xl shadow-lg">
+          <div className="bg-white p-6 rounded-xl shadow-lg">
             <h3 className="text-xl font-semibold mb-4 text-center">Quick Reference</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
