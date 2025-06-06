@@ -9,7 +9,7 @@ import { useGame } from '../context/GameContext';
 import { Position, GameMove, GameState } from '../types/go';
 import ChatBox from '../components/ChatBox';
 import FloatingChatBubble from '../components/FloatingChatBubble';
-import Notification from '../components/Notification';
+
 import GameCompleteModal from '../components/GameCompleteModal';
 import GoseiLogo from '../components/GoseiLogo';
 import GameNotification from '../components/GameNotification';
@@ -89,11 +89,7 @@ const GamePage: React.FC = () => {
   const [autoSaveInterval, setAutoSaveInterval] = useState<NodeJS.Timeout | null>(null);
   const [showDevTools, setShowDevTools] = useState(false);
   const [confirmingScore, setConfirmingScore] = useState<boolean>(false);
-  const [notifications, setNotifications] = useState<Array<{
-    id: string;
-    message: string;
-    type: 'info' | 'warning' | 'error';
-  }>>([]);
+
 
   // Notification state
   const [notification, setNotification] = useState<{
@@ -255,13 +251,7 @@ const GamePage: React.FC = () => {
       
       // Only show notification if it's not the current player leaving
       if (leaveData.playerId !== currentPlayer?.id) {
-        setNotifications(prev => [...prev, {
-          id: Date.now().toString(),
-          message: `${username} has left the game`,
-          type: 'warning'
-        }]);
-        
-        // Also show in the notification modal for better visibility
+        // Show main notification modal for better visibility
         setNotification({
           visible: true,
           message: `${username} has left the game.`,
@@ -279,11 +269,12 @@ const GamePage: React.FC = () => {
       );
       if (disconnectedPlayer) {
         const username = disconnectedPlayer.username || 'A player';
-        setNotifications(prev => [...prev, {
-          id: Date.now().toString(),
-          message: `${username} has disconnected from the game`,
+        // Use main notification for better visibility
+        setNotification({
+          visible: true,
+          message: `${username} has disconnected from the game.`,
           type: 'warning'
-        }]);
+        });
       }
     });
 
@@ -584,9 +575,7 @@ const GamePage: React.FC = () => {
     }
   };
 
-  const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
+
 
   // Loading state
   if (loading) {
@@ -713,15 +702,7 @@ const GamePage: React.FC = () => {
   return (
     <>
       <div className="min-h-screen bg-neutral-100 relative">
-        {/* Notifications */}
-        {notifications.map(notification => (
-          <Notification
-            key={notification.id}
-            message={notification.message}
-            type={notification.type}
-            onClose={() => removeNotification(notification.id)}
-          />
-        ))}
+
         
         <div className="max-w-7xl mx-auto p-2 sm:p-4 md:p-6">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
