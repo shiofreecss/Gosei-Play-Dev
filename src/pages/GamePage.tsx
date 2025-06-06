@@ -761,26 +761,7 @@ const GamePage: React.FC = () => {
                   showTerritory={gameState.status === 'finished' || gameState.status === 'scoring'}
                 />
                 
-                {/* Game completion buttons below board */}
-                {gameState.status === 'finished' && (
-                  <div className="mt-4 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-4">
-                    <button
-                      onClick={() => navigate('/')}
-                      className="px-4 sm:px-6 py-2 sm:py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors font-medium"
-                    >
-                      Return Home
-                    </button>
-                    <button
-                      onClick={() => {
-                        resetGame();
-                        navigate('/');
-                      }}
-                      className="px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-colors font-medium"
-                    >
-                      Play Again
-                    </button>
-                  </div>
-                )}
+                {/* Game completion buttons below board - Removed to prevent conflicts with GameCompleteModal */}
               </div>
             </div>
 
