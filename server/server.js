@@ -1438,6 +1438,8 @@ io.on('connection', (socket) => {
     
     const gameState = activeGames.get(gameId);
     if (gameState) {
+      log(`Current game has ${gameState.history.length} moves, requesting to keep ${moveIndex} moves (removing ${gameState.history.length - moveIndex} moves)`);
+      
       // Add undo request to game state
       gameState.undoRequest = {
         requestedBy: playerId,
@@ -1459,42 +1461,80 @@ io.on('connection', (socket) => {
     const gameState = activeGames.get(gameId);
     if (gameState) {
       if (accepted) {
-        // Revert to the requested move index
+        // Revert to the requested move index (keep all moves up to but not including moveIndex)
         const historyToKeep = gameState.history.slice(0, moveIndex);
         
-        // Reset board state
-        let stones = [];
+        log(`Undo accepted: Keeping ${historyToKeep.length} moves out of ${gameState.history.length} total moves`);
         
-        // Add handicap stones first if any
-        if (historyToKeep.length === 0 && gameState.currentTurn === 'white' && 
-            gameState.board.stones.some(s => s.color === 'black')) {
-          stones = gameState.board.stones.filter(s => s.color === 'black');
-        } else {
-          // Replay history to create the board state
-          let currentTurn = 'black';
-          
-          historyToKeep.forEach(move => {
-            if (!move.pass) {
-              stones.push({
-                position: move,
-                color: currentTurn
-              });
-              currentTurn = currentTurn === 'black' ? 'white' : 'black';
-            } else {
-              currentTurn = currentTurn === 'black' ? 'white' : 'black';
-            }
-          });
+        // Reset board state and replay from the beginning
+        let stones = [];
+        let currentTurn = 'black'; // Black always starts first
+        let capturedStones = { black: 0, white: 0 };
+        
+        // Add handicap stones first if this is a handicap game
+        if (gameState.gameType === 'handicap' && gameState.handicap > 0) {
+          // Find handicap stones from the original board setup
+          const handicapStones = getHandicapStones(gameState.board.size, gameState.handicap);
+          stones = handicapStones;
+          currentTurn = 'white'; // White plays first in handicap games
+          log(`Added ${handicapStones.length} handicap stones`);
         }
         
-        // Calculate next turn
-        const nextTurn = historyToKeep.length === 0 ? 
-          (gameState.board.stones.some(s => s.color === 'black') ? 'white' : 'black') :
-          (historyToKeep.length % 2 === 0 ? 'black' : 'white');
+        // Replay each move in the history with proper capture logic
+        historyToKeep.forEach((move, index) => {
+          if (!move.pass) {
+            // Add the stone
+            const newStone = {
+              position: move.position || move, // Handle both old and new move formats
+              color: currentTurn
+            };
+            stones.push(newStone);
+            
+            // Apply capture logic (simplified version)
+            const updatedStones = [...stones];
+            const captureResult = captureDeadStones(
+              { ...gameState, board: { ...gameState.board, stones: updatedStones } },
+              updatedStones,
+              newStone.position,
+              currentTurn
+            );
+            
+            stones = captureResult.remainingStones;
+            
+            // Update captured count
+            if (currentTurn === 'black') {
+              capturedStones.black += captureResult.capturedCount;
+            } else {
+              capturedStones.white += captureResult.capturedCount;
+            }
+            
+            log(`Replayed move ${index + 1}: ${currentTurn} at (${newStone.position.x}, ${newStone.position.y}), captured ${captureResult.capturedCount} stones`);
+          }
+          
+          // Toggle turn for next move
+          currentTurn = currentTurn === 'black' ? 'white' : 'black';
+        });
+        
+        // Calculate the current turn after undo
+        let nextTurn;
+        if (gameState.gameType === 'handicap' && gameState.handicap > 0) {
+          // In handicap games, determine turn based on remaining moves
+          nextTurn = historyToKeep.length % 2 === 0 ? 'white' : 'black';
+        } else {
+          // In normal games, black starts first
+          nextTurn = historyToKeep.length % 2 === 0 ? 'black' : 'white';
+        }
         
         // Update game state
         gameState.board.stones = stones;
         gameState.currentTurn = nextTurn;
         gameState.history = historyToKeep;
+        gameState.capturedStones = capturedStones;
+        
+        // Clear KO position since board state changed
+        gameState.koPosition = undefined;
+        
+        log(`Undo completed: Board has ${stones.length} stones, next turn: ${nextTurn}`);
       }
       
       // Clear the undo request

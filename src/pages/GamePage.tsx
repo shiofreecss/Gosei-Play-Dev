@@ -13,6 +13,7 @@ import Notification from '../components/Notification';
 import GameCompleteModal from '../components/GameCompleteModal';
 import GoseiLogo from '../components/GoseiLogo';
 import GameNotification from '../components/GameNotification';
+import UndoNotification from '../components/UndoNotification';
 
 // Helper function to check game status safely
 const hasStatus = (gameState: GameState, status: 'waiting' | 'playing' | 'finished' | 'scoring'): boolean => {
@@ -766,6 +767,15 @@ const GamePage: React.FC = () => {
           duration={1000}
           onClose={() => setNotification(prev => ({ ...prev, visible: false }))}
         />
+
+        {/* Undo Request Notification */}
+        {gameState.undoRequest && currentPlayer && gameState.undoRequest.requestedBy !== currentPlayer.id && (
+          <UndoNotification
+            onAccept={handleAcceptUndo}
+            onReject={handleRejectUndo}
+            moveIndex={gameState.undoRequest.moveIndex}
+          />
+        )}
       </div>
       
       {/* Floating Chat Bubble - moved outside the positioned container to fix positioning */}

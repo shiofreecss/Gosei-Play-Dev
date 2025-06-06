@@ -335,6 +335,30 @@ const GameInfo: React.FC<GameInfoProps> = ({
         )}
       </div>
 
+      {/* Undo Request Status */}
+      {undoRequest && (
+        <div className={`text-center p-2 mb-4 rounded-lg ${
+          isDarkMode 
+            ? 'bg-yellow-900/20 border border-yellow-800/50' 
+            : 'bg-yellow-50 border border-yellow-200'
+        } ${isTablet ? 'text-base p-3' : 'text-sm'}`}>
+          <div className="flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${
+              isDarkMode ? 'text-yellow-400' : 'text-yellow-600'
+            }`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span className={`font-medium ${
+              isDarkMode ? 'text-yellow-300' : 'text-yellow-700'
+            }`}>
+              {undoRequest.requestedBy === currentPlayer?.id 
+                ? 'Waiting for opponent to respond to undo request...' 
+                : 'Opponent has requested to undo moves'}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Game Control Buttons */}
       <div className={`space-y-2 ${isTablet ? 'space-y-4' : 'sm:space-y-3'} mb-3 sm:mb-4`}>
         {/* Primary Game Controls */}
@@ -356,17 +380,24 @@ const GameInfo: React.FC<GameInfoProps> = ({
           
           <button
             onClick={onRequestUndo}
-            disabled={!isPlayerTurn || status !== 'playing'}
+            disabled={status !== 'playing' || history.length === 0 || !!undoRequest || isPlayerTurn}
             className={`flex items-center justify-center gap-2 ${
               isTablet 
                 ? 'text-base gap-4 px-6 py-4' 
                 : 'sm:gap-2 px-4 py-2.5'
-            } bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md`}
+            } ${!!undoRequest 
+              ? (isDarkMode 
+                ? 'bg-yellow-900/30 hover:bg-yellow-900/40 text-yellow-300 border border-yellow-700' 
+                : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border border-yellow-300') 
+              : (isDarkMode
+                ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-600 hover:border-neutral-500'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300')
+            } rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${isTablet ? 'h-5 w-5' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Undo
+            {!!undoRequest ? 'Undo Pending...' : 'Undo'}
           </button>
         </div>
 

@@ -487,6 +487,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           }
         });
 
+
+
         // Handle play again request
         newSocket.on('playAgainRequest', (requestData) => {
           console.log(`Received play again request from ${requestData.fromUsername}`);
@@ -1916,9 +1918,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     // Clear any previous move errors
     dispatch({ type: 'CLEAR_MOVE_ERROR' });
     
-    // Create undo request - typically we'd undo the last two moves (one from each player)
-    // But if there's only one move, we'll undo just that one
-    const moveIndex = Math.max(0, gameState.history.length - 2);
+    // Create undo request - undo just the previous move
+    const moveIndex = gameState.history.length - 1;
     
     // Update the game state with the undo request
     const updatedGameState: GameState = {
