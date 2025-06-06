@@ -815,7 +815,13 @@ const GamePage: React.FC = () => {
         {/* Game error messages */}
         <GameError />
 
-        {gameState.status === 'finished' && <GameCompleteModal />}
+        {gameState.status === 'finished' && (
+          <GameCompleteModal 
+            onClose={() => {
+              // Allow the modal to be dismissed while keeping game controls accessible
+            }}
+          />
+        )}
         
         {/* Add connection status component */}
         <ConnectionStatus />

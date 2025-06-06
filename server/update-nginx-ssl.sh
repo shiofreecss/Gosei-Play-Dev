@@ -95,6 +95,16 @@ upstream gosei_backend {
     keepalive_timeout 60s;
 }
 
+# Sticky session upstream for Socket.IO
+upstream gosei_socketio {
+    ip_hash;  # Use IP-based sticky sessions
+    server 127.0.0.1:3001 max_fails=3 fail_timeout=30s;
+    server 127.0.0.1:3002 max_fails=2 fail_timeout=15s;
+    keepalive 32;
+    keepalive_requests 1000;
+    keepalive_timeout 60s;
+}
+
 # Rate limiting zones
 limit_req_zone \$binary_remote_addr zone=api:10m rate=10r/s;
 limit_req_zone \$binary_remote_addr zone=general:10m rate=30r/s;
@@ -190,7 +200,7 @@ server {
     # WebSocket/Socket.IO specific configuration
     location /socket.io/ {
         limit_req zone=socket burst=200 nodelay;
-        proxy_pass http://gosei_backend;
+        proxy_pass http://gosei_socketio;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "upgrade";
