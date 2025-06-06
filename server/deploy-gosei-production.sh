@@ -468,9 +468,63 @@ start_services() {
         exit 1
     fi
     
-    # Start the applications
-    NODE_ENV=production PORT=3001 pm2 start server.js --name gosei-server-cluster --instances 2 -e /var/log/pm2/gosei-error.log -o /var/log/pm2/gosei-out.log
-    NODE_ENV=production PORT=3002 pm2 start server.js --name gosei-server-backup --instances 1 -e /var/log/pm2/gosei-backup-error.log -o /var/log/pm2/gosei-backup-out.log
+    # Check if PM2 processes already exist and handle accordingly
+    print_status "Checking for existing PM2 processes..."
+    
+    if pm2 list | grep -q "gosei-server"; then
+        print_warning "Existing Gosei PM2 processes found"
+        pm2 status
+        
+        read -p "Do you want to (r)estart, (d)elete and recreate, or (s)kip PM2 setup? [r/d/s]: " -n 1 -r
+        echo
+        
+        case $REPLY in
+            [Rr]* )
+                print_status "Restarting existing PM2 processes..."
+                pm2 restart gosei-server-cluster 2>/dev/null || true
+                pm2 restart gosei-server-backup 2>/dev/null || true
+                print_success "PM2 processes restarted"
+                ;;
+            [Dd]* )
+                print_status "Deleting existing processes and recreating..."
+                pm2 delete gosei-server-cluster 2>/dev/null || true
+                pm2 delete gosei-server-backup 2>/dev/null || true
+                sleep 2
+                start_pm2_processes
+                ;;
+            [Ss]* )
+                print_warning "Skipping PM2 setup - using existing processes"
+                ;;
+            * )
+                print_status "Invalid option, restarting existing processes..."
+                pm2 restart gosei-server-cluster 2>/dev/null || true
+                pm2 restart gosei-server-backup 2>/dev/null || true
+                ;;
+        esac
+    else
+        print_status "No existing PM2 processes found, creating new ones..."
+        start_pm2_processes
+    fi
+}
+
+# Function to start PM2 processes
+start_pm2_processes() {
+    print_status "Starting new PM2 processes..."
+    
+    # Start the applications with error handling
+    if NODE_ENV=production PORT=3001 pm2 start server.js --name gosei-server-cluster --instances 2 -e /var/log/pm2/gosei-error.log -o /var/log/pm2/gosei-out.log; then
+        print_success "Main cluster started successfully"
+    else
+        print_error "Failed to start main cluster"
+        return 1
+    fi
+    
+    if NODE_ENV=production PORT=3002 pm2 start server.js --name gosei-server-backup --instances 1 -e /var/log/pm2/gosei-backup-error.log -o /var/log/pm2/gosei-backup-out.log; then
+        print_success "Backup server started successfully"
+    else
+        print_error "Failed to start backup server"
+        return 1
+    fi
     
     print_status "Saving PM2 configuration..."
     pm2 save
@@ -534,37 +588,126 @@ EOF
 setup_ssl() {
     print_header "🔐 SETTING UP SSL CERTIFICATE"
     
-    print_status "Installing Certbot..."
-    sudo apt install -y certbot python3-certbot-nginx
+    print_status "Installing Certbot and dependencies..."
+    sudo apt update
+    sudo apt install -y certbot python3-certbot-nginx snapd
     
-    print_warning "Please ensure your domain ${DOMAIN} is pointing to this server's IP"
+    # Install certbot via snap for latest version
+    print_status "Installing latest Certbot via snap..."
+    sudo snap install core; sudo snap refresh core
+    sudo snap install --classic certbot
+    sudo ln -sf /snap/bin/certbot /usr/bin/certbot
     
-    read -p "Continue with SSL certificate generation? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        print_status "Getting SSL certificate..."
-        sudo certbot certonly --webroot -w /var/www/html -d ${DOMAIN} --non-interactive --agree-tos --email ${EMAIL}
-        
-        if [ $? -eq 0 ]; then
-            print_status "SSL certificate obtained successfully. Updating Nginx configuration..."
-            configure_nginx_ssl
-            
-            print_status "Testing SSL certificate auto-renewal..."
-            sudo certbot renew --dry-run
-            
-            print_success "SSL certificate installed and auto-renewal configured"
-        else
-            print_error "SSL certificate generation failed. Check domain DNS settings."
-            print_warning "Server will continue running on HTTP. You can run SSL setup manually later."
-        fi
+    # Ensure webroot directory exists
+    print_status "Preparing webroot directory..."
+    sudo mkdir -p /var/www/html/.well-known/acme-challenge
+    sudo chown -R www-data:www-data /var/www/html
+    sudo chmod -R 755 /var/www/html
+    
+    print_status "Checking domain DNS resolution..."
+    if ! nslookup ${DOMAIN} >/dev/null 2>&1; then
+        print_warning "DNS resolution for ${DOMAIN} failed. Continuing anyway..."
     else
-        print_warning "SSL certificate setup skipped. Run manually: sudo certbot certonly --webroot -w /var/www/html -d ${DOMAIN}"
+        print_success "DNS resolution for ${DOMAIN} successful"
     fi
+    
+    print_warning "Ensure your domain ${DOMAIN} is pointing to this server's IP: $(curl -s ifconfig.me 2>/dev/null || echo 'Unable to detect')"
+    
+    # Auto-enable SSL by default
+    print_status "Setting up SSL certificate automatically..."
+    
+    # Try multiple approaches for getting the certificate
+    SSL_SUCCESS=false
+    
+    # Method 1: Webroot method
+    print_status "Attempting SSL certificate generation (Method 1: Webroot)..."
+    if sudo certbot certonly --webroot -w /var/www/html -d ${DOMAIN} --non-interactive --agree-tos --email ${EMAIL} --no-eff-email; then
+        SSL_SUCCESS=true
+        print_success "SSL certificate obtained via webroot method"
+    else
+        print_warning "Webroot method failed, trying standalone method..."
+        
+        # Method 2: Standalone method (temporarily stop nginx)
+        print_status "Attempting SSL certificate generation (Method 2: Standalone)..."
+        sudo systemctl stop nginx
+        if sudo certbot certonly --standalone -d ${DOMAIN} --non-interactive --agree-tos --email ${EMAIL} --no-eff-email; then
+            SSL_SUCCESS=true
+            print_success "SSL certificate obtained via standalone method"
+        fi
+        sudo systemctl start nginx
+    fi
+    
+    if [ "$SSL_SUCCESS" = true ]; then
+        print_status "SSL certificate obtained successfully. Updating Nginx configuration..."
+        configure_nginx_ssl
+        
+        print_status "Testing SSL certificate auto-renewal..."
+        if sudo certbot renew --dry-run; then
+            print_success "SSL auto-renewal test passed"
+        else
+            print_warning "SSL auto-renewal test failed, but certificate is installed"
+        fi
+        
+        # Set up automatic renewal
+        setup_ssl_renewal
+        
+        print_success "SSL certificate installed and auto-renewal configured"
+    else
+        print_error "All SSL certificate generation methods failed."
+        print_warning "Common issues:"
+        print_warning "1. Domain not pointing to this server"
+        print_warning "2. Firewall blocking port 80/443"
+        print_warning "3. DNS propagation not complete"
+        print_warning ""
+        print_warning "Server will continue running on HTTP."
+        print_warning "To retry SSL later, run: sudo certbot certonly --webroot -w /var/www/html -d ${DOMAIN}"
+    fi
+}
+
+# Setup SSL auto-renewal
+setup_ssl_renewal() {
+    print_status "Setting up SSL certificate auto-renewal..."
+    
+    # Create renewal script
+    sudo tee /usr/local/bin/renew-ssl.sh > /dev/null << 'EOF'
+#!/bin/bash
+# SSL Certificate Renewal Script for Gosei
+
+/usr/bin/certbot renew --quiet --no-self-upgrade
+
+# Check if renewal was successful and reload nginx
+if [ $? -eq 0 ]; then
+    systemctl reload nginx
+    logger "SSL certificate renewed successfully for Gosei server"
+else
+    logger "SSL certificate renewal failed for Gosei server"
+fi
+EOF
+    
+    sudo chmod +x /usr/local/bin/renew-ssl.sh
+    
+    # Add to crontab for automatic renewal (twice daily)
+    (crontab -l 2>/dev/null; echo "0 2,14 * * * /usr/local/bin/renew-ssl.sh") | sudo crontab -
+    
+    # Enable and start certbot timer (systemd approach)
+    if systemctl is-enabled certbot.timer >/dev/null 2>&1; then
+        sudo systemctl enable certbot.timer
+        sudo systemctl start certbot.timer
+        print_status "Enabled systemd certbot timer for automatic renewal"
+    fi
+    
+    print_success "SSL auto-renewal configured"
 }
 
 # Configure Nginx with SSL
 configure_nginx_ssl() {
-    print_status "Updating Nginx configuration with SSL..."
+    print_status "Updating Nginx configuration with SSL and enhanced security..."
+    
+    # Generate stronger DH parameters if they don't exist
+    if [ ! -f /etc/nginx/dhparam.pem ]; then
+        print_status "Generating strong DH parameters (this may take a few minutes)..."
+        sudo openssl dhparam -out /etc/nginx/dhparam.pem 2048
+    fi
     
     sudo tee /etc/nginx/sites-available/${DOMAIN} > /dev/null << EOF
 # Upstream configuration for load balancing
@@ -573,11 +716,18 @@ upstream gosei_backend {
     server 127.0.0.1:3001 max_fails=3 fail_timeout=30s weight=3;
     server 127.0.0.1:3002 backup max_fails=2 fail_timeout=15s;
     keepalive 32;
+    keepalive_requests 1000;
+    keepalive_timeout 60s;
 }
 
 # Rate limiting zones
 limit_req_zone \$binary_remote_addr zone=api:10m rate=10r/s;
 limit_req_zone \$binary_remote_addr zone=general:10m rate=30r/s;
+limit_req_zone \$binary_remote_addr zone=socket:10m rate=100r/s;
+
+# SSL session cache
+ssl_session_cache shared:SSL:10m;
+ssl_session_timeout 10m;
 
 server {
     listen 80;
@@ -586,6 +736,7 @@ server {
     # Let's Encrypt ACME challenge
     location /.well-known/acme-challenge/ {
         root /var/www/html;
+        allow all;
     }
     
     # Redirect all other HTTP traffic to HTTPS
@@ -601,15 +752,46 @@ server {
     # SSL configuration
     ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
-    include /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    
+    # Enhanced SSL security
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_dhparam /etc/nginx/dhparam.pem;
+    ssl_ecdh_curve secp384r1;
+    
+    # OCSP Stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    ssl_trusted_certificate /etc/letsencrypt/live/${DOMAIN}/chain.pem;
+    resolver 8.8.8.8 8.8.4.4 valid=300s;
+    resolver_timeout 5s;
     
     # Security headers
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' ws: wss: data: blob: 'unsafe-inline' 'unsafe-eval'" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
     
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/javascript
+        application/xml+rss
+        application/json;
+    
+    # Main application proxy
     location / {
         limit_req zone=general burst=50 nodelay;
         proxy_pass http://gosei_backend;
@@ -620,13 +802,17 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Host \$server_name;
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 300s;
         proxy_cache_bypass \$http_upgrade;
+        proxy_buffering off;
     }
     
+    # WebSocket/Socket.IO specific configuration
     location /socket.io/ {
+        limit_req zone=socket burst=200 nodelay;
         proxy_pass http://gosei_backend;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
@@ -635,15 +821,45 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Host \$server_name;
+        proxy_cache_bypass \$http_upgrade;
+        proxy_buffering off;
+        
+        # WebSocket timeout settings
         proxy_read_timeout 86400;
         proxy_send_timeout 86400;
+        proxy_connect_timeout 60s;
     }
     
+    # Health check endpoint
     location /health {
         access_log off;
+        limit_req zone=api burst=20 nodelay;
         proxy_pass http://gosei_backend;
         proxy_http_version 1.1;
         proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 10s;
+    }
+    
+    # Static file serving with caching
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)\$ {
+        proxy_pass http://gosei_backend;
+        proxy_cache_valid 200 1h;
+        add_header Cache-Control "public, immutable";
+        expires 1h;
+    }
+    
+    # Security: Block common attack patterns
+    location ~ /\.(ht|git|svn) {
+        deny all;
+        return 404;
+    }
+    
+    location ~ /\.(env|log|config) {
+        deny all;
+        return 404;
     }
 }
 EOF
@@ -653,8 +869,20 @@ EOF
         print_success "Nginx SSL configuration is valid"
         sudo systemctl reload nginx
         print_status "Nginx reloaded with SSL configuration"
+        
+        # Test SSL configuration
+        print_status "Testing SSL configuration..."
+        sleep 2
+        if curl -sI https://${DOMAIN} >/dev/null 2>&1; then
+            print_success "HTTPS connection test passed"
+        else
+            print_warning "HTTPS connection test failed - check certificate installation"
+        fi
     else
         print_error "Nginx SSL configuration test failed"
+        # Show nginx error log for debugging
+        print_status "Nginx error log (last 10 lines):"
+        sudo tail -10 /var/log/nginx/error.log
         exit 1
     fi
 }
@@ -711,6 +939,29 @@ verify_installation() {
         print_success "Nginx proxy test: PASSED"
     else
         print_error "Nginx proxy test: FAILED"
+    fi
+    
+    # Test HTTPS if SSL is configured
+    if [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
+        print_status "Testing HTTPS connection..."
+        if curl -sf https://${DOMAIN} > /dev/null 2>&1; then
+            print_success "HTTPS connection test: PASSED"
+            
+            # SSL certificate details
+            print_status "SSL certificate information:"
+            CERT_EXPIRY=$(openssl x509 -in /etc/letsencrypt/live/${DOMAIN}/cert.pem -noout -enddate | cut -d= -f2)
+            print_status "Certificate expires: ${CERT_EXPIRY}"
+            
+            # SSL rating check (optional)
+            print_status "SSL configuration rating check:"
+            SSL_LABS_URL="https://www.ssllabs.com/ssltest/analyze.html?d=${DOMAIN}&hideResults=on&latest"
+            print_status "Check SSL rating at: ${SSL_LABS_URL}"
+        else
+            print_warning "HTTPS connection test: FAILED"
+            print_warning "SSL may need more time to propagate"
+        fi
+    else
+        print_warning "SSL certificate not found - running in HTTP mode"
     fi
     
     print_success "Installation verification completed"
@@ -785,8 +1036,18 @@ main() {
     echo -e "${CYAN}• Domain: ${DOMAIN}${NC}"
     echo -e "${CYAN}• User: ${USER}${NC}"
     echo -e "${CYAN}• Load Balancer: Nginx with PM2 cluster mode${NC}"
-    echo -e "${CYAN}• SSL: Let's Encrypt certificate${NC}"
+    
+    # SSL status
+    if [ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]; then
+        echo -e "${CYAN}• SSL: ✅ Let's Encrypt certificate (HTTPS enabled)${NC}"
+        echo -e "${CYAN}• Auto-renewal: ✅ Configured (twice daily)${NC}"
+    else
+        echo -e "${CYAN}• SSL: ⚠️ Not configured (HTTP only)${NC}"
+        echo -e "${YELLOW}  Run SSL setup: sudo certbot certonly --webroot -w /var/www/html -d ${DOMAIN}${NC}"
+    fi
+    
     echo -e "${CYAN}• Monitoring: Health checks every 5 minutes${NC}"
+    echo -e "${CYAN}• Security: Enhanced headers, rate limiting, DDoS protection${NC}"
     
     echo ""
     echo -e "${YELLOW}Useful commands (run as user '${USER}'):${NC}"
