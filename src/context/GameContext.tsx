@@ -371,6 +371,14 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         
         newSocket.on('playerJoined', (joinData) => {
           console.log(`Player ${joinData.username} (${joinData.playerId}) joined the game`);
+          
+          // Only show notification for new players (not current player rejoining)
+          if (joinData.playerId !== state.currentPlayer?.id) {
+            dispatch({ 
+              type: 'MOVE_ERROR', 
+              payload: `${joinData.username} has joined the game.` 
+            });
+          }
         });
         
         newSocket.on('playerLeft', (leaveData) => {

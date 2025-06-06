@@ -259,6 +259,14 @@ io.on('connection', (socket) => {
               timeRemaining: player.timeRemaining
             });
           });
+          
+          // Notify other players that this player has rejoined
+          socket.to(gameId).emit('playerJoined', {
+            gameId,
+            playerId,
+            username,
+            isReconnect: true
+          });
         } else {
           log(`Warning: Reconnecting player ${playerId} not found in game ${gameId}`);
           socket.emit('gameState', gameState);

@@ -294,6 +294,20 @@ const GamePage: React.FC = () => {
       });
     });
 
+    // Listen for player joined/rejoined
+    socket.on('playerJoined', (data: { gameId: string, playerId: string, username: string, isReconnect?: boolean }) => {
+      console.log(`Player ${data.username} ${data.isReconnect ? 'rejoined' : 'joined'} the game`);
+      
+      // Only show notification if it's not the current player
+      if (currentPlayer && data.playerId !== currentPlayer.id) {
+        setNotification({
+          visible: true,
+          message: `${data.username} has ${data.isReconnect ? 'rejoined' : 'joined'} the game.`,
+          type: 'info'
+        });
+      }
+    });
+
     return () => {
       socket.off('chatMessageReceived');
       socket.off('chatHistory');
@@ -305,6 +319,7 @@ const GamePage: React.FC = () => {
       socket.off('playerDisconnected');
       socket.off('playerResigned');
       socket.off('playerTimeout');
+      socket.off('playerJoined');
     };
   }, [gameState?.socket, gameState?.id, currentPlayer, gameState?.players]);
 
@@ -764,7 +779,7 @@ const GamePage: React.FC = () => {
           message={notification.message}
           type={notification.type}
           result={notification.result}
-          duration={1000}
+          duration={2000}
           onClose={() => setNotification(prev => ({ ...prev, visible: false }))}
         />
 

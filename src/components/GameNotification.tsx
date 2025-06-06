@@ -15,7 +15,7 @@ const GameNotification: React.FC<GameNotificationProps> = ({
   isVisible,
   message,
   type = 'info',
-  duration = 5000,
+  duration = 2000,
   onClose,
   result
 }) => {
