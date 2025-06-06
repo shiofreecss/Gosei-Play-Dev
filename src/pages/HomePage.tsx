@@ -259,11 +259,28 @@ const HomePage: React.FC = () => {
             byoYomiTime: 0
           };
         } else if (gameType === 'even' || gameType === 'handicap' || gameType === 'teaching') {
-          // Set defaults for standard games
+          // Set defaults for standard games using utility function
           newState.timePerMove = 0;
+          
+          // Auto-set main time based on board size for standard games
+          const recommendedTime = getRecommendedTimeForBoardSize(newState.boardSize);
+          const currentTimeControl = newState.timeControl || 0;
+          const shouldAutoSetTime = currentTimeControl === 0;
+          
+          // Determine the appropriate time control based on game type
+          let defaultTimeControl: number;
+          if (gameType === 'teaching') {
+            defaultTimeControl = shouldAutoSetTime ? recommendedTime * 2 : currentTimeControl;
+          } else {
+            defaultTimeControl = shouldAutoSetTime ? recommendedTime : currentTimeControl;
+          }
+          
+          newState.timeControl = defaultTimeControl;
+          
           newState.timeControlOptions = {
             ...prev.timeControlOptions,
             timePerMove: 0,
+            timeControl: defaultTimeControl,
             fischerTime: 0,
             byoYomiPeriods: 5, // Default to 5 periods for standard games
             byoYomiTime: 30    // Default to 30 seconds per period
