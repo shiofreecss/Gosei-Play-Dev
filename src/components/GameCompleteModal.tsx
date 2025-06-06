@@ -154,12 +154,12 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
   // If waiting for new game, always show the waiting modal regardless of game status
   if (waitingForNewGame) {
     return (
-      <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'} pointer-events-none`}>
+      <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
         {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto"></div>
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
         
         {/* Modal */}
-        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'} pointer-events-auto relative z-10`}>
+        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
           {/* Header */}
           <div className="bg-green-600 dark:bg-green-800 text-white py-4 px-6">
             <h2 className="text-xl font-bold text-center">Starting New Game...</h2>
@@ -182,12 +182,12 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
   // Render play again confirmation dialog
   if (showPlayAgainDialog && playAgainRequestReceived) {
     return (
-      <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'} pointer-events-none`}>
+      <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
         {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto"></div>
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
         
         {/* Modal */}
-        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'} pointer-events-auto relative z-10`}>
+        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
           {/* Header */}
           <div className="bg-blue-600 dark:bg-blue-800 text-white py-4 px-6">
             <h2 className="text-xl font-bold text-center">Play Again?</h2>
@@ -221,25 +221,15 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
   }
 
   return (
-    <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'} pointer-events-none`}>
-      {/* Backdrop - only blocks the center area where modal appears */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto" onClick={handleClose}></div>
+    <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose}></div>
       
       {/* Modal */}
-      <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'} pointer-events-auto relative z-10`}>
+      <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
         {/* Header */}
-        <div className="bg-indigo-600 dark:bg-indigo-800 text-white py-4 px-6 relative">
+        <div className="bg-indigo-600 dark:bg-indigo-800 text-white py-4 px-6">
           <h2 className="text-xl font-bold text-center">Game Complete!</h2>
-          {/* Close button */}
-          <button
-            onClick={handleClose}
-            className="absolute top-2 right-2 p-2 hover:bg-indigo-700 rounded-full transition-colors"
-            title="Close modal"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
         
         {/* Result Card */}
@@ -318,11 +308,6 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
             >
               {playAgainRequestSent ? 'Request Sent' : 'Play Again'}
             </button>
-          </div>
-          
-          {/* Helpful hint */}
-          <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-            You can still use game controls by closing this modal or clicking outside it
           </div>
         </div>
       </div>

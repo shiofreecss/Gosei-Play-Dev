@@ -89,6 +89,7 @@ const GamePage: React.FC = () => {
   const [autoSaveInterval, setAutoSaveInterval] = useState<NodeJS.Timeout | null>(null);
   const [showDevTools, setShowDevTools] = useState(false);
   const [confirmingScore, setConfirmingScore] = useState<boolean>(false);
+  const [showGameCompleteModal, setShowGameCompleteModal] = useState(false);
 
 
   // Notification state
@@ -115,6 +116,13 @@ const GamePage: React.FC = () => {
       setShowJoinForm(true);
     }
   }, [gameId, gameState, showJoinForm, loading]);
+
+  // Show game complete modal when game finishes
+  useEffect(() => {
+    if (gameState?.status === 'finished') {
+      setShowGameCompleteModal(true);
+    }
+  }, [gameState?.status]);
 
   // Set up or clear autosave interval based on autoSaveEnabled state
   useEffect(() => {
@@ -815,10 +823,15 @@ const GamePage: React.FC = () => {
         {/* Game error messages */}
         <GameError />
 
-        {gameState.status === 'finished' && (
+        {gameState.status === 'finished' && showGameCompleteModal && (
           <GameCompleteModal 
             onClose={() => {
-              // Allow the modal to be dismissed while keeping game controls accessible
+              // Allow users to close the modal and interact with underlying UI
+              setShowGameCompleteModal(false);
+            }}
+            onPlayAgain={() => {
+              resetGame();
+              navigate('/');
             }}
           />
         )}
