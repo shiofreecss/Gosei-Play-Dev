@@ -23,9 +23,9 @@ NC='\033[0m' # No Color
 DOMAIN="gosei-svr-01.beaver.foundation"
 APP_DIR="/var/www/gosei"
 USER=$(whoami)
-REPO_URL="https://github.com/yourusername/gosei-play.git"  # UPDATE THIS!
+REPO_URL="https://github.com/shiofreecss/DEV-Gosei-Play.git"  # UPDATE THIS!
 NODE_VERSION="18"
-EMAIL="admin@beaver.foundation"  # UPDATE THIS for SSL certificates
+EMAIL="nhvu.dalat@gmail.com"  # UPDATE THIS for SSL certificates
 
 # Script start
 clear
@@ -369,8 +369,32 @@ deploy_application() {
         cd ${APP_DIR}
     fi
     
+    print_status "Checking server directory structure..."
+    if [ ! -d "${APP_DIR}/server" ]; then
+        print_error "Server directory not found at ${APP_DIR}/server"
+        print_status "Available directories in ${APP_DIR}:"
+        ls -la ${APP_DIR}/
+        
+        # Check for common alternative directory names
+        if [ -d "${APP_DIR}/heroku-server" ]; then
+            print_warning "Found 'heroku-server' directory. Creating symlink to 'server'..."
+            ln -s ${APP_DIR}/heroku-server ${APP_DIR}/server
+        elif [ -d "${APP_DIR}/src" ]; then
+            print_warning "Found 'src' directory. Using that instead..."
+            cd ${APP_DIR}/src
+        elif [ -f "${APP_DIR}/server.js" ]; then
+            print_warning "Found server.js in root directory. Using root directory..."
+            cd ${APP_DIR}
+        else
+            print_error "Could not find Node.js server files. Please check repository structure."
+            exit 1
+        fi
+    else
+        print_success "Server directory found"
+        cd ${APP_DIR}/server
+    fi
+    
     print_status "Installing application dependencies..."
-    cd ${APP_DIR}/heroku-server
     npm install --production
     
     print_status "Installing production optimization packages..."
@@ -418,7 +442,31 @@ start_services() {
     sudo chown -R ${USER}:${USER} /var/log/pm2
     
     print_status "Starting Gosei server with PM2..."
-    cd ${APP_DIR}/heroku-server
+    
+    # Determine the correct server directory
+    if [ -d "${APP_DIR}/server" ]; then
+        SERVER_PATH="${APP_DIR}/server"
+    elif [ -d "${APP_DIR}/heroku-server" ]; then
+        SERVER_PATH="${APP_DIR}/heroku-server"
+    elif [ -d "${APP_DIR}/src" ]; then
+        SERVER_PATH="${APP_DIR}/src"
+    elif [ -f "${APP_DIR}/server.js" ]; then
+        SERVER_PATH="${APP_DIR}"
+    else
+        print_error "Cannot find server files to start"
+        exit 1
+    fi
+    
+    print_status "Using server path: ${SERVER_PATH}"
+    cd ${SERVER_PATH}
+    
+    # Verify server.js exists
+    if [ ! -f "server.js" ]; then
+        print_error "server.js not found in ${SERVER_PATH}"
+        print_status "Available files:"
+        ls -la
+        exit 1
+    fi
     
     # Start the applications
     NODE_ENV=production PORT=3001 pm2 start server.js --name gosei-server-cluster --instances 2 -e /var/log/pm2/gosei-error.log -o /var/log/pm2/gosei-out.log
