@@ -1679,6 +1679,128 @@ io.on('connection', (socket) => {
       socket.emit('error', `Game ${gameId} not found`);
     }
   });
+
+  // Get game state
+  socket.on('getGameState', ({ gameId }) => {
+    log(`Request for game state of game ${gameId}`);
+    
+    const gameState = activeGames.get(gameId);
+    if (gameState) {
+      socket.emit('gameState', gameState);
+    } else {
+      socket.emit('error', `Game ${gameId} not found`);
+    }
+  });
+
+  // Handle toggle dead stone in scoring phase
+  socket.on('toggleDeadStone', ({ gameId, position, playerId }) => {
+    log(`Player ${playerId} toggled dead stone at (${position.x}, ${position.y}) in game ${gameId}`);
+    
+    const gameState = activeGames.get(gameId);
+    if (gameState) {
+      // Only allow toggling in scoring mode
+      if (gameState.status !== 'scoring') {
+        log(`Cannot toggle dead stone: game ${gameId} not in scoring mode`);
+        socket.emit('error', 'Cannot toggle dead stone: game not in scoring mode');
+        return;
+      }
+      
+      // Initialize deadStones array if it doesn't exist
+      if (!gameState.deadStones) {
+        gameState.deadStones = [];
+      }
+      
+      // Find the stone at the clicked position
+      const stoneAtPos = findStoneAt(position, gameState.board.stones);
+      if (!stoneAtPos) {
+        log(`No stone found at position (${position.x}, ${position.y})`);
+        socket.emit('error', 'Cannot toggle dead stone: no stone at position');
+        return;
+      }
+      
+      // Get the connected group of stones
+      const connectedGroup = getConnectedGroup(position, gameState.board.stones, gameState.board.size);
+      
+      // Count how many stones in the group are already marked as dead
+      const alreadyMarkedCount = connectedGroup.filter(pos => 
+        gameState.deadStones.some(dead => dead.x === pos.x && dead.y === pos.y)
+      ).length;
+      
+      // If more than half are already marked, remove them all
+      // Otherwise, add all stones in the group
+      if (alreadyMarkedCount > connectedGroup.length / 2) {
+        // Remove all stones in the group from dead stones
+        gameState.deadStones = gameState.deadStones.filter(deadStone => 
+          !connectedGroup.some(groupPos => groupPos.x === deadStone.x && groupPos.y === deadStone.y)
+        );
+      } else {
+        // Add all stones in the group to dead stones (avoiding duplicates)
+        const newDeadStones = connectedGroup.filter(groupPos => 
+          !gameState.deadStones.some(deadStone => deadStone.x === groupPos.x && deadStone.y === groupPos.y)
+        );
+        
+        gameState.deadStones = [...gameState.deadStones, ...newDeadStones];
+      }
+      
+      // Update stored game state
+      activeGames.set(gameId, gameState);
+      
+      // Broadcast dead stone change to all clients
+      io.to(gameId).emit('deadStoneToggled', {
+        gameId,
+        position,
+        playerId,
+        deadStones: gameState.deadStones
+      });
+      
+      // Use the new broadcast function for move updates
+      broadcastGameUpdate(gameId, gameState);
+    }
+  });
+
+  // Handle sync dead stones request  
+  socket.on('syncDeadStones', ({ gameId, playerId }) => {
+    log(`Player ${playerId} requested dead stones sync for game ${gameId}`);
+    
+    const gameState = activeGames.get(gameId);
+    if (gameState) {
+      // Send current dead stones to the requesting client
+      socket.emit('deadStonesSynced', {
+        gameId,
+        deadStones: gameState.deadStones || []
+      });
+      
+      log(`Sent ${gameState.deadStones ? gameState.deadStones.length : 0} dead stones to player ${playerId}`);
+    } else {
+      log(`Game ${gameId} not found for dead stones sync request`);
+      socket.emit('error', `Game ${gameId} not found`);
+    }
+  });
+
+  // Handle game status changed
+  socket.on('gameStatusChanged', ({ gameId, status }) => {
+    log(`Game ${gameId} status changed to ${status}`);
+    
+    const gameState = activeGames.get(gameId);
+    if (gameState) {
+      gameState.status = status;
+      activeGames.set(gameId, gameState);
+      
+      // Broadcast the status change to all clients
+      io.to(gameId).emit('gameStatusChanged', {
+        gameId,
+        status
+      });
+      
+      // Use the new broadcast function for move updates
+      broadcastGameUpdate(gameId, gameState);
+      
+      log(`Broadcasting status change to all clients in room ${gameId}`);
+    } else {
+      log(`Game ${gameId} not found for status change`);
+      socket.emit('error', `Game ${gameId} not found`);
+    }
+  });
 });
 
 // Route to check server status
