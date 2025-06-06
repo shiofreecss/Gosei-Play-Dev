@@ -263,7 +263,6 @@ upstream gosei_backend {
     least_conn;
     server 127.0.0.1:3001 max_fails=3 fail_timeout=30s weight=3;
     server 127.0.0.1:3002 backup max_fails=2 fail_timeout=15s;
-    ip_hash;
     keepalive 32;
 }
 
@@ -274,18 +273,11 @@ limit_req_zone \$binary_remote_addr zone=general:10m rate=30r/s;
 server {
     listen 80;
     server_name ${DOMAIN};
-    return 301 https://\$server_name\$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name ${DOMAIN};
     
-    # Security headers
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header X-XSS-Protection "1; mode=block" always;
+    # Let's Encrypt ACME challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
     
     location / {
         limit_req zone=general burst=50 nodelay;
@@ -502,14 +494,120 @@ setup_ssl() {
     read -p "Continue with SSL certificate generation? (y/N): " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        sudo certbot --nginx -d ${DOMAIN} --non-interactive --agree-tos --email ${EMAIL} --redirect
+        print_status "Getting SSL certificate..."
+        sudo certbot certonly --webroot -w /var/www/html -d ${DOMAIN} --non-interactive --agree-tos --email ${EMAIL}
         
-        print_status "Testing SSL certificate auto-renewal..."
-        sudo certbot renew --dry-run
-        
-        print_success "SSL certificate installed and auto-renewal configured"
+        if [ $? -eq 0 ]; then
+            print_status "SSL certificate obtained successfully. Updating Nginx configuration..."
+            configure_nginx_ssl
+            
+            print_status "Testing SSL certificate auto-renewal..."
+            sudo certbot renew --dry-run
+            
+            print_success "SSL certificate installed and auto-renewal configured"
+        else
+            print_error "SSL certificate generation failed. Check domain DNS settings."
+            print_warning "Server will continue running on HTTP. You can run SSL setup manually later."
+        fi
     else
-        print_warning "SSL certificate setup skipped. Run manually: sudo certbot --nginx -d ${DOMAIN}"
+        print_warning "SSL certificate setup skipped. Run manually: sudo certbot certonly --webroot -w /var/www/html -d ${DOMAIN}"
+    fi
+}
+
+# Configure Nginx with SSL
+configure_nginx_ssl() {
+    print_status "Updating Nginx configuration with SSL..."
+    
+    sudo tee /etc/nginx/sites-available/${DOMAIN} > /dev/null << EOF
+# Upstream configuration for load balancing
+upstream gosei_backend {
+    least_conn;
+    server 127.0.0.1:3001 max_fails=3 fail_timeout=30s weight=3;
+    server 127.0.0.1:3002 backup max_fails=2 fail_timeout=15s;
+    keepalive 32;
+}
+
+# Rate limiting zones
+limit_req_zone \$binary_remote_addr zone=api:10m rate=10r/s;
+limit_req_zone \$binary_remote_addr zone=general:10m rate=30r/s;
+
+server {
+    listen 80;
+    server_name ${DOMAIN};
+    
+    # Let's Encrypt ACME challenge
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+    
+    # Redirect all other HTTP traffic to HTTPS
+    location / {
+        return 301 https://\$server_name\$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name ${DOMAIN};
+    
+    # SSL configuration
+    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+    
+    # Security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    
+    location / {
+        limit_req zone=general burst=50 nodelay;
+        proxy_pass http://gosei_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 300s;
+        proxy_cache_bypass \$http_upgrade;
+    }
+    
+    location /socket.io/ {
+        proxy_pass http://gosei_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_read_timeout 86400;
+        proxy_send_timeout 86400;
+    }
+    
+    location /health {
+        access_log off;
+        proxy_pass http://gosei_backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+    }
+}
+EOF
+    
+    print_status "Testing updated Nginx configuration..."
+    if sudo nginx -t; then
+        print_success "Nginx SSL configuration is valid"
+        sudo systemctl reload nginx
+        print_status "Nginx reloaded with SSL configuration"
+    else
+        print_error "Nginx SSL configuration test failed"
+        exit 1
     fi
 }
 
