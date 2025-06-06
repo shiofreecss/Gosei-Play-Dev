@@ -164,6 +164,30 @@ const getRecommendedTimeForBoardSize = (size: number): number => {
   };
 };
 
+// Username validation function
+const validateUsername = (name: string): { isValid: boolean; error: string | null } => {
+  // Check length (4-32 characters)
+  if (name.length < 4) {
+    return { isValid: false, error: 'Name must be at least 4 characters long' };
+  }
+  if (name.length > 32) {
+    return { isValid: false, error: 'Name must be no more than 32 characters long' };
+  }
+  
+  // Check for special characters (only allow letters, numbers, spaces, underscores, and hyphens)
+  const allowedCharsRegex = /^[a-zA-Z0-9\s_-]+$/;
+  if (!allowedCharsRegex.test(name)) {
+    return { isValid: false, error: 'Name can only contain letters, numbers, spaces, underscores, and hyphens' };
+  }
+  
+  // Check that it's not just spaces
+  if (name.trim().length === 0) {
+    return { isValid: false, error: 'Name cannot be empty or only spaces' };
+  }
+  
+  return { isValid: true, error: null };
+};
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { createGame, joinGame, gameState, error } = useGame();
@@ -174,6 +198,7 @@ const HomePage: React.FC = () => {
   const [localError, setLocalError] = useState<string | null>(null);
   const [savedGames, setSavedGames] = useState<SavedGame[]>([]);
   const [showCustomSizes, setShowCustomSizes] = useState(false);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
   const [gameOptions, setGameOptions] = useState<GameOptions>({
     boardSize: getStoredValue(STORAGE_KEYS.BOARD_SIZE, 19),
     handicap: getStoredValue(STORAGE_KEYS.HANDICAP, 0),
@@ -396,14 +421,42 @@ const HomePage: React.FC = () => {
     });
   };
 
+  // Handle username input changes with validation
+  const handleUsernameChange = (value: string) => {
+    setUsername(value);
+    
+    // Clear errors when user starts typing again
+    if (usernameError) {
+      setUsernameError(null);
+    }
+    
+    // Validate if not empty
+    if (value.length > 0) {
+      const validation = validateUsername(value);
+      if (!validation.isValid) {
+        setUsernameError(validation.error);
+      }
+    }
+  };
+
   const handleCreateGame = () => {
-    if (!username.trim()) {
-      alert('Please enter your username');
+    const trimmedUsername = username.trim();
+    
+    if (!trimmedUsername) {
+      setUsernameError('Please enter your username');
       return;
     }
 
-    // Save username for future games
-    localStorage.setItem(STORAGE_KEYS.USERNAME, username.trim());
+    // Validate username
+    const validation = validateUsername(trimmedUsername);
+    if (!validation.isValid) {
+      setUsernameError(validation.error);
+      return;
+    }
+
+    // Clear any errors and save username for future games
+    setUsernameError(null);
+    localStorage.setItem(STORAGE_KEYS.USERNAME, trimmedUsername);
     setShowGameSettings(true);
   };
 
@@ -437,26 +490,37 @@ const HomePage: React.FC = () => {
   };
 
   const handleJoinGame = async () => {
-    if (!username.trim()) {
-      alert('Please enter your username');
+    const trimmedUsername = username.trim();
+    const trimmedGameId = gameId.trim();
+    
+    if (!trimmedUsername) {
+      setUsernameError('Please enter your username');
       return;
     }
     
-    if (!gameId.trim()) {
-      alert('Please enter a game ID or code');
+    // Validate username
+    const validation = validateUsername(trimmedUsername);
+    if (!validation.isValid) {
+      setUsernameError(validation.error);
+      return;
+    }
+    
+    if (!trimmedGameId) {
+      setLocalError('Please enter a game ID or code');
       return;
     }
 
     // Clear any previous errors
     setLocalError(null);
+    setUsernameError(null);
 
     // Save username for future games
-    localStorage.setItem(STORAGE_KEYS.USERNAME, username.trim());
+    localStorage.setItem(STORAGE_KEYS.USERNAME, trimmedUsername);
     
     // Call the joinGame function from context and let the effect handle the navigation
     try {
-      console.log(`Attempting to join game with ID/code: ${gameId.trim()}`);
-      await joinGame(gameId.trim(), username.trim());
+      console.log(`Attempting to join game with ID/code: ${trimmedGameId}`);
+      await joinGame(trimmedGameId, trimmedUsername);
       
       // Set a timeout to check if navigation hasn't happened
       setTimeout(() => {
@@ -741,11 +805,15 @@ const HomePage: React.FC = () => {
                     }
                   }}
                   min="0"
+                  step="5"
                   className="form-input w-full"
                 />
                 <div className="mt-1">
                   <p className="text-sm text-neutral-500">
                     Recommended {getRecommendedTimeForBoardSize(gameOptions.boardSize)} minutes for {gameOptions.boardSize}×{gameOptions.boardSize} board (you can set any time you want)
+                  </p>
+                  <p className="text-xs text-neutral-400 mt-1">
+                    Set to 0 minutes for unlimited time (no time counting)
                   </p>
                 </div>
               </div>
@@ -935,11 +1003,18 @@ const HomePage: React.FC = () => {
                 <input
                   type="text"
                   id="username"
-                  className="form-input text-lg py-3"
+                  className={`form-input text-lg py-3 ${usernameError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter your name"
+                  onChange={(e) => handleUsernameChange(e.target.value)}
+                  placeholder="Enter your name (4-32 characters)"
+                  maxLength={32}
                 />
+                {usernameError && (
+                  <p className="mt-2 text-sm text-red-600">{usernameError}</p>
+                )}
+                <p className="mt-1 text-sm text-neutral-500">
+                  Name must be 4-32 characters. Only letters, numbers, spaces, underscores, and hyphens allowed.
+                </p>
               </div>
 
                   <div className="space-y-4">

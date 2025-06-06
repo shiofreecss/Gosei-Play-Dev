@@ -20,6 +20,30 @@ const hasStatus = (gameState: GameState, status: 'waiting' | 'playing' | 'finish
   return gameState.status === status;
 };
 
+// Username validation function
+const validateUsername = (name: string): { isValid: boolean; error: string | null } => {
+  // Check length (4-32 characters)
+  if (name.length < 4) {
+    return { isValid: false, error: 'Name must be at least 4 characters long' };
+  }
+  if (name.length > 32) {
+    return { isValid: false, error: 'Name must be no more than 32 characters long' };
+  }
+  
+  // Check for special characters (only allow letters, numbers, spaces, underscores, and hyphens)
+  const allowedCharsRegex = /^[a-zA-Z0-9\s_-]+$/;
+  if (!allowedCharsRegex.test(name)) {
+    return { isValid: false, error: 'Name can only contain letters, numbers, spaces, underscores, and hyphens' };
+  }
+  
+  // Check that it's not just spaces
+  if (name.trim().length === 0) {
+    return { isValid: false, error: 'Name cannot be empty or only spaces' };
+  }
+  
+  return { isValid: true, error: null };
+};
+
 const GamePage: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
@@ -46,6 +70,7 @@ const GamePage: React.FC = () => {
   const [showJoinForm, setShowJoinForm] = useState<boolean>(true);
   const [copied, setCopied] = useState<boolean>(false);
   const [syncing, setSyncing] = useState<boolean>(false);
+  const [usernameError, setUsernameError] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<Array<{
     id: string;
     playerId: string;
@@ -409,13 +434,46 @@ const GamePage: React.FC = () => {
     cancelScoring();
   };
 
+  // Handle username input changes with validation
+  const handleUsernameChange = (value: string) => {
+    setUsername(value);
+    
+    // Clear errors when user starts typing again
+    if (usernameError) {
+      setUsernameError(null);
+    }
+    
+    // Validate if not empty
+    if (value.length > 0) {
+      const validation = validateUsername(value);
+      if (!validation.isValid) {
+        setUsernameError(validation.error);
+      }
+    }
+  };
+
   const handleJoinGame = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username.trim() && gameId) {
-      // Save username for future games
-      localStorage.setItem('gosei-player-name', username.trim());
+    const trimmedUsername = username.trim();
+    
+    if (!trimmedUsername) {
+      setUsernameError('Please enter your username');
+      return;
+    }
+    
+    // Validate username
+    const validation = validateUsername(trimmedUsername);
+    if (!validation.isValid) {
+      setUsernameError(validation.error);
+      return;
+    }
+    
+    if (gameId) {
+      // Clear errors and save username for future games
+      setUsernameError(null);
+      localStorage.setItem('gosei-player-name', trimmedUsername);
       // Join the game using the joinGame function
-      joinGame(gameId, username.trim());
+      joinGame(gameId, trimmedUsername);
       setShowJoinForm(false);
     }
   };
@@ -593,11 +651,19 @@ const GamePage: React.FC = () => {
                 type="text"
                 id="username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="form-input"
+                onChange={(e) => handleUsernameChange(e.target.value)}
+                className={`form-input ${usernameError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                placeholder="Enter your name (4-32 characters)"
+                maxLength={32}
                 required
                 autoFocus
               />
+              {usernameError && (
+                <p className="mt-2 text-sm text-red-600">{usernameError}</p>
+              )}
+              <p className="mt-1 text-xs text-neutral-500">
+                Name must be 4-32 characters. Only letters, numbers, spaces, underscores, and hyphens allowed.
+              </p>
             </div>
             <div className="flex gap-2">
               <button
