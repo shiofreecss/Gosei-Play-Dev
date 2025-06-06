@@ -109,6 +109,7 @@ if (gameState.gameType === 'blitz' && gameState.timePerMove) {
 - Each move records exact time spent thinking
 - Time displayed in MM:SS format (e.g., "00:15s" for 15 seconds)
 - Both moves and passes record time spent
+- **Unlimited time support**: Displays ∞ symbol when main time = 0
 
 ### ✅ Proper Time Deduction
 - Time deducted from player's remaining time when moves are made
@@ -177,6 +178,13 @@ if (gameState.gameType === 'blitz' && gameState.timePerMove) {
   timeControl: 120,        // 2 minutes main time
   byoYomiPeriods: 5,       // 5 byo-yomi periods
   byoYomiTime: 40          // 40 seconds per period
+}
+
+// Unlimited time control (displays as ∞)
+{
+  timeControl: 0,          // 0 minutes = unlimited time
+  byoYomiPeriods: 0,       // No byo-yomi periods
+  byoYomiTime: 0           // No byo-yomi time
 }
 
 // Blitz time control

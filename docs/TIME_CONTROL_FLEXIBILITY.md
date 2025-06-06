@@ -17,17 +17,19 @@ As of version 1.0.5, Gosei Play now offers complete flexibility in time control 
 - Board size changes would force time to minimum values
 - Help text stated "Minimum X minutes for Y×Y board"
 
-### After (v1.0.5)
+### After (v1.0.5+)
 - **Flexible time controls**: Users can set any time they want (≥0 minutes)
 - **Recommended time settings**: Previous minimums are now suggestions
 - **Smart board changes**: Only updates time if user hasn't customized it
 - **User-friendly help text**: "Recommended X minutes (you can set any time you want)"
 - **Support for all game types**: Bullet games, blitz games, custom timings
+- **Unlimited time support**: Set 0 minutes for unlimited time (displays as ∞)
 
 ## Benefits
 
 ### For Players
 - **Complete freedom** in time control selection
+- **Unlimited time**: Set 0 minutes for untimed games (perfect for analysis)
 - **Bullet games**: Set very short times (1-5 minutes) for fast-paced games
 - **Blitz games**: Set medium times (5-15 minutes) for quick matches
 - **Custom timings**: Set any time that fits your schedule
@@ -48,7 +50,7 @@ As of version 1.0.5, Gosei Play now offers complete flexibility in time control 
 4. In the Time Control section:
    - Enter any positive number in "Main Time (minutes)"
    - The system shows recommended time but doesn't enforce it
-   - You can set 0 minutes for demonstration games
+   - You can set 0 minutes for unlimited time games (displays as ∞)
    - Your setting will be preserved when changing board sizes
 
 ### Recommended vs. Custom Times
@@ -63,6 +65,12 @@ All advanced features work with any main time setting:
 - **Time per move**: Optional maximum time per individual move
 
 ## Examples
+
+### Unlimited Time (0 minutes) 
+- Set main time to 0 minutes (displays as ∞)
+- Perfect for analysis, teaching, and casual study
+- No time pressure allows for deep thinking
+- Ideal for reviewing games or exploring positions
 
 ### Bullet Go (1-5 minutes)
 - Set main time to 1-5 minutes

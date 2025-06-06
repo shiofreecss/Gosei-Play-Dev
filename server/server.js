@@ -599,10 +599,15 @@ io.on('connection', (socket) => {
                 return; // Exit early, game is over
               }
             } else {
-              // No byo-yomi available - player times out
-              log(`💀 TIMEOUT - Player ${movingPlayer.color} exceeded main time with no byo-yomi available (spent ${timeSpentOnMove}s, main time was ${movingPlayer.timeRemaining}s)`);
-              handlePlayerTimeout(gameState, movingPlayer);
-              return; // Exit early, game is over
+              // No byo-yomi available - check if unlimited time before timing out
+              const isUnlimitedTime = (gameState.timeControl?.timeControl || 0) === 0;
+              if (!isUnlimitedTime) {
+                log(`💀 TIMEOUT - Player ${movingPlayer.color} exceeded main time with no byo-yomi available (spent ${timeSpentOnMove}s, main time was ${movingPlayer.timeRemaining}s)`);
+                handlePlayerTimeout(gameState, movingPlayer);
+                return; // Exit early, game is over
+              } else {
+                log(`⏰ UNLIMITED TIME - Player ${movingPlayer.color} spending time but no timeout (unlimited time mode)`);
+              }
             }
           }
         }
@@ -786,11 +791,14 @@ io.on('connection', (socket) => {
             }
             } else {
             // Standard game timeout: check byo-yomi and main time
+            // Only timeout if main time was originally > 0 (not unlimited time)
+            const isUnlimitedTime = (gameState.timeControl?.timeControl || 0) === 0;
+            
             if (currentIsInByoYomi && currentByoYomiPeriods <= 0 && currentByoYomiTime <= 0) {
               log(`💀 STANDARD TIMEOUT DETECTED - Player ${currentPlayer.color} ran out of byo-yomi time`);
               handlePlayerTimeout(gameState, currentPlayer);
               return;
-            } else if (!currentIsInByoYomi && currentTimeRemaining <= 0 && (gameState.timeControl?.byoYomiPeriods || 0) === 0) {
+            } else if (!currentIsInByoYomi && currentTimeRemaining <= 0 && (gameState.timeControl?.byoYomiPeriods || 0) === 0 && !isUnlimitedTime) {
               log(`💀 STANDARD TIMEOUT DETECTED - Player ${currentPlayer.color} ran out of main time with no byo-yomi`);
               handlePlayerTimeout(gameState, currentPlayer);
               return;
@@ -973,10 +981,13 @@ io.on('connection', (socket) => {
             });
             
             // Check for standard timeout
+            // Only timeout if main time was originally > 0 (not unlimited time)
+            const isUnlimitedTime = (gameState.timeControl?.timeControl || 0) === 0;
+            
             if (calculatedIsInByoYomi && calculatedByoYomiPeriods <= 0 && calculatedByoYomiTime <= 0) {
               log(`💀 SERVER STANDARD TIMEOUT DETECTED - Player ${currentPlayer.color} ran out of byo-yomi time`);
               handlePlayerTimeout(gameState, currentPlayer);
-            } else if (!calculatedIsInByoYomi && calculatedTimeRemaining <= 0 && (gameState.timeControl?.byoYomiPeriods || 0) === 0) {
+            } else if (!calculatedIsInByoYomi && calculatedTimeRemaining <= 0 && (gameState.timeControl?.byoYomiPeriods || 0) === 0 && !isUnlimitedTime) {
               log(`💀 SERVER STANDARD TIMEOUT DETECTED - Player ${currentPlayer.color} ran out of main time with no byo-yomi`);
               handlePlayerTimeout(gameState, currentPlayer);
             }
@@ -1126,10 +1137,15 @@ io.on('connection', (socket) => {
                 return; // Exit early, game is over
               }
             } else {
-              // No byo-yomi available - player times out
-              log(`💀 TIMEOUT (PASS) - Player ${passingPlayerForTime.color} exceeded main time with no byo-yomi available (spent ${timeSpentOnPass}s, main time was ${passingPlayerForTime.timeRemaining}s)`);
-              handlePlayerTimeout(gameState, passingPlayerForTime);
-              return; // Exit early, game is over
+              // No byo-yomi available - check if unlimited time before timing out
+              const isUnlimitedTime = (gameState.timeControl?.timeControl || 0) === 0;
+              if (!isUnlimitedTime) {
+                log(`💀 TIMEOUT (PASS) - Player ${passingPlayerForTime.color} exceeded main time with no byo-yomi available (spent ${timeSpentOnPass}s, main time was ${passingPlayerForTime.timeRemaining}s)`);
+                handlePlayerTimeout(gameState, passingPlayerForTime);
+                return; // Exit early, game is over
+              } else {
+                log(`⏰ UNLIMITED TIME (PASS) - Player ${passingPlayerForTime.color} spending time but no timeout (unlimited time mode)`);
+              }
             }
           }
         }

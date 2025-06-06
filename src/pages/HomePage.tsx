@@ -344,6 +344,15 @@ const HomePage: React.FC = () => {
           timeControl: value
         };
         
+        // When main time is 0 (unlimited time), disable byo-yomi
+        if (value === 0) {
+          newState.timeControlOptions = {
+            ...newState.timeControlOptions,
+            byoYomiPeriods: 0,
+            byoYomiTime: 0
+          };
+        }
+        
         // Validate blitz settings - main time should be 0 for blitz games
         if (newState.gameType === 'blitz' && value > 0) {
           console.warn('Main time should be 0 for Blitz games - automatically set to 0');
@@ -836,7 +845,7 @@ const HomePage: React.FC = () => {
                     };
                     updateGameOption('timeControlOptions', newOptions);
                   }}
-                  disabled={gameOptions.gameType === 'blitz'}
+                  disabled={gameOptions.gameType === 'blitz' || (gameOptions.timeControl === 0)}
                   className="form-select w-full"
                 >
                   <option value="0">No byo-yomi</option>
@@ -847,6 +856,8 @@ const HomePage: React.FC = () => {
                 <p className="mt-1 text-xs text-neutral-500">
                   {gameOptions.gameType === 'blitz' 
                     ? 'Not available in Blitz games (uses per-move timing)'
+                    : gameOptions.timeControl === 0
+                    ? 'Not available when main time is 0 (unlimited time)'
                     : 'Number of extra time periods after main time'
                   }
                 </p>
@@ -866,7 +877,7 @@ const HomePage: React.FC = () => {
                     updateGameOption('timeControlOptions', newOptions);
                   }}
                   className="form-select w-full"
-                  disabled={!gameOptions.timeControlOptions?.byoYomiPeriods || gameOptions.gameType === 'blitz'}
+                  disabled={!gameOptions.timeControlOptions?.byoYomiPeriods || gameOptions.gameType === 'blitz' || (gameOptions.timeControl === 0)}
                 >
                   <option value="0">Not used</option>
                   <option value="30">30 seconds (Standard)</option>
@@ -876,6 +887,8 @@ const HomePage: React.FC = () => {
                 <p className="mt-1 text-xs text-neutral-500">
                   {gameOptions.gameType === 'blitz' 
                     ? 'Not available in Blitz games'
+                    : gameOptions.timeControl === 0
+                    ? 'Not available when main time is 0 (unlimited time)'
                     : 'Time per byo-yomi period (auto-set to 30s when periods selected)'
                   }
                 </p>

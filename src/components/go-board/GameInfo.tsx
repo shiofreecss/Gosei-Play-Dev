@@ -286,7 +286,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
       </div>
       
       {/* Timer component */}
-      {gameState.timeControl && (gameState.timeControl.timeControl > 0 || gameState.gameType === 'blitz' || (gameState.timePerMove && gameState.timePerMove > 0)) && (
+      {gameState.timeControl && (gameState.timeControl.timeControl >= 0 || gameState.gameType === 'blitz' || (gameState.timePerMove && gameState.timePerMove > 0)) && (
         <div className="mt-3 mb-4">
           <TimeControl
             timeControl={gameState.timeControl.timeControl}

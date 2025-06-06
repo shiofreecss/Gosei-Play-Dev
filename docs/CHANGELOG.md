@@ -5,6 +5,27 @@ All notable changes to Gosei Play will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-01-08
+
+### Added
+- **Unlimited Time Display Enhancement**: Professional display for unlimited time games
+  - **Infinity Symbol (∞)**: Shows ∞ instead of confusing "0:00" when main time is 0
+  - **Improved UX**: Clear visual indication for unlimited time games
+  - **Consistent Display**: TimeControl component now shows for all time control configurations
+
+### Changed
+- **Time Display Logic**: Enhanced `getTimeDisplay` function in TimeControl component
+- **Game Info Display**: Updated condition to show timer for unlimited time games (main time ≥ 0)
+
+### Fixed
+- **Unlimited Time Confusion**: Eliminated misleading "0" display for unlimited time games
+- **Timer Visibility**: Fixed issue where timer component wasn't shown for unlimited time
+
+### Technical
+- Enhanced `src/components/TimeControl.tsx` with infinity symbol display logic
+- Updated `src/components/go-board/GameInfo.tsx` timer display condition
+- Added comprehensive test coverage for all time display scenarios
+
 ## [1.1.0] - 2025-06-04
 
 ### Added

@@ -1,8 +1,8 @@
 # Game Type Time Control Behavior
 
-## Current Version: v1.0.8 ✅
+## Current Version: v1.0.9 ✅
 
-**Status**: Production Ready | **Last Updated**: May 26, 2025
+**Status**: Production Ready | **Last Updated**: January 2025
 
 ## Overview
 
@@ -69,12 +69,12 @@ if (gameType === 'blitz') {
 
 ## Time Control Matrix
 
-| Game Type | Time per Move | Main Time | Byo-yomi | Fischer |
-|-----------|---------------|-----------|----------|---------|
-| Even | 0 (disabled) | Board-based | Available | Optional |
-| Handicap | 0 (disabled) | Board-based | Available | Optional |
-| Teaching | 0 (disabled) | 2x Board-based | Available | Optional |
-| Blitz | 5+ seconds | 0 | Disabled | Optional |
+| Game Type | Time per Move | Main Time | Byo-yomi | Fischer | Display |
+|-----------|---------------|-----------|----------|---------|---------|
+| Even | 0 (disabled) | Board-based or 0 (∞) | Available | Optional | MM:SS or ∞ |
+| Handicap | 0 (disabled) | Board-based or 0 (∞) | Available | Optional | MM:SS or ∞ |
+| Teaching | 0 (disabled) | 2x Board-based or 0 (∞) | Available | Optional | MM:SS or ∞ |
+| Blitz | 5+ seconds | 0 | Disabled | Optional | MM:SS ⏱️ |
 
 ## Board Size Time Recommendations
 
@@ -99,6 +99,7 @@ if (gameType === 'blitz') {
 - Explanatory tooltips for automatic behaviors
 - Warning messages for invalid combinations
 - Success messages for valid configurations
+- **Unlimited time display**: Shows ∞ symbol when main time = 0
 
 ## Implementation Details
 

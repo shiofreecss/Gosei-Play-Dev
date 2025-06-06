@@ -339,6 +339,12 @@ const TimeControl: React.FC<TimeControlProps> = ({
     } else if (timeState.isByoYomi && byoYomiPeriods > 0) {
       return `BY ${timeState.byoYomiPeriodsLeft}×${formatTime(timeState.byoYomiTimeLeft)}`;
     }
+    
+    // Check if this is unlimited time (timeControl = 0 and no byo-yomi)
+    if (timeControl === 0 && byoYomiPeriods === 0) {
+      return '∞'; // Infinity symbol for unlimited time
+    }
+    
     return '0:00';
   };
 
