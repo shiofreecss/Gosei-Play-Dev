@@ -340,6 +340,7 @@ All game preferences are automatically saved to localStorage:
 - [Blitz Game Byo-yomi Restrictions](BLITZ_GAME_BYO_YOMI_BEHAVIOR.md)
 
 ### Technical Implementation
+- [Move Storage System](MOVE_STORAGE_SYSTEM.md) - How moves are stored and managed
 - [Ko Rule Implementation](KO_RULE_IMPLEMENTATION.md)
 - [Time Tracking System](TIME_TRACKING_SYSTEM.md)
 - [Byo-yomi Implementation Summary](BYO_YOMI_IMPLEMENTATION_SUMMARY.md)
