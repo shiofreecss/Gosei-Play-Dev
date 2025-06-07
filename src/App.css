@@ -2243,6 +2243,49 @@
   background-color: #059669; /* darker green */
 }
 
+/* Game Review Slider Styles */
+.slider-thumb-light::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #16a34a;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider-thumb-light::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #16a34a;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider-thumb-dark::-webkit-slider-thumb {
+  appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #22c55e;
+  cursor: pointer;
+  border: 2px solid #374151;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.slider-thumb-dark::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: #22c55e;
+  cursor: pointer;
+  border: 2px solid #374151;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
 /* Theme-aware mobile controls - Modern Dark Mode */
 .theme-modern .mobile-stone-controls {
   background: var(--card-bg);
@@ -2392,4 +2435,77 @@
   .theme-traditional .mobile-stone-controls {
     box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
   }
+}
+
+/* Game Status Indicator Panels - Theme Aware */
+.game-status-panel {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid;
+  transition: all 0.2s ease;
+}
+
+/* Review Mode Panel */
+.review-mode-panel {
+  background-color: rgba(30, 64, 175, 0.9);
+  border-color: rgba(59, 130, 246, 0.6);
+  color: #ffffff;
+}
+
+.theme-modern-light .review-mode-panel {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #1e40af;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Territory Legend Panel */
+.territory-legend-panel {
+  background-color: rgba(23, 23, 23, 0.9);
+  border-color: rgba(82, 82, 91, 0.6);
+  color: #ffffff;
+}
+
+.theme-modern-light .territory-legend-panel {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(212, 212, 216, 0.6);
+  color: #374151;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Territory indicators inside the legend */
+.territory-indicator {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  border: 2px solid;
+}
+
+.territory-indicator.black {
+  background-color: #000000;
+  opacity: 0.6;
+  border-color: rgba(107, 114, 128, 0.8);
+}
+
+.territory-indicator.white {
+  background-color: #ffffff;
+  opacity: 0.8;
+  border-color: rgba(107, 114, 128, 0.8);
+}
+
+.theme-modern-light .territory-indicator.black {
+  background-color: #1f2937;
+  opacity: 0.8;
+  border-color: rgba(156, 163, 175, 0.8);
+}
+
+.theme-modern-light .territory-indicator.white {
+  background-color: #f9fafb;
+  opacity: 0.9;
+  border-color: rgba(156, 163, 175, 0.8);
 }

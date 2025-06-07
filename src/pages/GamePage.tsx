@@ -6,11 +6,12 @@ import BoardThemeButton from '../components/BoardThemeButton';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import ConnectionStatus from '../components/ConnectionStatus';
 import { useGame } from '../context/GameContext';
-import { Position, GameMove, GameState } from '../types/go';
+import { Position, GameMove, GameState, Stone } from '../types/go';
 import ChatBox from '../components/ChatBox';
 import FloatingChatBubble from '../components/FloatingChatBubble';
 
 import GameCompleteModal from '../components/GameCompleteModal';
+import GameReview from '../components/GameReview';
 import GoseiLogo from '../components/GoseiLogo';
 import GameNotification from '../components/GameNotification';
 import UndoNotification from '../components/UndoNotification';
@@ -90,6 +91,13 @@ const GamePage: React.FC = () => {
   const [showDevTools, setShowDevTools] = useState(false);
   const [confirmingScore, setConfirmingScore] = useState<boolean>(false);
   const [showGameCompleteModal, setShowGameCompleteModal] = useState(false);
+  
+  // Review mode state
+  const [reviewBoardState, setReviewBoardState] = useState<{
+    stones: Stone[];
+    currentMoveIndex: number;
+    isReviewing: boolean;
+  } | null>(null);
 
 
   // Notification state
@@ -737,6 +745,38 @@ const GamePage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Go Board - adjust to be full width on mobile and take 3/4 on larger screens */}
             <div className="lg:col-span-3 flex flex-col items-center">
+              
+              {/* Game Status Indicators - positioned outside the board */}
+              <div className="w-full max-w-full mb-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+                {/* Review Mode Indicator */}
+                {reviewBoardState?.isReviewing && (
+                  <div className="game-status-panel review-mode-panel">
+                    <div className="flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414-1.414L9 5.586 7.707 4.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4a1 1 0 00-1.414-1.414L10 4.586z" clipRule="evenodd" />
+                      </svg>
+                      <span>Review Mode: Use controls below to navigate</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Territory Legend */}
+                {(gameState.status === 'finished' || gameState.status === 'scoring') && (
+                  <div className="game-status-panel territory-legend-panel">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="territory-indicator black"></div>
+                        <span>Black Territory</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="territory-indicator white"></div>
+                        <span>White Territory</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="w-full max-w-full overflow-auto">
                 <GoBoard
                   board={gameState.board}
@@ -759,9 +799,17 @@ const GamePage: React.FC = () => {
                   onToggleDeadStone={handleToggleDeadStone}
                   territory={gameState.territory}
                   showTerritory={gameState.status === 'finished' || gameState.status === 'scoring'}
+                  isReviewing={reviewBoardState?.isReviewing || false}
+                  reviewStones={reviewBoardState?.stones || []}
                 />
                 
-                {/* Game completion buttons below board - Removed to prevent conflicts with GameCompleteModal */}
+                {/* Game Review Controls - Only shown when game is finished */}
+                {gameState.status === 'finished' && (
+                  <GameReview
+                    gameState={gameState}
+                    onBoardStateChange={setReviewBoardState}
+                  />
+                )}
               </div>
             </div>
 

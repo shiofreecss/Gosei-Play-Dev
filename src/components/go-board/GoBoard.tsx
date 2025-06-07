@@ -18,6 +18,9 @@ interface GoBoardProps {
   territory?: Territory[];
   showTerritory?: boolean;
   isHandicapPlacement?: boolean;
+  // Review mode props
+  isReviewing?: boolean;
+  reviewStones?: Stone[];
 }
 
 const GoBoard: React.FC<GoBoardProps> = ({
@@ -32,6 +35,8 @@ const GoBoard: React.FC<GoBoardProps> = ({
   territory = [],
   showTerritory = false,
   isHandicapPlacement = false,
+  isReviewing = false,
+  reviewStones = [],
 }) => {
   const [hoverPosition, setHoverPosition] = useState<Position | null>(null);
   const [previewPosition, setPreviewPosition] = useState<Position | null>(null);
@@ -93,7 +98,8 @@ const GoBoard: React.FC<GoBoardProps> = ({
 
   // Helper to get stone at position
   const getStoneAtPosition = (x: number, y: number): Stone | undefined => {
-    return board.stones.find(
+    const stones = isReviewing ? reviewStones : board.stones;
+    return stones.find(
       (stone) => stone.position.x === x && stone.position.y === y
     );
   };
@@ -123,6 +129,9 @@ const GoBoard: React.FC<GoBoardProps> = ({
 
   // Handle click on board intersection
   const handleIntersectionClick = (x: number, y: number) => {
+    // Disable interactions when reviewing
+    if (isReviewing) return;
+    
     if (isScoring) {
       // In scoring mode, clicking toggles whether a stone is marked as dead
       const stone = getStoneAtPosition(x, y);
@@ -141,7 +150,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
 
   // Handle mouse over board intersection
   const handleMouseOver = (x: number, y: number) => {
-    if (isPlayerTurn && isValidPlacement(x, y)) {
+    if (!isReviewing && isPlayerTurn && isValidPlacement(x, y)) {
       setHoverPosition({ x, y });
     }
   };
@@ -175,7 +184,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
   // Handle touch events for mobile
   const handleTouchStart = (e: React.TouchEvent, x: number, y: number) => {
     e.preventDefault();
-    if (isPlayerTurn && isValidPlacement(x, y) && !isScoring) {
+    if (!isReviewing && isPlayerTurn && isValidPlacement(x, y) && !isScoring) {
       // Add haptic feedback on supported devices
       if ('vibrate' in navigator) {
         navigator.vibrate(50); // Short vibration
@@ -344,7 +353,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
       </div>
 
       {/* Mobile Place/Cancel buttons */}
-      {isMobile && isPlayerTurn && !isScoring && (
+      {isMobile && isPlayerTurn && !isScoring && !isReviewing && (
         <div className="mobile-stone-controls mt-4 flex flex-col items-center gap-3">
           {previewPosition ? (
             <>
@@ -400,22 +409,6 @@ const GoBoard: React.FC<GoBoardProps> = ({
       {isHandicapPlacement && (
         <div className="absolute top-0 left-0 bg-neutral-800/90 text-white px-3 py-1 rounded-br-lg text-sm font-medium">
           Handicap Mode: Place stones on highlighted points
-        </div>
-      )}
-
-      {/* Territory legend */}
-      {showTerritory && (
-        <div className="absolute top-0 right-0 bg-neutral-800/90 text-white px-4 py-2 rounded-bl-lg text-sm font-medium shadow-md border border-neutral-700">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-black opacity-40 rounded-full border-2 border-neutral-600"></div>
-              <span>Black Territory</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-white opacity-40 rounded-full border-2 border-neutral-600"></div>
-              <span>White Territory</span>
-            </div>
-          </div>
         </div>
       )}
     </div>
