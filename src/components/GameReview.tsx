@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GameState, GameMove, Position, StoneColor, Stone } from '../types/go';
 import { useAppTheme } from '../context/AppThemeContext';
 import useDeviceDetect from '../hooks/useDeviceDetect';
+import { downloadSGF, copySGFToClipboard } from '../utils/sgfUtils';
 
 // Helper function to check if a move is a pass
 function isPassMove(move: GameMove): move is { pass: true } {
@@ -24,6 +25,8 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
   const [currentMoveIndex, setCurrentMoveIndex] = useState<number>(gameState.history.length);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playSpeed, setPlaySpeed] = useState<number>(1000); // milliseconds between moves
+  const [isExporting, setIsExporting] = useState<boolean>(false);
+  const [showExportSuccess, setShowExportSuccess] = useState<boolean>(false);
   const playIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Calculate board state for the current move index
@@ -243,6 +246,33 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
     setCurrentMoveIndex(gameState.history.length);
   };
 
+  // SGF Export handlers
+  const handleDownloadSGF = () => {
+    try {
+      setIsExporting(true);
+      downloadSGF(gameState);
+      setShowExportSuccess(true);
+      setTimeout(() => setShowExportSuccess(false), 3000);
+    } catch (error) {
+      console.error('Error downloading SGF:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleCopySGF = async () => {
+    try {
+      setIsExporting(true);
+      await copySGFToClipboard(gameState);
+      setShowExportSuccess(true);
+      setTimeout(() => setShowExportSuccess(false), 3000);
+    } catch (error) {
+      console.error('Error copying SGF to clipboard:', error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // Get current move info for display
   const getCurrentMoveInfo = () => {
     if (currentMoveIndex === 0) {
@@ -447,6 +477,59 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
             <option value={500}>2x</option>
             <option value={250}>4x</option>
           </select>
+        </div>
+
+        {/* SGF Export Section */}
+        <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+          <div className="flex flex-col sm:flex-row gap-2">
+            {/* Download SGF Button */}
+            <button
+              onClick={handleDownloadSGF}
+              disabled={isExporting}
+              className={`${buttonSize} flex-1 ${
+                isDarkMode 
+                  ? 'bg-blue-700 hover:bg-blue-600 text-white border border-blue-600 disabled:opacity-50' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white border border-blue-600 disabled:opacity-50'
+              } rounded-lg disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2`}
+              title="Download game as SGF file"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className={iconSize} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>{isExporting ? 'Exporting...' : 'Download SGF'}</span>
+            </button>
+
+            {/* Copy SGF Button */}
+            <button
+              onClick={handleCopySGF}
+              disabled={isExporting}
+              className={`${buttonSize} flex-1 ${
+                isDarkMode 
+                  ? 'bg-neutral-700 hover:bg-neutral-600 text-neutral-300 border border-neutral-600 disabled:opacity-50' 
+                  : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border border-neutral-300 disabled:opacity-50'
+              } rounded-lg disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2`}
+              title="Copy SGF to clipboard"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className={iconSize} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span>Copy SGF</span>
+            </button>
+          </div>
+
+          {/* Export Success Message */}
+          {showExportSuccess && (
+            <div className={`mt-2 p-2 rounded text-sm ${
+              isDarkMode 
+                ? 'bg-green-800 text-green-200 border border-green-700' 
+                : 'bg-green-100 text-green-800 border border-green-200'
+            } flex items-center gap-2`}>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>SGF exported successfully!</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
