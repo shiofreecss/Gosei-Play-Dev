@@ -255,18 +255,17 @@ const HomePage: React.FC = () => {
         [key]: value
       };
       
-      // If updating board size, automatically set the recommended time (only if current time is at the old recommended value)
+      // If updating board size, automatically set the recommended time
       if (key === 'boardSize') {
         const newRecommendedTime = getRecommendedTimeForBoardSize(value as number);
-        const oldRecommendedTime = getRecommendedTimeForBoardSize(prev.boardSize);
-        // Only update time if it's currently at the old recommended value (user hasn't customized it)
-        if (prev.timeControl === oldRecommendedTime) {
-          newState.timeControl = newRecommendedTime;
+        
+        // Always update time to the recommended value for the new board size
+        // This provides a better user experience and ensures appropriate time for each board size
+        newState.timeControl = newRecommendedTime;
         newState.timeControlOptions = {
           ...prev.timeControlOptions,
-            timeControl: newRecommendedTime
+          timeControl: newRecommendedTime
         };
-        }
       }
       
       // If updating game type, apply proper time control settings
@@ -286,6 +285,15 @@ const HomePage: React.FC = () => {
         } else if (gameType === 'even' || gameType === 'handicap' || gameType === 'teaching') {
           // Set defaults for standard games using utility function
           newState.timePerMove = 0;
+          
+          // Reset handicap to 0 for even games, set default for handicap games
+          if (gameType === 'even') {
+            newState.handicap = 0;
+          } else if (gameType === 'handicap' && prev.gameType !== 'handicap') {
+            // Only set default handicap when switching TO handicap from another game type
+            // This preserves user's handicap selection when they're adjusting other settings
+            newState.handicap = 2; // Default to 2 stones for new handicap games
+          }
           
           // Auto-set main time based on board size for standard games
           const recommendedTime = getRecommendedTimeForBoardSize(newState.boardSize);
@@ -553,14 +561,8 @@ const HomePage: React.FC = () => {
             : 'border-neutral-200 hover:border-primary-300 hover:bg-primary-50/30'
         } ${isStandard ? '' : 'opacity-90 hover:opacity-100'}`}
         onClick={() => {
-          // Update board size
+          // Update board size - let updateGameOption handle time control updates
           updateGameOption('boardSize', size);
-          // Only update time control to recommended if it's currently at the old recommended value
-          const currentRecommendedTime = getRecommendedTimeForBoardSize(gameOptions.boardSize);
-          const newRecommendedTime = getRecommendedTimeForBoardSize(size);
-          if (!gameOptions.timeControl || gameOptions.timeControl === currentRecommendedTime) {
-            updateGameOption('timeControl', newRecommendedTime);
-          }
         }}
         title={`${size}×${size} board - ${description}`}
       >
