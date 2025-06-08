@@ -69,6 +69,10 @@ echo.
 echo Server running on http://localhost:3001
 echo Client running on http://localhost:3000
 echo.
+echo For LAN play (other computers on network):
+echo - Use start-lan.bat instead of this script
+echo - Allow ports 3000 and 3001 through Windows Firewall
+echo.
 echo If you encounter any issues with game creation:
 echo 1. Make sure the socket server is running
 echo 2. Check browser console for errors 

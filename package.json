@@ -28,6 +28,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:lan": "HOST=0.0.0.0 react-scripts start",
     "build": "react-scripts build",
     "build:netlify": "npm run netlify-build",
     "netlify-build": "npm run build && npx copyfiles -u 1 \"functions/socket-server/**/*\" build/socket-server",

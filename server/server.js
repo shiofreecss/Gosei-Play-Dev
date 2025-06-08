@@ -1825,8 +1825,9 @@ app.get('/', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-  log(`Socket server listening on port ${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+server.listen(PORT, HOST, () => {
+  log(`Socket server listening on ${HOST}:${PORT}`);
 });
 
 // Helper function to get handicap stone positions
