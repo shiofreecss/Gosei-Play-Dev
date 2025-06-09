@@ -543,32 +543,19 @@ const GameInfo: React.FC<GameInfoProps> = ({
               <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.blackTerritory?.toFixed(1) || '0.0'}</div>
               <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.whiteTerritory?.toFixed(1) || '0.0'}</div>
               
-              {/* Stones (for Chinese/Korean scoring) */}
-              {(gameState.scoringRule === 'chinese' || gameState.scoringRule === 'korean' || gameState.scoringRule === 'aga' || gameState.scoringRule === 'ing') && (
-                <>
-                  <div className={isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}>Stones</div>
-                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.blackStones?.toFixed(1) || '0.0'}</div>
-                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.whiteStones?.toFixed(1) || '0.0'}</div>
-                </>
-              )}
-              
-              {/* Captures (for Japanese scoring) */}
+              {/* Prisoners (stones captured during play) */}
               {(gameState.scoringRule === 'japanese' || gameState.scoringRule === 'aga' || gameState.scoringRule === 'ing') && (
                 <>
-                  <div className={isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}>Captures</div>
-                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.blackCaptures?.toFixed(1) || capturedStones.black.toFixed(1)}</div>
-                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.whiteCaptures?.toFixed(1) || capturedStones.white.toFixed(1)}</div>
+                  <div className={isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}>Prisoners</div>
+                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{capturedStones.black.toFixed(1)}</div>
+                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{capturedStones.white.toFixed(1)}</div>
                 </>
               )}
               
-              {/* Dead Stones */}
-              {deadStonesByColor.black > 0 || deadStonesByColor.white > 0 ? (
-                <>
-                  <div className={isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}>Dead Stones</div>
-                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{deadStonesByColor.black}</div>
-                  <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{deadStonesByColor.white}</div>
-                </>
-              ) : null}
+              {/* Dead Stones (marked during scoring) */}
+              <div className={isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}>Dead Stones</div>
+              <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{deadStonesByColor.black.toFixed(1)}</div>
+              <div className={`text-center ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{deadStonesByColor.white.toFixed(1)}</div>
               
               {/* Komi */}
               <div className={isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}>Komi</div>
@@ -577,8 +564,8 @@ const GameInfo: React.FC<GameInfoProps> = ({
               
               {/* Total */}
               <div className={`font-semibold ${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'}`}>Total</div>
-              <div className={`text-center font-bold text-base ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.black.toFixed(1)}</div>
-              <div className={`text-center font-bold text-base ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{score.white.toFixed(1)}</div>
+              <div className={`text-center font-bold text-base ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{((score.blackTerritory ?? 0) - capturedStones.black - deadStonesByColor.black).toFixed(1)}</div>
+              <div className={`text-center font-bold text-base ${isDarkMode ? 'text-white' : 'text-neutral-900'}`}>{((score.whiteTerritory ?? 0) - capturedStones.white - deadStonesByColor.white + (score.komi || gameState.komi)).toFixed(1)}</div>
             </div>
           ) : (
             <div className={`text-center p-3 ${isTablet ? 'text-base' : 'text-sm'} ${

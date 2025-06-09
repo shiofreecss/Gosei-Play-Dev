@@ -1851,9 +1851,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       status: 'finished',
       score: {
         ...scoringResult.score,
-        // Add dead stone counts to established properties in the score object
-        blackCaptures: updatedCapturedStones.black,
-        whiteCaptures: updatedCapturedStones.white,
         deadBlackStones: deadBlackStones,
         deadWhiteStones: deadWhiteStones
       },

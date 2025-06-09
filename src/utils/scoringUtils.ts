@@ -246,7 +246,7 @@ export const calculateChineseScore = (
 
 /**
  * Calculates score using Japanese rules: 
- * - Territory points + captured stones + komi
+ * - Territory points - own prisoners - own dead stones + komi (for white)
  */
 export const calculateJapaneseScore = (
   board: Board,
@@ -258,25 +258,24 @@ export const calculateJapaneseScore = (
   const territories = calculateTerritories(board, deadStonePositions);
   const territoryPoints = countTerritoryPoints(territories);
   
-  // Count dead stones (they count as captures)
-  let blackCaptures = capturedStones.black;
-  let whiteCaptures = capturedStones.white;
+  // Count dead stones by color
+  let deadBlackStones = 0;
+  let deadWhiteStones = 0;
   
-  // Add dead stones to captures
   board.stones.forEach(stone => {
     const posKey = `${stone.position.x},${stone.position.y}`;
     if (deadStonePositions.has(posKey)) {
       if (stone.color === 'black') {
-        whiteCaptures++;
+        deadBlackStones++;
       } else if (stone.color === 'white') {
-        blackCaptures++;
+        deadWhiteStones++;
       }
     }
   });
   
-  // Calculate final scores
-  const blackScore = territoryPoints.black + blackCaptures;
-  const whiteScore = territoryPoints.white + whiteCaptures + komi;
+  // Japanese scoring: Territory - own prisoners - own dead stones
+  const blackScore = territoryPoints.black - capturedStones.black - deadBlackStones;
+  const whiteScore = territoryPoints.white - capturedStones.white - deadWhiteStones + komi;
   
   return {
     territories,
@@ -285,8 +284,8 @@ export const calculateJapaneseScore = (
       white: whiteScore,
       blackTerritory: territoryPoints.black,
       whiteTerritory: territoryPoints.white,
-      blackCaptures,
-      whiteCaptures,
+      blackCaptures: capturedStones.black,
+      whiteCaptures: capturedStones.white,
       komi
     },
     winner: blackScore > whiteScore ? 'black' : blackScore < whiteScore ? 'white' : null as StoneColor
@@ -334,10 +333,9 @@ export const calculateKoreanScore = (
 
 /**
  * Calculates score using AGA (American Go Association) rules: 
- * - Hybrid approach combining area scoring with Japanese-style handling
+ * - Hybrid approach: Territory + live stones - own losses + komi
  * - Territory points + living stones on the board + komi
- * - Empty points in seki are not counted as territory
- * - Captures are counted in the final score
+ * - Own losses = own prisoners + own dead stones
  * - Default komi is 7.5
  */
 export const calculateAGAScore = (
@@ -353,25 +351,24 @@ export const calculateAGAScore = (
   // Count stones on the board
   const liveStones = countLiveStones(board, deadStonePositions);
   
-  // Count dead stones (they count as captures)
-  let blackCaptures = capturedStones.black;
-  let whiteCaptures = capturedStones.white;
+  // Count dead stones by color
+  let deadBlackStones = 0;
+  let deadWhiteStones = 0;
   
-  // Add dead stones to captures
   board.stones.forEach(stone => {
     const posKey = `${stone.position.x},${stone.position.y}`;
     if (deadStonePositions.has(posKey)) {
       if (stone.color === 'black') {
-        whiteCaptures++;
+        deadBlackStones++;
       } else if (stone.color === 'white') {
-        blackCaptures++;
+        deadWhiteStones++;
       }
     }
   });
   
-  // Calculate final scores - AGA combines area scoring with captures
-  const blackScore = territoryPoints.black + liveStones.black + blackCaptures;
-  const whiteScore = territoryPoints.white + liveStones.white + whiteCaptures + komi;
+  // AGA scoring: Territory + live stones - own prisoners - own dead stones
+  const blackScore = territoryPoints.black + liveStones.black - capturedStones.black - deadBlackStones;
+  const whiteScore = territoryPoints.white + liveStones.white - capturedStones.white - deadWhiteStones + komi;
   
   return {
     territories,
@@ -382,8 +379,8 @@ export const calculateAGAScore = (
       whiteTerritory: territoryPoints.white,
       blackStones: liveStones.black,
       whiteStones: liveStones.white,
-      blackCaptures,
-      whiteCaptures,
+      blackCaptures: capturedStones.black,
+      whiteCaptures: capturedStones.white,
       komi
     },
     winner: blackScore > whiteScore ? 'black' : blackScore < whiteScore ? 'white' : null as StoneColor
@@ -411,18 +408,17 @@ export const calculateIngScore = (
   // Count stones on the board
   const liveStones = countLiveStones(board, deadStonePositions);
   
-  // Count dead stones as prisoners
-  let blackPrisoners = capturedStones.black;
-  let whitePrisoners = capturedStones.white;
+  // Count dead stones by color
+  let deadBlackStones = 0;
+  let deadWhiteStones = 0;
   
-  // Add dead stones to prisoners
   board.stones.forEach(stone => {
     const posKey = `${stone.position.x},${stone.position.y}`;
     if (deadStonePositions.has(posKey)) {
       if (stone.color === 'black') {
-        whitePrisoners++;
+        deadBlackStones++;
       } else if (stone.color === 'white') {
-        blackPrisoners++;
+        deadWhiteStones++;
       }
     }
   });
@@ -436,14 +432,9 @@ export const calculateIngScore = (
                      board.size === 9 ? 40 : 180;
   */
   
-  // Calculate adjusted stone counts (stones on board + prisoners)
-  const adjustedBlackStones = liveStones.black + blackPrisoners;
-  const adjustedWhiteStones = liveStones.white + whitePrisoners;
-  
-  // Calculate territory score (unconditionally occupied intersections)
-  // and add adjusted stone count
-  const blackScore = territoryPoints.black + adjustedBlackStones;
-  const whiteScore = territoryPoints.white + adjustedWhiteStones + komi;
+  // Ing scoring: Territory + live stones - own prisoners - own dead stones
+  const blackScore = territoryPoints.black + liveStones.black - capturedStones.black - deadBlackStones;
+  const whiteScore = territoryPoints.white + liveStones.white - capturedStones.white - deadWhiteStones + komi;
   
   return {
     territories,
@@ -454,8 +445,8 @@ export const calculateIngScore = (
       whiteTerritory: territoryPoints.white,
       blackStones: liveStones.black,
       whiteStones: liveStones.white,
-      blackCaptures: blackPrisoners,
-      whiteCaptures: whitePrisoners,
+      blackCaptures: capturedStones.black,
+      whiteCaptures: capturedStones.white,
       komi
     },
     winner: blackScore > whiteScore ? 'black' : blackScore < whiteScore ? 'white' : null as StoneColor
