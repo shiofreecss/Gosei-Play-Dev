@@ -447,7 +447,7 @@ const TimeControl: React.FC<TimeControlProps> = ({
       {/* White Player Timer */}
       <div className={getClockCardClasses(currentTurn === 'white')}>
         <div className={getTimePressureClasses(whiteTime)} />
-        <div className={`rounded-full bg-white border-2 border-neutral-400 shadow-sm ${
+        <div className={`rounded-full timer-white-stone border-2 border-neutral-800 shadow-md ${
           isMobile ? 'w-3 h-3 mb-1' : isTablet ? 'w-4 h-4 mb-1' : 'w-5 h-5 mb-2'
         }`}></div>
         <div className={getTimeStyle(whiteTime, currentTurn === 'white')}>
