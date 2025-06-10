@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { GoBoard, GameInfo } from '../components/go-board';
 import GameError from '../components/GameError';
@@ -99,6 +99,26 @@ const GamePage: React.FC = () => {
     isReviewing: boolean;
   } | null>(null);
 
+  // Helper function to show notifications
+  const showNotification = useCallback((message: string, type: 'info' | 'warning' | 'error' | 'resign' | 'leave', result?: string) => {
+    setNotification({
+      visible: true,
+      message,
+      type,
+      result,
+      id: `${Date.now()}-${Math.random()}`
+    });
+  }, []);
+
+  // Stable notification close handler
+  const handleNotificationClose = useCallback(() => {
+    setNotification({
+      visible: false,
+      message: '',
+      type: 'info'
+    });
+  }, []);
+
 
   // Notification state
   const [notification, setNotification] = useState<{
@@ -106,6 +126,7 @@ const GamePage: React.FC = () => {
     message: string;
     type: 'info' | 'warning' | 'error' | 'resign' | 'leave';
     result?: string;
+    id?: string;
   }>({
     visible: false,
     message: '',
@@ -276,11 +297,7 @@ const GamePage: React.FC = () => {
       // Only show notification if it's not the current player leaving
       if (leaveData.playerId !== currentPlayer?.id) {
         // Show main notification modal for better visibility
-        setNotification({
-          visible: true,
-          message: `${username} has left the game.`,
-          type: 'leave'
-        });
+        showNotification(`${username} has left the game.`, 'leave');
       }
     });
 
@@ -340,11 +357,7 @@ const GamePage: React.FC = () => {
       
       // Only show notification if it's not the current player
       if (currentPlayer && data.playerId !== currentPlayer.id) {
-        setNotification({
-          visible: true,
-          message: `${data.username} has ${data.isReconnect ? 'rejoined' : 'joined'} the game.`,
-          type: 'info'
-        });
+        showNotification(`${data.username} has ${data.isReconnect ? 'rejoined' : 'joined'} the game.`, 'info');
       }
     });
 
@@ -358,17 +371,9 @@ const GamePage: React.FC = () => {
         
         // Check if both players have now confirmed
         if (data.scoreConfirmation.black && data.scoreConfirmation.white) {
-          setNotification({
-            visible: true,
-            message: `${opponentName} confirmed the score. Both players agreed - game will finish now!`,
-            type: 'info'
-          });
+          showNotification(`${opponentName} confirmed the score. Both players agreed - game will finish now!`, 'info');
         } else {
-          setNotification({
-            visible: true,
-            message: `${opponentName} confirmed the score. Waiting for your confirmation.`,
-            type: 'info'
-          });
+          showNotification(`${opponentName} confirmed the score. Waiting for your confirmation.`, 'info');
         }
       }
     });
@@ -465,11 +470,7 @@ const GamePage: React.FC = () => {
     
     // Check if current player has already confirmed
     if (gameState.scoreConfirmation?.[currentPlayer.color as 'black' | 'white']) {
-      setNotification({
-        visible: true,
-        message: 'You have already confirmed the score. Waiting for your opponent.',
-        type: 'warning'
-      });
+      showNotification('You have already confirmed the score. Waiting for your opponent.', 'warning');
       return;
     }
     
@@ -483,17 +484,9 @@ const GamePage: React.FC = () => {
     const opponentConfirmed = confirmationStatus[opponentColor];
     
     if (opponentConfirmed) {
-      setNotification({
-        visible: true,
-        message: `Score confirmed! Both players agreed. Dead stones: ${totalDeadStones} (${deadBlackStones} black, ${deadWhiteStones} white). Game will finish now.`,
-        type: 'info'
-      });
+      showNotification(`Score confirmed! Both players agreed. Dead stones: ${totalDeadStones} (${deadBlackStones} black, ${deadWhiteStones} white). Game will finish now.`, 'info');
     } else {
-      setNotification({
-        visible: true,
-        message: `Your score confirmation sent. Dead stones: ${totalDeadStones} (${deadBlackStones} black, ${deadWhiteStones} white). Waiting for opponent confirmation.`,
-        type: 'info'
-      });
+      showNotification(`Your score confirmation sent. Dead stones: ${totalDeadStones} (${deadBlackStones} black, ${deadWhiteStones} white). Waiting for opponent confirmation.`, 'info');
     }
     
     // Call the confirmScore function from context
@@ -946,12 +939,13 @@ const GamePage: React.FC = () => {
 
         {/* Game Notifications */}
         <GameNotification
+          key={notification.id || 'default'}
           isVisible={notification.visible}
           message={notification.message}
           type={notification.type}
           result={notification.result}
           duration={2000}
-          onClose={() => setNotification(prev => ({ ...prev, visible: false }))}
+          onClose={handleNotificationClose}
         />
 
         {/* Undo Request Notification */}
