@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { GameOptions, ColorPreference, ScoringRule, GameType } from '../types/go';
-import ConnectionStatus from '../components/ConnectionStatus';
+
 import BoardSizePreview from '../components/go-board/BoardSizePreview';
 import GoseiLogo from '../components/GoseiLogo';
 import ThemeToggleButton from '../components/ThemeToggleButton';
@@ -1145,8 +1145,7 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
-      {/* Add connection status component */}
-      <ConnectionStatus />
+
     </div>
   );
 };
