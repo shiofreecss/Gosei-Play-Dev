@@ -154,12 +154,12 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
   // If waiting for new game, always show the waiting modal regardless of game status
   if (waitingForNewGame) {
     return (
-      <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`absolute top-0 left-0 w-full min-h-screen flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
         {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div className="fixed inset-0"></div>
         
         {/* Modal */}
-        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
+        <div className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
           {/* Header */}
           <div className="bg-green-600 dark:bg-green-800 text-white py-4 px-6">
             <h2 className="text-xl font-bold text-center">Starting New Game...</h2>
@@ -182,12 +182,12 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
   // Render play again confirmation dialog
   if (showPlayAgainDialog && playAgainRequestReceived) {
     return (
-      <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`absolute top-0 left-0 w-full min-h-screen flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
         {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div className="fixed inset-0"></div>
         
         {/* Modal */}
-        <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
+        <div className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
           {/* Header */}
           <div className="bg-blue-600 dark:bg-blue-800 text-white py-4 px-6">
             <h2 className="text-xl font-bold text-center">Play Again?</h2>
@@ -221,12 +221,12 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
   }
 
   return (
-    <div className={`fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`absolute top-0 left-0 w-full min-h-screen flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose}></div>
+      <div className="fixed inset-0" onClick={handleClose}></div>
       
       {/* Modal */}
-      <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
+      <div className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
         {/* Header */}
         <div className="bg-indigo-600 dark:bg-indigo-800 text-white py-4 px-6">
           <h2 className="text-xl font-bold text-center">Game Complete!</h2>
