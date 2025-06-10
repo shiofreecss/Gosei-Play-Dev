@@ -1312,6 +1312,7 @@ io.on('connection', (socket) => {
           // Transition to scoring phase instead of finishing immediately
           gameState.status = 'scoring';
           gameState.deadStones = []; // Initialize empty dead stones array
+          gameState.scoreConfirmation = { black: false, white: false }; // Initialize score confirmations
           
           log(`Game ${gameId} has transitioned to scoring phase after two consecutive passes.`);
         }
@@ -1321,6 +1322,7 @@ io.on('connection', (socket) => {
       if (endGame) {
         gameState.status = 'scoring';
         gameState.deadStones = gameState.deadStones || []; // Ensure deadStones array exists
+        gameState.scoreConfirmation = gameState.scoreConfirmation || { black: false, white: false }; // Ensure score confirmation exists
         log(`Client signaled end game, ensuring scoring state for game ${gameId}`);
       }
       
@@ -1423,6 +1425,47 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Handle score confirmation from players
+  socket.on('confirmScore', ({ gameId, playerId, playerColor, confirmed }) => {
+    log(`Player ${playerId} (${playerColor}) ${confirmed ? 'confirmed' : 'unconfirmed'} score for game ${gameId}`);
+    
+    const gameState = activeGames.get(gameId);
+    if (gameState) {
+      // Only allow confirmation in scoring mode
+      if (gameState.status !== 'scoring') {
+        log(`Cannot confirm score: game ${gameId} not in scoring mode`);
+        socket.emit('error', 'Cannot confirm score: game not in scoring mode');
+        return;
+      }
+      
+      // Initialize score confirmation if it doesn't exist
+      if (!gameState.scoreConfirmation) {
+        gameState.scoreConfirmation = { black: false, white: false };
+      }
+      
+      // Update the confirmation for this player
+      gameState.scoreConfirmation[playerColor] = confirmed;
+      
+      log(`Score confirmations for game ${gameId}: Black: ${gameState.scoreConfirmation.black}, White: ${gameState.scoreConfirmation.white}`);
+      
+      // Store updated game state
+      activeGames.set(gameId, gameState);
+      
+      // Broadcast the confirmation update to all clients
+      io.to(gameId).emit('scoreConfirmationUpdate', {
+        gameId,
+        playerId,
+        playerColor,
+        confirmed,
+        scoreConfirmation: gameState.scoreConfirmation
+      });
+      
+      // Also broadcast the full game state
+      io.to(gameId).emit('gameState', gameState);
+      log(`Broadcasting score confirmation update to all clients in room ${gameId}`);
+    }
+  });
+
   // Handle game end after scoring
   socket.on('gameEnded', ({ gameId, score, winner, territory }) => {
     log(`Game ${gameId} has ended. Winner: ${winner}`);
@@ -1475,6 +1518,7 @@ io.on('connection', (socket) => {
       gameState.status = 'playing';
       gameState.deadStones = []; // Clear dead stones
       gameState.territory = undefined; // Clear territory visualization
+      gameState.scoreConfirmation = undefined; // Clear score confirmations
       
       // Store updated game state
       activeGames.set(gameId, gameState);

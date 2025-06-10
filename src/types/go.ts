@@ -103,6 +103,10 @@ export interface GameState {
     requestedBy: string;
     moveIndex: number;
   };
+  scoreConfirmation?: {
+    black: boolean;
+    white: boolean;
+  };
   komi: number;
   handicap: number;
   socket?: Socket | null;

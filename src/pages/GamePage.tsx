@@ -159,7 +159,11 @@ const GamePage: React.FC = () => {
           // If storage is full, disable auto-save
           if (error instanceof DOMException && error.name === 'QuotaExceededError') {
             setAutoSaveEnabled(false);
-            alert('Auto-save has been disabled because your device storage is full.');
+            setNotification({
+          visible: true,
+          message: 'Auto-save has been disabled because your device storage is full.',
+          type: 'warning'
+        });
           }
         }
       }, 30000); // Save every 30 seconds
@@ -250,7 +254,11 @@ const GamePage: React.FC = () => {
     socket.on('error', (error) => {
       console.error('Socket error:', error);
       if (error.includes('chat')) {
-        alert('Chat error: ' + error);
+        setNotification({
+          visible: true,
+          message: 'Chat error: ' + error,
+          type: 'error'
+        });
       }
     });
 
@@ -340,6 +348,31 @@ const GamePage: React.FC = () => {
       }
     });
 
+    // Listen for score confirmation updates
+    socket.on('scoreConfirmationUpdate', (data: { gameId: string, playerId: string, playerColor: string, confirmed: boolean, scoreConfirmation: { black: boolean, white: boolean } }) => {
+      console.log(`Score confirmation update: ${data.playerColor} ${data.confirmed ? 'confirmed' : 'unconfirmed'}`);
+      
+      // Only show notification if it's not the current player confirming
+      if (currentPlayer && data.playerId !== currentPlayer.id && data.confirmed) {
+        const opponentName = gameState?.players.find(p => p.id === data.playerId)?.username || 'Your opponent';
+        
+        // Check if both players have now confirmed
+        if (data.scoreConfirmation.black && data.scoreConfirmation.white) {
+          setNotification({
+            visible: true,
+            message: `${opponentName} confirmed the score. Both players agreed - game will finish now!`,
+            type: 'info'
+          });
+        } else {
+          setNotification({
+            visible: true,
+            message: `${opponentName} confirmed the score. Waiting for your confirmation.`,
+            type: 'info'
+          });
+        }
+      }
+    });
+
     return () => {
       socket.off('chatMessageReceived');
       socket.off('chatHistory');
@@ -352,6 +385,7 @@ const GamePage: React.FC = () => {
       socket.off('playerResigned');
       socket.off('playerTimeout');
       socket.off('playerJoined');
+      socket.off('scoreConfirmationUpdate');
     };
   }, [gameState?.socket, gameState?.id, currentPlayer, gameState?.players]);
 
@@ -374,10 +408,18 @@ const GamePage: React.FC = () => {
           savedAt: new Date().toISOString(),
           currentPlayer
         }));
-        alert('Game saved successfully for offline access!');
+        setNotification({
+          visible: true,
+          message: 'Game saved successfully for offline access!',
+          type: 'info'
+        });
       } catch (error) {
         console.error('Failed to save game:', error);
-        alert('Failed to save game. Your device storage might be full.');
+        setNotification({
+          visible: true,
+          message: 'Failed to save game. Your device storage might be full.',
+          type: 'error'
+        });
       }
     }
   };
@@ -405,7 +447,7 @@ const GamePage: React.FC = () => {
 
   const handleConfirmScore = () => {
     // First, count dead stones by color for the confirmation message
-    if (!gameState) return;
+    if (!gameState || !currentPlayer) return;
     
     const deadBlackStones = gameState.board.stones.filter(stone => 
       stone.color === 'black' && 
@@ -421,12 +463,38 @@ const GamePage: React.FC = () => {
       )
     ).length;
     
+    // Check if current player has already confirmed
+    if (gameState.scoreConfirmation?.[currentPlayer.color as 'black' | 'white']) {
+      setNotification({
+        visible: true,
+        message: 'You have already confirmed the score. Waiting for your opponent.',
+        type: 'warning'
+      });
+      return;
+    }
+    
     // Set confirming score state
     setConfirmingScore(true);
     
-    // Show confirmation toast or alert
+    // Show confirmation message based on confirmation status
     const totalDeadStones = deadBlackStones + deadWhiteStones;
-    alert(`Score confirmed with ${totalDeadStones} dead stones (${deadBlackStones} black, ${deadWhiteStones} white)`);
+    const confirmationStatus = gameState.scoreConfirmation || { black: false, white: false };
+    const opponentColor = currentPlayer.color === 'black' ? 'white' : 'black';
+    const opponentConfirmed = confirmationStatus[opponentColor];
+    
+    if (opponentConfirmed) {
+      setNotification({
+        visible: true,
+        message: `Score confirmed! Both players agreed. Dead stones: ${totalDeadStones} (${deadBlackStones} black, ${deadWhiteStones} white). Game will finish now.`,
+        type: 'info'
+      });
+    } else {
+      setNotification({
+        visible: true,
+        message: `Your score confirmation sent. Dead stones: ${totalDeadStones} (${deadBlackStones} black, ${deadWhiteStones} white). Waiting for opponent confirmation.`,
+        type: 'info'
+      });
+    }
     
     // Call the confirmScore function from context
     confirmScore();
@@ -525,7 +593,11 @@ const GamePage: React.FC = () => {
     if (!chatInput.trim() || !gameState?.socket || !currentPlayer) {
       // Show feedback if there's an issue
       if (!gameState?.socket) {
-        alert('Cannot send message: You are disconnected from the game server.');
+        setNotification({
+          visible: true,
+          message: 'Cannot send message: You are disconnected from the game server.',
+          type: 'warning'
+        });
         handleSyncGame(); // Try to reconnect
         return;
       }
@@ -558,7 +630,11 @@ const GamePage: React.FC = () => {
       });
     } catch (error) {
       console.error('Error sending chat message:', error);
-      alert('Failed to send message. Please try again.');
+      setNotification({
+        visible: true,
+        message: 'Failed to send message. Please try again.',
+        type: 'error'
+      });
     }
   };
 

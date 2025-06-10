@@ -600,6 +600,30 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           }
         });
         
+        // Handle score confirmation updates
+        newSocket.on('scoreConfirmationUpdate', (confirmationData) => {
+          console.log(`Score confirmation update for game ${confirmationData.gameId}: ${confirmationData.playerColor} ${confirmationData.confirmed ? 'confirmed' : 'unconfirmed'}`);
+          
+          // Apply the confirmation update to the current game state
+          if (state.gameState && state.gameState.id === confirmationData.gameId) {
+            const updatedGameState: GameState = {
+              ...state.gameState,
+              scoreConfirmation: confirmationData.scoreConfirmation
+            };
+            
+            dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGameState });
+            
+            // Update in localStorage as backup
+            try {
+              localStorage.setItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
+            } catch (e) {
+              console.warn('Failed to save score confirmation to localStorage:', e);
+            }
+            
+            console.log('Updated score confirmation status:', confirmationData.scoreConfirmation);
+          }
+        });
+        
         // Timer tick handler for polling
         let timerInterval: ReturnType<typeof setInterval> | null = null;
         
@@ -648,6 +672,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             newSocket.off('byoYomiPeriodUsed');
             newSocket.off('deadStoneToggled');
             newSocket.off('scoringCanceled');
+            newSocket.off('scoreConfirmationUpdate');
             newSocket.off('playAgainRequest');
             newSocket.off('playAgainResponse');
             
@@ -1404,6 +1429,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         console.log("Two consecutive passes detected - transitioning to scoring phase");
         updatedGameState.status = 'scoring';
         updatedGameState.deadStones = []; // Initialize empty dead stones array
+        updatedGameState.scoreConfirmation = { black: false, white: false }; // Initialize score confirmations
         
         // Calculate initial territory for visual feedback
         // This is just for UI feedback and will be recalculated when scoring is confirmed
@@ -1757,18 +1783,68 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   
   // Calculate the final score and end the game
   const confirmScore = () => {
-    if (!state.gameState) {
-      console.log("Cannot confirm score: no game state");
+    if (!state.gameState || !state.currentPlayer) {
+      console.log("Cannot confirm score: no game state or current player");
       return;
     }
     
-    const { gameState } = state;
+    const { gameState, currentPlayer } = state;
     
     // Only allow scoring confirmation in scoring mode
     if (gameState.status !== 'scoring') {
       console.log("Cannot confirm score: not in scoring mode");
       return;
     }
+    
+    // Initialize score confirmation if it doesn't exist
+    const currentConfirmation = gameState.scoreConfirmation || { black: false, white: false };
+    
+    // Mark current player's confirmation
+    const updatedConfirmation = {
+      ...currentConfirmation,
+      [currentPlayer.color as string]: true
+    };
+    
+    console.log(`Player ${currentPlayer.color} confirmed score. Current confirmations:`, updatedConfirmation);
+    
+    // Check if both players have confirmed
+    const bothConfirmed = updatedConfirmation.black && updatedConfirmation.white;
+    
+    if (!bothConfirmed) {
+      // Update game state with partial confirmation
+      const updatedGameState: GameState = {
+        ...gameState,
+        scoreConfirmation: updatedConfirmation
+      };
+      
+      // Update local state
+      dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGameState });
+      
+      // Emit confirmation to server
+      if (state.socket && state.socket.connected) {
+        const confirmationData = {
+          gameId: gameState.id,
+          playerId: currentPlayer.id,
+          playerColor: currentPlayer.color,
+          confirmed: true
+        };
+        
+        console.log(`Emitting score confirmation for ${currentPlayer.color} player`);
+        state.socket.emit('confirmScore', confirmationData);
+      }
+      
+      // Update in localStorage as backup
+      try {
+        localStorage.setItem(`gosei-game-${updatedGameState.id}`, JSON.stringify(updatedGameState));
+      } catch (e) {
+        console.error('Failed to save game state after partial confirmation:', e);
+      }
+      
+      return;
+    }
+    
+    // Both players have confirmed - proceed with final scoring
+    console.log("Both players confirmed score - finalizing game");
     
     // Convert dead stones to a Set for faster lookups
     const deadStonePositions = new Set<string>();
@@ -1791,11 +1867,14 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     console.log(`Scoring with dead stones: ${deadStones.length} (${deadBlackStones} black, ${deadWhiteStones} white)`);
     console.log(`Dead stone positions set has ${deadStonePositions.size} entries`);
     
-    // Update captured stones count to include dead stones of opposite color
-    const updatedCapturedStones = {
-      black: (gameState.capturedStones.black || 0) + deadWhiteStones,
-      white: (gameState.capturedStones.white || 0) + deadBlackStones
+    // DO NOT add dead stones to capture count - keep original captures only
+    const originalCapturedStones = {
+      black: gameState.capturedStones.black || 0,
+      white: gameState.capturedStones.white || 0
     };
+    
+    console.log(`Using original captured stones for scoring: Black ${originalCapturedStones.black}, White ${originalCapturedStones.white}`);
+    console.log(`Dead stones will be handled separately in scoring calculation`);
     
     // Calculate score based on selected scoring rule
     const scoringRule = gameState.scoringRule || 'japanese'; // Default to Japanese rules if not specified
@@ -1808,7 +1887,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       scoringResult = calculateChineseScore(
         gameState.board,
         deadStonePositions,
-        updatedCapturedStones,
+        originalCapturedStones,
         komi
       );
     } else if (scoringRule === 'korean') {
@@ -1816,7 +1895,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       scoringResult = calculateKoreanScore(
         gameState.board,
         deadStonePositions,
-        updatedCapturedStones,
+        originalCapturedStones,
         komi
       );
     } else if (scoringRule === 'aga') {
@@ -1824,7 +1903,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       scoringResult = calculateAGAScore(
         gameState.board,
         deadStonePositions,
-        updatedCapturedStones,
+        originalCapturedStones,
         komi
       );
     } else if (scoringRule === 'ing') {
@@ -1832,7 +1911,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       scoringResult = calculateIngScore(
         gameState.board,
         deadStonePositions,
-        updatedCapturedStones,
+        originalCapturedStones,
         komi
       );
     } else {
@@ -1840,7 +1919,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       scoringResult = calculateJapaneseScore(
         gameState.board,
         deadStonePositions,
-        updatedCapturedStones,
+        originalCapturedStones,
         komi
       );
     }
@@ -1856,8 +1935,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       },
       territory: scoringResult.territories,
       winner: scoringResult.winner,
-      capturedStones: updatedCapturedStones,  // Update captured stones to include dead stones
-      deadStones: deadStones  // Ensure dead stones are preserved in the final game state
+      capturedStones: originalCapturedStones,  // Keep original captured stones count
+      deadStones: deadStones,  // Ensure dead stones are preserved in the final game state
+      scoreConfirmation: updatedConfirmation
     };
     
     // Update local state immediately for responsive UI
@@ -1870,13 +1950,15 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         score: updatedGameState.score,
         winner: scoringResult.winner,
         territory: scoringResult.territories,
-        capturedStones: updatedCapturedStones,
+        capturedStones: originalCapturedStones,
         deadStones: deadStones,
         deadBlackStones: deadBlackStones,
-        deadWhiteStones: deadWhiteStones
+        deadWhiteStones: deadWhiteStones,
+        scoreConfirmation: updatedConfirmation
       };
       
       console.log(`Emitting game end to server with ${deadStones.length} dead stones (${deadBlackStones} black, ${deadWhiteStones} white)`);
+      console.log(`Final captured stones: Black ${originalCapturedStones.black}, White ${originalCapturedStones.white}`);
       state.socket.emit('gameEnded', scoreData);
     } else {
       console.warn('Socket not connected, updating state locally only');
@@ -2111,7 +2193,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       ...gameState,
       status: 'playing',
       deadStones: [], // Clear dead stones
-      territory: undefined // Clear territory visualization
+      territory: undefined, // Clear territory visualization
+      scoreConfirmation: undefined // Clear score confirmations
     };
     
     // Update local state immediately for responsive UI

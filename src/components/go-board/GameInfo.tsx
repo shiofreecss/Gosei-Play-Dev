@@ -596,21 +596,72 @@ const GameInfo: React.FC<GameInfoProps> = ({
             </div>
           )}
           
+          {/* Score Confirmation Status */}
+          {status === 'scoring' && gameState.scoreConfirmation && (
+            <div className={`mt-4 p-3 rounded-md border ${
+              isDarkMode ? 'bg-neutral-700/50 border-neutral-600' : 'bg-blue-50 border-blue-200'
+            }`}>
+              <h4 className={`text-sm font-medium mb-2 ${
+                isDarkMode ? 'text-white' : 'text-neutral-800'
+              }`}>
+                Score Confirmation Status
+              </h4>
+              <div className="flex items-center justify-between space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className={`w-3 h-3 rounded-full ${
+                    gameState.scoreConfirmation.black 
+                      ? 'bg-green-500' 
+                      : 'bg-neutral-400'
+                  }`}></div>
+                  <span className={`text-sm ${
+                    isDarkMode ? 'text-neutral-300' : 'text-neutral-600'
+                  }`}>
+                    Black {gameState.scoreConfirmation.black ? 'Confirmed' : 'Pending'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className={`w-3 h-3 rounded-full ${
+                    gameState.scoreConfirmation.white 
+                      ? 'bg-green-500' 
+                      : 'bg-neutral-400'
+                  }`}></div>
+                  <span className={`text-sm ${
+                    isDarkMode ? 'text-neutral-300' : 'text-neutral-600'
+                  }`}>
+                    White {gameState.scoreConfirmation.white ? 'Confirmed' : 'Pending'}
+                  </span>
+                </div>
+              </div>
+              {gameState.scoreConfirmation.black && gameState.scoreConfirmation.white && (
+                <div className={`mt-2 text-center text-sm font-medium ${
+                  isDarkMode ? 'text-green-400' : 'text-green-600'
+                }`}>
+                  Both players confirmed - Game will finish!
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Scoring actions */}
           {status === 'scoring' && (
             <div className={`mt-4 grid grid-cols-2 gap-3 ${isTablet ? 'gap-4' : 'gap-3'}`}>
               <button
                 onClick={onConfirmScore}
+                disabled={currentPlayer && gameState.scoreConfirmation?.[currentPlayer.color as 'black' | 'white']}
                 className={`flex items-center justify-center gap-2 ${
                   isTablet 
                     ? 'text-base gap-4 px-6 py-4' 
                     : 'sm:gap-2 px-4 py-2.5'
-                } bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium`}
+                } ${
+                  currentPlayer && gameState.scoreConfirmation?.[currentPlayer.color as 'black' | 'white']
+                    ? 'bg-green-800 text-green-200 cursor-not-allowed'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                } rounded-md transition-colors text-sm font-medium`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${isTablet ? 'h-5 w-5' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Confirm Score
+                {currentPlayer && gameState.scoreConfirmation?.[currentPlayer.color as 'black' | 'white'] ? 'Confirmed' : 'Confirm Score'}
               </button>
               
               <button
