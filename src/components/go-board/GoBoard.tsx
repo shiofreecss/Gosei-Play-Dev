@@ -306,18 +306,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
                     opacity: isDead ? 0.3 : 1 
                   }}
                 >
-                  {isLastMove && (
-                    <div 
-                      className="absolute w-2 h-2 rounded-full last-move-dot"
-                      style={{
-                        backgroundColor: stone.color === 'black' ? 'white' : 'black',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        opacity: 0.8
-                      }}
-                    />
-                  )}
+
                 </div>
               )}
 
