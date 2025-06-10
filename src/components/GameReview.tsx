@@ -27,6 +27,7 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
   const [playSpeed, setPlaySpeed] = useState<number>(1000); // milliseconds between moves
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [showExportSuccess, setShowExportSuccess] = useState<boolean>(false);
+  const [showFinalPosition, setShowFinalPosition] = useState<boolean>(true);
   const playIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Calculate board state for the current move index
@@ -171,24 +172,34 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
     return true; // No liberties found
   };
 
-  // Update board state when move index changes
+  // Update board state when move index changes or final position toggle changes
   useEffect(() => {
-    const stones = calculateBoardState(currentMoveIndex);
-    
-    // Debug: Log some information about the current state
-    console.log('GameReview - Move Index:', currentMoveIndex);
-    console.log('GameReview - Total moves:', gameState.history.length);
-    console.log('GameReview - Calculated stones:', stones.length);
-    if (currentMoveIndex > 0 && currentMoveIndex <= gameState.history.length) {
-      console.log('GameReview - Current move:', gameState.history[currentMoveIndex - 1]);
+    if (showFinalPosition) {
+      // Show final position with original board state (not reviewing)
+      onBoardStateChange({
+        stones: gameState.board.stones,
+        currentMoveIndex: gameState.history.length,
+        isReviewing: false
+      });
+    } else {
+      // Show calculated board state for current move (reviewing)
+      const stones = calculateBoardState(currentMoveIndex);
+      
+      // Debug: Log some information about the current state
+      console.log('GameReview - Move Index:', currentMoveIndex);
+      console.log('GameReview - Total moves:', gameState.history.length);
+      console.log('GameReview - Calculated stones:', stones.length);
+      if (currentMoveIndex > 0 && currentMoveIndex <= gameState.history.length) {
+        console.log('GameReview - Current move:', gameState.history[currentMoveIndex - 1]);
+      }
+      
+      onBoardStateChange({
+        stones,
+        currentMoveIndex,
+        isReviewing: true
+      });
     }
-    
-    onBoardStateChange({
-      stones,
-      currentMoveIndex,
-      isReviewing: true
-    });
-  }, [currentMoveIndex, gameState, onBoardStateChange]);
+  }, [currentMoveIndex, gameState, onBoardStateChange, showFinalPosition]);
 
   // Handle play/pause functionality
   useEffect(() => {
@@ -244,6 +255,15 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
   const goToEnd = () => {
     setIsPlaying(false);
     setCurrentMoveIndex(gameState.history.length);
+  };
+
+  const toggleFinalPosition = () => {
+    setIsPlaying(false);
+    setShowFinalPosition(!showFinalPosition);
+    if (!showFinalPosition) {
+      // When switching to final position, set to end
+      setCurrentMoveIndex(gameState.history.length);
+    }
   };
 
   // SGF Export handlers
@@ -339,6 +359,39 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
 
       {/* Controls */}
       <div className="px-4 py-4">
+        {/* Toggle between Review and Final Position */}
+        <div className="mb-4 flex justify-center">
+          <button
+            onClick={toggleFinalPosition}
+            className={`${buttonSize} ${
+              showFinalPosition
+                ? (isDarkMode 
+                  ? 'bg-orange-700 hover:bg-orange-600 text-white border border-orange-600' 
+                  : 'bg-orange-600 hover:bg-orange-700 text-white border border-orange-600')
+                : (isDarkMode 
+                  ? 'bg-blue-700 hover:bg-blue-600 text-white border border-blue-600' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white border border-blue-600')
+            } rounded-lg transition-colors duration-200 flex items-center justify-center gap-2`}
+            title={showFinalPosition ? "Switch to Review Mode" : "Show Final Position"}
+          >
+            {showFinalPosition ? (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className={iconSize} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                <span>Review Moves</span>
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className={iconSize} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Final Score</span>
+              </>
+            )}
+          </button>
+        </div>
+
         {/* Move slider */}
         <div className="mb-4">
           <input
@@ -346,11 +399,14 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
             min="0"
             max={gameState.history.length}
             value={currentMoveIndex}
+            disabled={showFinalPosition}
             onChange={(e) => {
               setIsPlaying(false);
               setCurrentMoveIndex(parseInt(e.target.value));
             }}
             className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${
+              showFinalPosition ? 'opacity-50 cursor-not-allowed' : ''
+            } ${
               isDarkMode 
                 ? 'bg-neutral-700 slider-thumb-dark' 
                 : 'bg-neutral-200 slider-thumb-light'
@@ -374,7 +430,7 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
           {/* Go to start */}
           <button
             onClick={goToStart}
-            disabled={currentMoveIndex === 0}
+            disabled={showFinalPosition || currentMoveIndex === 0}
             className={`${buttonSize} ${
               isDarkMode 
                 ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-600 disabled:opacity-50' 
@@ -390,7 +446,7 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
           {/* Previous move */}
           <button
             onClick={goToPreviousMove}
-            disabled={currentMoveIndex === 0}
+            disabled={showFinalPosition || currentMoveIndex === 0}
             className={`${buttonSize} ${
               isDarkMode 
                 ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-600 disabled:opacity-50' 
@@ -406,7 +462,7 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
           {/* Play/Pause */}
           <button
             onClick={togglePlay}
-            disabled={currentMoveIndex >= gameState.history.length && !isPlaying}
+            disabled={showFinalPosition || (currentMoveIndex >= gameState.history.length && !isPlaying)}
             className={`${buttonSize} ${
               isDarkMode 
                 ? 'bg-green-700 hover:bg-green-600 text-white disabled:opacity-50' 
@@ -428,7 +484,7 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
           {/* Next move */}
           <button
             onClick={goToNextMove}
-            disabled={currentMoveIndex >= gameState.history.length}
+            disabled={showFinalPosition || currentMoveIndex >= gameState.history.length}
             className={`${buttonSize} ${
               isDarkMode 
                 ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-600 disabled:opacity-50' 
@@ -444,7 +500,7 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
           {/* Go to end */}
           <button
             onClick={goToEnd}
-            disabled={currentMoveIndex >= gameState.history.length}
+            disabled={showFinalPosition || currentMoveIndex >= gameState.history.length}
             className={`${buttonSize} ${
               isDarkMode 
                 ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-600 disabled:opacity-50' 
@@ -460,13 +516,16 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
 
         {/* Playback speed control */}
         <div className="mt-4 flex items-center gap-3">
-          <label className={`text-sm font-medium ${isDarkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
+          <label className={`text-sm font-medium ${isDarkMode ? 'text-neutral-300' : 'text-neutral-700'} ${showFinalPosition ? 'opacity-50' : ''}`}>
             Speed:
           </label>
           <select
             value={playSpeed}
+            disabled={showFinalPosition}
             onChange={(e) => setPlaySpeed(parseInt(e.target.value))}
             className={`text-sm px-3 py-1 rounded border ${
+              showFinalPosition ? 'opacity-50 cursor-not-allowed' : ''
+            } ${
               isDarkMode 
                 ? 'bg-neutral-800 border-neutral-600 text-neutral-300' 
                 : 'bg-white border-neutral-300 text-neutral-700'

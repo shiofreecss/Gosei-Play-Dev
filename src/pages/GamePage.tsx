@@ -761,7 +761,7 @@ const GamePage: React.FC = () => {
                 )}
 
                 {/* Territory Legend */}
-                {(gameState.status === 'finished' || gameState.status === 'scoring') && (
+                {(gameState.status === 'finished' || gameState.status === 'scoring') && !(reviewBoardState?.isReviewing) && (
                   <div className="game-status-panel territory-legend-panel">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-2">
@@ -798,7 +798,7 @@ const GamePage: React.FC = () => {
                   deadStones={gameState.deadStones}
                   onToggleDeadStone={handleToggleDeadStone}
                   territory={gameState.territory}
-                  showTerritory={gameState.status === 'finished' || gameState.status === 'scoring'}
+                  showTerritory={(gameState.status === 'finished' || gameState.status === 'scoring') && !(reviewBoardState?.isReviewing)}
                   isReviewing={reviewBoardState?.isReviewing || false}
                   reviewStones={reviewBoardState?.stones || []}
                 />

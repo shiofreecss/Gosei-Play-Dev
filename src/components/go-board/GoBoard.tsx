@@ -250,8 +250,8 @@ const GoBoard: React.FC<GoBoardProps> = ({
           // Check if this is the last move
           const isLastMove = lastMove && lastMove.x === x && lastMove.y === y;
           
-          // Check if stone is marked as dead
-          const isDead = stone && isDeadStone(x, y);
+          // Check if stone is marked as dead (but not in review mode)
+          const isDead = stone && !isReviewing && isDeadStone(x, y);
           
           // Check if this is the hover position (desktop only)
           const isHovered = !isMobile && hoverPosition && hoverPosition.x === x && hoverPosition.y === y;
