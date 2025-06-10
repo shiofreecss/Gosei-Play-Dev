@@ -4,6 +4,7 @@ import { useGame } from '../context/GameContext';
 import { GameOptions, ColorPreference, ScoringRule, GameType } from '../types/go';
 
 import BoardSizePreview from '../components/go-board/BoardSizePreview';
+import CreateGameForm from '../components/CreateGameForm';
 import GoseiLogo from '../components/GoseiLogo';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import { useAppTheme } from '../context/AppThemeContext';
@@ -191,10 +192,12 @@ const validateUsername = (name: string): { isValid: boolean; error: string | nul
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { createGame, joinGame, gameState, error } = useGame();
+  const { isDarkMode } = useAppTheme();
   const [username, setUsername] = useState('');
   const [gameId, setGameId] = useState('');
   const [isCreatingGame, setIsCreatingGame] = useState(false);
   const [showGameSettings, setShowGameSettings] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [savedGames, setSavedGames] = useState<SavedGame[]>([]);
   const [showCustomSizes, setShowCustomSizes] = useState(false);
@@ -475,6 +478,45 @@ const HomePage: React.FC = () => {
     setUsernameError(null);
     localStorage.setItem(STORAGE_KEYS.USERNAME, trimmedUsername);
     setShowGameSettings(true);
+  };
+
+  // New handler for CreateGameForm
+  const handleCreateGameWithCaptcha = (playerName: string, options: GameOptions, captcha?: any, captchaAnswer?: any) => {
+    setIsCreatingGame(true);
+    setLocalError(null);
+
+    console.log('Creating game with captcha verification:', { playerName, options, captcha: !!captcha, captchaAnswer: !!captchaAnswer });
+    
+    try {
+      // Check if it's multi-captcha or single captcha
+      const isMultiCaptcha = captcha && captcha.problems && Array.isArray(captcha.problems);
+      
+      // Create game through context
+      createGame({
+        ...options,
+        playerName,
+        ...(isMultiCaptcha ? {
+          multiCaptcha: captcha,
+          captchaAnswers: captchaAnswer
+        } : {
+          captcha,
+          captchaAnswer
+        })
+      });
+      
+      // Set a timeout to check if navigation hasn't happened
+      setTimeout(() => {
+        if (!gameState?.id) {
+          console.log('Navigation did not occur through context');
+          setLocalError('Could not navigate to the game. Please try again or check your connection.');
+          setIsCreatingGame(false);
+        }
+      }, 3000); // Wait 3 seconds before showing error
+    } catch (err) {
+      console.error('Error in game creation:', err);
+      setLocalError('Failed to create game. Please try again.');
+      setIsCreatingGame(false);
+    }
   };
 
   const handleStartGame = () => {
@@ -997,7 +1039,36 @@ const HomePage: React.FC = () => {
         </header>
 
         <div className="max-w-6xl mx-auto">
-          {!showGameSettings ? (
+          {showCreateForm ? (
+            // Create Game Form with Captcha
+            <div className="bg-white rounded-xl shadow overflow-hidden">
+              <div className="p-6 md:p-10">
+                <div className="flex items-center justify-between mb-6">
+                  <button
+                    onClick={() => setShowCreateForm(false)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-200 hover:scale-105 ${
+                      isDarkMode
+                        ? 'bg-neutral-700 border-neutral-600 text-neutral-200 hover:bg-neutral-600 hover:border-neutral-500'
+                        : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 shadow-sm hover:shadow-md'
+                    }`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span className="font-medium">Back</span>
+                  </button>
+                </div>
+                
+                <CreateGameForm
+                  onCreateGame={handleCreateGameWithCaptcha}
+                  gameOptions={gameOptions}
+                  onUpdateGameOptions={updateGameOption}
+                  isCreating={isCreatingGame}
+                  error={error || localError}
+                />
+              </div>
+            </div>
+          ) : !showGameSettings ? (
             // Initial screen with name input
             <div className="bg-white rounded-xl shadow overflow-hidden">
           <div className="lg:flex">
@@ -1034,7 +1105,7 @@ const HomePage: React.FC = () => {
 
                   <div className="space-y-4">
                 <button
-                      onClick={handleCreateGame}
+                      onClick={() => setShowCreateForm(true)}
                       className="btn btn-primary w-full text-lg py-3"
                 >
                   Create New Game
@@ -1121,9 +1192,16 @@ const HomePage: React.FC = () => {
                   </div>
                   <button 
                     onClick={() => setShowGameSettings(false)}
-                    className="btn btn-secondary"
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-200 hover:scale-105 ${
+                      isDarkMode
+                        ? 'bg-neutral-700 border-neutral-600 text-neutral-200 hover:bg-neutral-600 hover:border-neutral-500'
+                        : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 shadow-sm hover:shadow-md'
+                    }`}
                   >
-                    Back
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span className="font-medium">Back</span>
                   </button>
                       </div>
 

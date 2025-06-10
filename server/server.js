@@ -133,6 +133,9 @@ const socketToGame = new Map();
 // Debug flag
 const DEBUG = true;
 
+// Import captcha validation utilities
+const { validateGameCreation } = require('./utils/captcha');
+
 // Game types and their default configurations
 const GAME_CONFIGURATIONS = {
   standard: {
@@ -261,8 +264,31 @@ io.on('connection', (socket) => {
   log(`New client connected: ${socket.id}`);
 
   // Create a new game
-  socket.on('createGame', ({ gameState, playerId }) => {
+  socket.on('createGame', ({ gameState, playerId, captcha, captchaAnswer, multiCaptcha, captchaAnswers, playerName }) => {
     log(`Creating game: ${gameState.id}, Code: ${gameState.code}`);
+    
+    // Get client IP for rate limiting
+    const clientIP = socket.handshake.address || socket.conn.remoteAddress || 'unknown';
+    
+    // Validate captcha and rate limiting
+    const validation = validateGameCreation({
+      playerName: playerName || gameState.players[0]?.username,
+      captcha,
+      captchaAnswer,
+      multiCaptcha,
+      captchaAnswers
+    }, clientIP);
+    
+    if (!validation.valid) {
+      log(`Game creation validation failed: ${validation.error}`);
+      socket.emit('gameCreationError', {
+        error: validation.error,
+        resetTime: validation.resetTime
+      });
+      return;
+    }
+    
+    log(`Captcha validation passed for game creation`);
     
     // Check for color preference if provided
     if (gameState.colorPreference) {

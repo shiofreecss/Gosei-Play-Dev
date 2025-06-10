@@ -269,6 +269,15 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             dispatch({ type: 'GAME_ERROR', payload: response.error || 'Failed to create game' });
           }
         });
+
+        // Handle game creation errors (captcha validation, rate limiting, etc.)
+        newSocket.on('gameCreationError', (data) => {
+          console.error('Game creation failed:', data);
+          dispatch({
+            type: 'GAME_ERROR',
+            payload: data.error || 'Failed to create game. Please try again.'
+          });
+        });
         
         newSocket.on('joinedGame', (response) => {
           if (response.success) {
@@ -1019,7 +1028,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   };
 
   // Create a new game
-  const createGame = (options: GameOptions & { playerName?: string }) => {
+  const createGame = (options: GameOptions & { playerName?: string; captcha?: any; captchaAnswer?: any; multiCaptcha?: any; captchaAnswers?: any }) => {
     dispatch({ type: 'CREATE_GAME_START' });
     
     const playerId = uuidv4(); // Generate a unique ID for this player
@@ -1115,7 +1124,12 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       console.log('Sending createGame request to server with game state:', gameState.id);
       state.socket.emit('createGame', {
         gameState,
-        playerId
+        playerId,
+        captcha: options.captcha,
+        captchaAnswer: options.captchaAnswer,
+        multiCaptcha: options.multiCaptcha,
+        captchaAnswers: options.captchaAnswers,
+        playerName: playerName
       });
     } else {
       console.error('Socket not connected, cannot create game');

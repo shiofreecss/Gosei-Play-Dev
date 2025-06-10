@@ -1,0 +1,410 @@
+import React, { useState, useEffect } from 'react';
+import { GameOptions } from '../types/go';
+import { 
+  generateMultiMathCaptcha, 
+  validateMultiCaptcha, 
+  MultiCaptchaChallenge,
+  captchaRateLimit 
+} from '../utils/captcha';
+import { useAppTheme } from '../context/AppThemeContext';
+
+interface CreateGameFormProps {
+  onCreateGame: (playerName: string, gameOptions: GameOptions, captcha?: MultiCaptchaChallenge, captchaAnswers?: number[]) => void;
+  gameOptions: GameOptions;
+  onUpdateGameOptions: (key: keyof GameOptions, value: any) => void;
+  isCreating?: boolean;
+  error?: string | null;
+}
+
+// Username validation function
+const validateUsername = (name: string): { isValid: boolean; error: string | null } => {
+  if (name.length < 4) {
+    return { isValid: false, error: 'Name must be at least 4 characters long' };
+  }
+  if (name.length > 32) {
+    return { isValid: false, error: 'Name must be no more than 32 characters long' };
+  }
+  
+  const allowedCharsRegex = /^[a-zA-Z0-9\s_-]+$/;
+  if (!allowedCharsRegex.test(name)) {
+    return { isValid: false, error: 'Name can only contain letters, numbers, spaces, underscores, and hyphens' };
+  }
+  
+  if (name.trim().length === 0) {
+    return { isValid: false, error: 'Name cannot be empty or only spaces' };
+  }
+  
+  return { isValid: true, error: null };
+};
+
+const CreateGameForm: React.FC<CreateGameFormProps> = ({
+  onCreateGame,
+  gameOptions,
+  onUpdateGameOptions,
+  isCreating = false,
+  error
+}) => {
+  const { isDarkMode } = useAppTheme();
+  const [playerName, setPlayerName] = useState(() => 
+    localStorage.getItem('gosei-player-name') || ''
+  );
+  const [nameError, setNameError] = useState<string | null>(null);
+  
+  // Multi-captcha state
+  const [multiCaptcha, setMultiCaptcha] = useState<MultiCaptchaChallenge>(() => generateMultiMathCaptcha(4));
+  const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>(new Array(4).fill(null));
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
+
+  // Rate limiting - use the exported instance
+  const rateLimit = captchaRateLimit;
+
+  // Fun captcha messages
+  const captchaMessages = [
+    "🧠 Prove your strategic mind! Solve these 4 math problems to show you're smarter than the bots:",
+    "🎯 Ready to outsmart the machines? Complete these 4 math challenges to prove your worth:",
+    "⚡ Time to flex those brain muscles! Solve 4 problems to show you're a true Go master:",
+    "🏆 Think you can beat the bots? Prove it by solving these 4 mathematical challenges:",
+    "🎲 Roll up your sleeves! Show your mental prowess with these 4 strategic calculations:",
+    "🔥 Bring the heat! Demonstrate your superior intellect with these 4 math problems:"
+  ];
+
+  const [captchaMessage] = useState(() => 
+    captchaMessages[Math.floor(Math.random() * captchaMessages.length)]
+  );
+
+  // Fun success messages
+  const successMessages = [
+    "🎉 Brilliant! Your strategic mind is ready for battle!",
+    "⭐ Outstanding! You've proven your mental superiority!",
+    "🏆 Excellent! You're clearly smarter than any bot!",
+    "🔥 Perfect! Your intellect shines brighter than the stars!",
+    "💎 Magnificent! You've earned your place among Go masters!",
+    "🚀 Incredible! Your brain power is off the charts!"
+  ];
+
+  const [successMessage] = useState(() => 
+    successMessages[Math.floor(Math.random() * successMessages.length)]
+  );
+
+  // Generate new multi-captcha
+  const refreshCaptcha = () => {
+    setMultiCaptcha(generateMultiMathCaptcha(4));
+    setSelectedAnswers(new Array(4).fill(null));
+    setCaptchaError(null);
+    setCaptchaVerified(false);
+    setCurrentProblemIndex(0);
+  };
+
+  // Handle name input changes
+  const handleNameChange = (value: string) => {
+    setPlayerName(value);
+    
+    if (nameError) {
+      setNameError(null);
+    }
+    
+    if (value.length > 0) {
+      const validation = validateUsername(value);
+      if (!validation.isValid) {
+        setNameError(validation.error);
+      }
+    }
+  };
+
+  // Handle captcha answer selection
+  const handleCaptchaAnswer = async (problemIndex: number, answer: number) => {
+    // Check rate limiting
+    const identifier = `create_game_${Date.now()}`;
+    if (rateLimit.isRateLimited(identifier)) {
+      setCaptchaError('Too many attempts. Please wait before trying again.');
+      return;
+    }
+
+    // Update selected answers
+    const newAnswers = [...selectedAnswers];
+    newAnswers[problemIndex] = answer;
+    setSelectedAnswers(newAnswers);
+    setCaptchaError(null);
+
+    // Check if all problems are answered
+    const allAnswered = newAnswers.every(ans => ans !== null);
+    
+    // Move to next problem if current one is answered
+    if (newAnswers[problemIndex] !== null && problemIndex < multiCaptcha.totalProblems - 1) {
+      setCurrentProblemIndex(problemIndex + 1);
+    }
+
+    // Check if all problems are answered
+    if (allAnswered) {
+      // Validate all answers
+      const validation = validateMultiCaptcha(multiCaptcha, newAnswers);
+      
+      if (validation.isValid) {
+        setCaptchaVerified(true);
+        setCaptchaError(null);
+      } else {
+        setCaptchaVerified(false);
+        setCaptchaError(validation.error || 'Some answers are incorrect. Please try again.');
+        // Auto-refresh captcha after wrong answers
+        setTimeout(refreshCaptcha, 2000);
+      }
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const trimmedName = playerName.trim();
+    
+    // Validate name
+    if (!trimmedName) {
+      setNameError('Please enter your name');
+      return;
+    }
+    
+    const nameValidation = validateUsername(trimmedName);
+    if (!nameValidation.isValid) {
+      setNameError(nameValidation.error);
+      return;
+    }
+    
+    // Validate captcha
+    if (!captchaVerified) {
+      const unansweredCount = selectedAnswers.filter(ans => ans === null).length;
+      if (unansweredCount > 0) {
+        setCaptchaError(`Please solve all ${multiCaptcha.totalProblems} math problems to continue`);
+      } else {
+        setCaptchaError('Please solve all math problems correctly');
+      }
+      return;
+    }
+    
+    // Clear errors and save name
+    setNameError(null);
+    setCaptchaError(null);
+    localStorage.setItem('gosei-player-name', trimmedName);
+    
+    // Create game with multi-captcha data
+    const validAnswers = selectedAnswers.filter(ans => ans !== null) as number[];
+    onCreateGame(trimmedName, gameOptions, multiCaptcha, validAnswers);
+  };
+
+  // Calculate progress
+  const answeredCount = selectedAnswers.filter(ans => ans !== null).length;
+  const progressPercentage = (answeredCount / multiCaptcha.totalProblems) * 100;
+
+  return (
+    <div className="create-game-form">
+      <h2 className="text-2xl font-bold mb-6">Create New Game</h2>
+      
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-200 text-red-700 rounded-lg">
+          <p>{error}</p>
+        </div>
+      )}
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Player Name Section */}
+        <div>
+          <label htmlFor="playerName" className="block text-sm font-medium text-neutral-700 mb-2">
+            Your Name
+          </label>
+          <input
+            type="text"
+            id="playerName"
+            value={playerName}
+            onChange={(e) => handleNameChange(e.target.value)}
+            className={`form-input w-full ${nameError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+            placeholder="Enter your name (4-32 characters)"
+            maxLength={32}
+            required
+            disabled={isCreating}
+          />
+          {nameError && (
+            <p className="mt-2 text-sm text-red-600">{nameError}</p>
+          )}
+          <p className="mt-1 text-xs text-neutral-500">
+            Name must be 4-32 characters. Only letters, numbers, spaces, underscores, and hyphens allowed.
+          </p>
+        </div>
+
+        {/* Anti-Bot Verification Section */}
+        <div className="p-4 rounded-lg border border-neutral-200 bg-white">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium flex items-center gap-2 text-neutral-700">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              🤖 Strategic Mind Challenge
+            </h3>
+            <div className="text-xs text-neutral-500">
+              {answeredCount}/{multiCaptcha.totalProblems} solved
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mb-4">
+            <div className="w-full rounded-full h-2 bg-neutral-200">
+              <div 
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  captchaVerified ? 'bg-green-500' : 'bg-blue-500'
+                }`}
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+          </div>
+          
+          <p className="text-sm mb-4 text-neutral-600">
+            {captchaMessage}
+          </p>
+
+          {/* Current Problem Display */}
+          <div className="mb-4">
+            {multiCaptcha.problems.length > 0 && (
+              <div 
+                className={`p-6 rounded-lg border-2 transition-all ${
+                  selectedAnswers[currentProblemIndex] !== null
+                    ? captchaVerified
+                      ? isDarkMode 
+                        ? 'border-green-500 bg-green-900/30' 
+                        : 'border-green-300 bg-green-50'
+                      : isDarkMode
+                        ? 'border-red-500 bg-red-900/30'
+                        : 'border-red-300 bg-red-50'
+                    : isDarkMode
+                      ? 'border-blue-500 bg-blue-900/30'
+                      : 'border-blue-300 bg-blue-50'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-medium text-neutral-500">
+                    Problem {currentProblemIndex + 1} of {multiCaptcha.totalProblems}
+                  </span>
+                  {selectedAnswers[currentProblemIndex] !== null && (
+                    <div className={`text-xs px-2 py-1 rounded ${
+                      captchaVerified 
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      {captchaVerified ? '✓ Correct' : 'Answered'}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="text-2xl font-mono text-center mb-6 p-4 rounded bg-neutral-100 text-neutral-800">
+                  {multiCaptcha.problems[currentProblemIndex].question}
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  {multiCaptcha.problems[currentProblemIndex].options.map((option, optionIndex) => (
+                    <button
+                      key={optionIndex}
+                      type="button"
+                      onClick={() => handleCaptchaAnswer(currentProblemIndex, option)}
+                      disabled={isCreating || selectedAnswers[currentProblemIndex] !== null}
+                      className={`p-4 rounded border text-center font-medium transition-colors text-lg ${
+                        selectedAnswers[currentProblemIndex] === option
+                          ? captchaVerified
+                            ? 'bg-green-100 border-green-500 text-green-700'
+                            : 'bg-red-100 border-red-500 text-red-700'
+                          : selectedAnswers[currentProblemIndex] !== null
+                            ? 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
+                            : 'bg-white border-neutral-300 hover:bg-neutral-50 text-neutral-700'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Navigation Controls */}
+          {!captchaVerified && (
+            <div className="flex justify-between items-center mb-4">
+              <button
+                type="button"
+                onClick={() => setCurrentProblemIndex(Math.max(0, currentProblemIndex - 1))}
+                disabled={currentProblemIndex === 0}
+                className={`px-4 py-2 rounded border font-medium transition-colors ${
+                  currentProblemIndex === 0
+                    ? 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
+                    : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50'
+                }`}
+              >
+                ← Previous
+              </button>
+
+              <div className="text-sm text-neutral-500">
+                {answeredCount} of {multiCaptcha.totalProblems} completed
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCurrentProblemIndex(Math.min(multiCaptcha.totalProblems - 1, currentProblemIndex + 1))}
+                disabled={currentProblemIndex === multiCaptcha.totalProblems - 1}
+                className={`px-4 py-2 rounded border font-medium transition-colors ${
+                  currentProblemIndex === multiCaptcha.totalProblems - 1
+                    ? 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
+                    : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50'
+                }`}
+              >
+                Next →
+              </button>
+            </div>
+          )}
+          
+          {captchaVerified && (
+            <div className="flex items-center gap-2 text-sm mb-2 text-green-600">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+{successMessage}
+            </div>
+          )}
+          
+          {captchaError && (
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-red-600">{captchaError}</p>
+              <button
+                type="button"
+                onClick={refreshCaptcha}
+                disabled={isCreating}
+                className="text-xs underline text-neutral-500 hover:text-neutral-700"
+              >
+                New Problems
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={isCreating || !captchaVerified || !!nameError}
+            className="btn btn-primary px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCreating ? (
+              <div className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating Game...
+              </div>
+            ) : (
+              'Create Game'
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default CreateGameForm; 
