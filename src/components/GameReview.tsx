@@ -228,6 +228,43 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
     };
   }, [isPlaying, playSpeed, gameState.history.length]);
 
+  // Add keyboard controls for review navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Only handle keyboard controls when not showing final position
+      if (showFinalPosition) {
+        return;
+      }
+
+      // Prevent default behavior for the keys we handle
+      if (event.code === 'ArrowLeft' || event.code === 'ArrowRight' || event.code === 'Space') {
+        event.preventDefault();
+      }
+
+      switch (event.code) {
+        case 'ArrowLeft':
+          goToPreviousMove();
+          break;
+        
+        case 'ArrowRight':
+          goToNextMove();
+          break;
+        
+        case 'Space':
+          togglePlay();
+          break;
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('keydown', handleKeyDown);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showFinalPosition, currentMoveIndex, gameState.history.length, isPlaying]);
+
   // Navigation functions
   const goToPreviousMove = () => {
     setIsPlaying(false);
@@ -564,31 +601,38 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
               disabled={isExporting}
               className={`${buttonSize} flex-1 ${
                 isDarkMode 
-                  ? 'bg-neutral-700 hover:bg-neutral-600 text-neutral-300 border border-neutral-600 disabled:opacity-50' 
-                  : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border border-neutral-300 disabled:opacity-50'
+                  ? 'bg-purple-700 hover:bg-purple-600 text-white border border-purple-600 disabled:opacity-50' 
+                  : 'bg-purple-600 hover:bg-purple-700 text-white border border-purple-600 disabled:opacity-50'
               } rounded-lg disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2`}
               title="Copy SGF to clipboard"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className={iconSize} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
               </svg>
-              <span>Copy SGF</span>
+              <span>{isExporting ? 'Copying...' : 'Copy SGF'}</span>
             </button>
           </div>
 
-          {/* Export Success Message */}
+          {/* Export success message */}
           {showExportSuccess && (
-            <div className={`mt-2 p-2 rounded text-sm ${
-              isDarkMode 
-                ? 'bg-green-800 text-green-200 border border-green-700' 
-                : 'bg-green-100 text-green-800 border border-green-200'
-            } flex items-center gap-2`}>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span>SGF exported successfully!</span>
+            <div className={`mt-2 p-2 rounded text-sm text-center ${
+              isDarkMode ? 'bg-green-800 text-green-200' : 'bg-green-100 text-green-800'
+            }`}>
+              ✓ SGF exported successfully!
             </div>
           )}
+        </div>
+
+        {/* Keyboard Shortcuts Help */}
+        <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
+          <div className={`text-xs ${isDarkMode ? 'text-neutral-400' : 'text-neutral-600'}`}>
+            <div className="font-medium mb-2">Keyboard Shortcuts:</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
+              <div>← Previous move</div>
+              <div>→ Next move</div>
+              <div>Space Play/Pause</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
