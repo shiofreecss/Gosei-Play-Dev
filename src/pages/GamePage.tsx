@@ -4,7 +4,7 @@ import { GoBoard, GameInfo } from '../components/go-board';
 import GameError from '../components/GameError';
 import BoardThemeButton from '../components/BoardThemeButton';
 import ThemeToggleButton from '../components/ThemeToggleButton';
-
+import ConnectionStatus from '../components/ConnectionStatus';
 import { useGame } from '../context/GameContext';
 import { Position, GameMove, GameState, Stone } from '../types/go';
 import ChatBox from '../components/ChatBox';
@@ -934,7 +934,8 @@ const GamePage: React.FC = () => {
           />
         )}
         
-
+        {/* Add connection status component */}
+        <ConnectionStatus />
 
         {/* Game Notifications */}
         <GameNotification
