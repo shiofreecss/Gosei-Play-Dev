@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { GoBoard, GameInfo } from '../components/go-board';
 import GameError from '../components/GameError';
 import BoardThemeButton from '../components/BoardThemeButton';
@@ -15,6 +15,9 @@ import GameReview from '../components/GameReview';
 import GoseiLogo from '../components/GoseiLogo';
 import GameNotification from '../components/GameNotification';
 import UndoNotification from '../components/UndoNotification';
+import MobileStoneControls from '../components/go-board/MobileStoneControls';
+import { playStoneSound } from '../utils/soundUtils';
+import useDeviceDetect from '../hooks/useDeviceDetect';
 
 // Helper function to check game status safely
 const hasStatus = (gameState: GameState, status: 'waiting' | 'playing' | 'finished' | 'scoring'): boolean => {
@@ -48,11 +51,12 @@ const validateUsername = (name: string): { isValid: boolean; error: string | nul
 const GamePage: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
-  const { 
+    const {
     gameState, 
     loading, 
     currentPlayer, 
-    error, 
+    error,
+    moveError,
     placeStone, 
     passTurn, 
     leaveGame, 
@@ -65,7 +69,8 @@ const GamePage: React.FC = () => {
     respondToUndoRequest,
     cancelScoring,
     resetGame,
-    syncDeadStones
+    syncDeadStones,
+    clearMoveError
   } = useGame();
   const [username, setUsername] = useState<string>(() => localStorage.getItem('gosei-player-name') || '');
   const [showJoinForm, setShowJoinForm] = useState<boolean>(true);
@@ -91,6 +96,9 @@ const GamePage: React.FC = () => {
   const [showDevTools, setShowDevTools] = useState(false);
   const [confirmingScore, setConfirmingScore] = useState<boolean>(false);
   const [showGameCompleteModal, setShowGameCompleteModal] = useState(false);
+  
+  // Mobile controls preview position state
+  const [previewPosition, setPreviewPosition] = useState<Position | null>(null);
   
   // Review mode state
   const [reviewBoardState, setReviewBoardState] = useState<{
@@ -660,7 +668,25 @@ const GamePage: React.FC = () => {
     }
   };
 
-
+  // Mobile stone placement handler
+  const handleMobilePlaceStone = () => {
+    if (previewPosition && currentPlayer && gameState && currentPlayer.color === gameState.currentTurn) {
+      handleStonePlace(previewPosition);
+      setPreviewPosition(null);
+    }
+  };
+  
+  // Monitor move errors and convert Ko rule violations to notifications
+  useEffect(() => {
+    if (moveError && moveError.toLowerCase().includes('ko rule violation')) {
+      // Show Ko rule violation as a warning notification
+      showNotification('Ko rule violation: You cannot immediately recapture. Please play elsewhere first.', 'warning');
+      // Clear the move error so it doesn't show in GameError component
+      clearMoveError();
+    }
+  }, [moveError, showNotification, clearMoveError]);
+  
+  // Review mode state
 
   // Loading state
   if (loading) {
@@ -870,6 +896,8 @@ const GamePage: React.FC = () => {
                   showTerritory={(gameState.status === 'finished' || gameState.status === 'scoring') && !(reviewBoardState?.isReviewing)}
                   isReviewing={reviewBoardState?.isReviewing || false}
                   reviewStones={reviewBoardState?.stones || []}
+                  onPreviewPositionChange={(pos) => setPreviewPosition(pos)}
+                  previewPosition={previewPosition}
                 />
                 
                 {/* Game Review Controls - Only shown when game is finished */}
@@ -884,6 +912,19 @@ const GamePage: React.FC = () => {
 
             {/* Game Info Panel - Make responsive with proper width constraints */}
             <div className="lg:col-span-1 w-full">
+              {/* Mobile Stone Controls - centered with proper spacing above game info */}
+              <div className="w-full flex justify-center mb-6">
+                <MobileStoneControls
+                  currentTurn={gameState.currentTurn}
+                  isPlayerTurn={gameState.status === 'playing' && currentPlayer?.color === gameState.currentTurn}
+                  isScoring={gameState.status === 'scoring'}
+                  isReviewing={reviewBoardState?.isReviewing || false}
+                  previewPosition={previewPosition}
+                  onPlaceStone={handleMobilePlaceStone}
+                  boardSize={gameState.board.size}
+                />
+              </div>
+              
               <GameInfo
                 gameState={gameState}
                 currentPlayer={currentPlayer || undefined}
@@ -934,8 +975,8 @@ const GamePage: React.FC = () => {
           />
         )}
         
-        {/* Add connection status component */}
-        <ConnectionStatus />
+        {/* Add connection status component - HIDDEN */}
+        {/* <ConnectionStatus /> */}
 
         {/* Game Notifications */}
         <GameNotification

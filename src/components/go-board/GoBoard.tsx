@@ -24,6 +24,10 @@ interface GoBoardProps {
   // Review mode props
   isReviewing?: boolean;
   reviewStones?: Stone[];
+  // Mobile controls positioning
+  showMobileControls?: boolean;
+  onPreviewPositionChange?: (position: Position | null) => void;
+  previewPosition?: Position | null;
 }
 
 // Theme configurations for different board styles
@@ -105,13 +109,19 @@ const GoBoard: React.FC<GoBoardProps> = ({
   isHandicapPlacement = false,
   isReviewing = false,
   reviewStones = [],
+  showMobileControls = false,
+  onPreviewPositionChange,
+  previewPosition: externalPreviewPosition,
 }) => {
   const [hoverPosition, setHoverPosition] = useState<Position | null>(null);
-  const [previewPosition, setPreviewPosition] = useState<Position | null>(null);
+  const [internalPreviewPosition, setInternalPreviewPosition] = useState<Position | null>(null);
   const [cellSize, setCellSize] = useState(32);
   const { currentTheme } = useBoardTheme();
   const { gameState } = useGame();
   const { isMobile } = useDeviceDetect();
+
+  // Use external preview position if provided, otherwise use internal
+  const previewPosition = externalPreviewPosition || internalPreviewPosition;
 
   // Map the board theme to our theme config
   const theme: BoardTheme = currentTheme === 'wood-3d' ? 'dark-wood-3d' : 
@@ -222,12 +232,17 @@ const GoBoard: React.FC<GoBoardProps> = ({
         onToggleDeadStone({ x, y });
       }
     } else if (isMobile && isPlayerTurn && isValidPlacement(x, y)) {
-      setPreviewPosition({ x, y });
+      // Set preview position for mobile
+      if (onPreviewPositionChange) {
+        onPreviewPositionChange({ x, y });
+      } else {
+        setInternalPreviewPosition({ x, y });
+      }
     } else if (!isMobile && isPlayerTurn && isValidPlacement(x, y)) {
       playStoneSound();
       onPlaceStone({ x, y });
     }
-  }, [isReviewing, isScoring, isMobile, isPlayerTurn, onToggleDeadStone, onPlaceStone, getStoneAtPosition, isValidPlacement]);
+  }, [isReviewing, isScoring, isMobile, isPlayerTurn, onToggleDeadStone, onPlaceStone, getStoneAtPosition, isValidPlacement, onPreviewPositionChange]);
 
   // Handle mouse over board intersection
   const handleMouseOver = (x: number, y: number) => {
@@ -254,7 +269,11 @@ const GoBoard: React.FC<GoBoardProps> = ({
       }
       playStoneSound();
       onPlaceStone(previewPosition);
-      setPreviewPosition(null);
+      if (onPreviewPositionChange) {
+        onPreviewPositionChange(null);
+      } else {
+        setInternalPreviewPosition(null);
+      }
     }
   };
 
@@ -265,7 +284,11 @@ const GoBoard: React.FC<GoBoardProps> = ({
       if ('vibrate' in navigator) {
         navigator.vibrate(50);
       }
-      setPreviewPosition({ x, y });
+      if (onPreviewPositionChange) {
+        onPreviewPositionChange({ x, y });
+      } else {
+        setInternalPreviewPosition({ x, y });
+      }
     }
   };
 
@@ -274,7 +297,11 @@ const GoBoard: React.FC<GoBoardProps> = ({
     if (isMobile && previewPosition) {
       const target = e.target as HTMLElement;
       if (!target.closest('.go-board') && !target.closest('.mobile-stone-controls')) {
-        setPreviewPosition(null);
+        if (onPreviewPositionChange) {
+          onPreviewPositionChange(null);
+        } else {
+          setInternalPreviewPosition(null);
+        }
       }
     }
   };
@@ -736,45 +763,6 @@ const GoBoard: React.FC<GoBoardProps> = ({
           <g>{renderCellOverlays()}</g>
         </svg>
       </div>
-
-      {/* Mobile Place/Cancel buttons */}
-      {isMobile && isPlayerTurn && !isScoring && !isReviewing && (
-        <div className="mobile-stone-controls mt-4 flex flex-col items-center gap-3">
-          {previewPosition ? (
-            <>
-              <div className="preview-position-indicator text-sm font-medium">
-                {currentTurn === 'black' ? '●' : '○'} Position: {previewPosition.x < 8 ? String.fromCharCode(65 + previewPosition.x) : String.fromCharCode(65 + previewPosition.x + 1)}{board.size - previewPosition.y}
-              </div>
-              
-              <div className="flex justify-center">
-                <button
-                  onClick={handlePlaceStone}
-                  className="place-stone-btn px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-md transition-colors duration-200 flex items-center gap-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Place Stone
-                </button>
-              </div>
-              
-              <div className="cancel-instruction text-xs opacity-70">
-                Touch outside the board to cancel
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="no-preview-indicator text-sm font-medium opacity-60">
-                {currentTurn === 'black' ? '●' : '○'} {currentTurn === 'black' ? 'Black' : 'White'}'s Turn
-              </div>
-              
-              <div className="touch-instruction text-xs opacity-60 text-center">
-                Touch any intersection on the board to preview your move
-              </div>
-            </>
-          )}
-        </div>
-      )}
 
       {/* Scoring mode indicator */}
       {isScoring && (

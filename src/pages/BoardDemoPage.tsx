@@ -8,6 +8,8 @@ import { useBoardTheme } from '../context/BoardThemeContext';
 import BoardThemeSelector from '../components/BoardThemeSelector';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import RulesSidebar from '../components/RulesSidebar';
+import MobileStoneControls from '../components/go-board/MobileStoneControls';
+import { playStoneSound } from '../utils/soundUtils';
 
 // Helper functions for capturing logic
 const getAdjacentPositions = (pos: Position, size: number): Position[] => {
@@ -133,6 +135,9 @@ const BoardDemoPage: React.FC = () => {
   // Last move for highlighting
   const [lastMove, setLastMove] = useState<Position | undefined>(undefined);
   
+  // Mobile controls preview position state
+  const [previewPosition, setPreviewPosition] = useState<Position | null>(null);
+  
   // Handle stone placement for demo
   const handlePlaceStone = (position: Position) => {
     // Check if position is already occupied
@@ -257,7 +262,27 @@ const BoardDemoPage: React.FC = () => {
                       isPlayerTurn={true}
                       lastMove={lastMove}
                       isScoring={false}
+                      onPreviewPositionChange={setPreviewPosition}
+                      previewPosition={previewPosition}
                     />
+                    
+                    {/* Mobile Stone Controls - centered below the board in board size view */}
+                    <div className="w-full flex justify-center mt-6">
+                      <MobileStoneControls
+                        currentTurn={currentTurn}
+                        isPlayerTurn={true}
+                        isScoring={false}
+                        isReviewing={false}
+                        previewPosition={previewPosition}
+                        onPlaceStone={() => {
+                          if (previewPosition) {
+                            handlePlaceStone(previewPosition);
+                            setPreviewPosition(null);
+                          }
+                        }}
+                        boardSize={board.size}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
