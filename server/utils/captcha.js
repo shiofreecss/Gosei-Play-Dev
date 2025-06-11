@@ -17,11 +17,13 @@ function validateMathCaptcha(question, answer) {
     // Extract the math expression from the question
     const expression = question.replace(' = ?', '').trim();
     
-    // Replace × with * for JavaScript evaluation
-    const jsExpression = expression.replace(/×/g, '*');
+    // Replace mathematical symbols with JavaScript operators
+    const jsExpression = expression
+      .replace(/×/g, '*')       // Replace × with *
+      .replace(/÷/g, '/');      // Replace ÷ with /
     
-    // Safely evaluate the expression (only allow basic math)
-    if (!/^[\d\s+\-*()]+$/.test(jsExpression)) {
+    // Safely evaluate the expression (allow basic math including division)
+    if (!/^[\d\s+\-*/()]+$/.test(jsExpression)) {
       return false; // Invalid characters
     }
     

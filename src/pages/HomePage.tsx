@@ -477,7 +477,7 @@ const HomePage: React.FC = () => {
     // Clear any errors and save username for future games
     setUsernameError(null);
     localStorage.setItem(STORAGE_KEYS.USERNAME, trimmedUsername);
-    setShowGameSettings(true);
+    setShowCreateForm(true);
   };
 
   // New handler for CreateGameForm
@@ -1065,6 +1065,7 @@ const HomePage: React.FC = () => {
                   onUpdateGameOptions={updateGameOption}
                   isCreating={isCreatingGame}
                   error={error || localError}
+                  initialPlayerName={username}
                 />
               </div>
             </div>
@@ -1105,7 +1106,7 @@ const HomePage: React.FC = () => {
 
                   <div className="space-y-4">
                 <button
-                      onClick={() => setShowCreateForm(true)}
+                      onClick={handleCreateGame}
                       className="btn btn-primary w-full text-lg py-3"
                 >
                   Create New Game

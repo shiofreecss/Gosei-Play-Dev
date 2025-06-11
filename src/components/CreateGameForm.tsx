@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { GameOptions } from '../types/go';
 import { 
   generateMultiMathCaptcha, 
@@ -14,6 +14,7 @@ interface CreateGameFormProps {
   onUpdateGameOptions: (key: keyof GameOptions, value: any) => void;
   isCreating?: boolean;
   error?: string | null;
+  initialPlayerName?: string;
 }
 
 // Username validation function
@@ -42,11 +43,12 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
   gameOptions,
   onUpdateGameOptions,
   isCreating = false,
-  error
+  error,
+  initialPlayerName
 }) => {
   const { isDarkMode } = useAppTheme();
   const [playerName, setPlayerName] = useState(() => 
-    localStorage.getItem('gosei-player-name') || ''
+    initialPlayerName || localStorage.getItem('gosei-player-name') || ''
   );
   const [nameError, setNameError] = useState<string | null>(null);
   
@@ -232,22 +234,32 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
         </div>
 
         {/* Anti-Bot Verification Section */}
-        <div className="p-4 rounded-lg border border-neutral-200 bg-white">
+        <div className={`p-4 rounded-lg border ${
+          isDarkMode 
+            ? 'border-neutral-600 bg-neutral-800' 
+            : 'border-neutral-200 bg-white'
+        }`}>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium flex items-center gap-2 text-neutral-700">
+            <h3 className={`text-sm font-medium flex items-center gap-2 ${
+              isDarkMode ? 'text-neutral-200' : 'text-neutral-700'
+            }`}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               🤖 Strategic Mind Challenge
             </h3>
-            <div className="text-xs text-neutral-500">
+            <div className={`text-xs ${
+              isDarkMode ? 'text-neutral-400' : 'text-neutral-500'
+            }`}>
               {answeredCount}/{multiCaptcha.totalProblems} solved
             </div>
           </div>
 
           {/* Progress Bar */}
           <div className="mb-4">
-            <div className="w-full rounded-full h-2 bg-neutral-200">
+            <div className={`w-full rounded-full h-2 ${
+              isDarkMode ? 'bg-neutral-600' : 'bg-neutral-200'
+            }`}>
               <div 
                 className={`h-2 rounded-full transition-all duration-300 ${
                   captchaVerified ? 'bg-green-500' : 'bg-blue-500'
@@ -257,7 +269,9 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
             </div>
           </div>
           
-          <p className="text-sm mb-4 text-neutral-600">
+          <p className={`text-sm mb-4 ${
+            isDarkMode ? 'text-neutral-300' : 'text-neutral-600'
+          }`}>
             {captchaMessage}
           </p>
 
@@ -280,21 +294,31 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
                 }`}
               >
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-medium text-neutral-500">
+                  <span className={`text-sm font-medium ${
+                    isDarkMode ? 'text-neutral-300' : 'text-neutral-500'
+                  }`}>
                     Problem {currentProblemIndex + 1} of {multiCaptcha.totalProblems}
                   </span>
                   {selectedAnswers[currentProblemIndex] !== null && (
                     <div className={`text-xs px-2 py-1 rounded ${
                       captchaVerified 
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                        ? isDarkMode
+                          ? 'bg-green-800 text-green-200'
+                          : 'bg-green-100 text-green-700'
+                        : isDarkMode
+                          ? 'bg-red-800 text-red-200'
+                          : 'bg-red-100 text-red-700'
                     }`}>
                       {captchaVerified ? '✓ Correct' : 'Answered'}
                     </div>
                   )}
                 </div>
                 
-                <div className="text-2xl font-mono text-center mb-6 p-4 rounded bg-neutral-100 text-neutral-800">
+                <div className={`text-2xl font-mono text-center mb-6 p-4 rounded ${
+                  isDarkMode 
+                    ? 'bg-neutral-700 text-neutral-100' 
+                    : 'bg-neutral-100 text-neutral-800'
+                }`}>
                   {multiCaptcha.problems[currentProblemIndex].question}
                 </div>
                 
@@ -308,11 +332,19 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
                       className={`p-4 rounded border text-center font-medium transition-colors text-lg ${
                         selectedAnswers[currentProblemIndex] === option
                           ? captchaVerified
-                            ? 'bg-green-100 border-green-500 text-green-700'
-                            : 'bg-red-100 border-red-500 text-red-700'
+                            ? isDarkMode
+                              ? 'bg-green-800 border-green-400 text-green-100'
+                              : 'bg-green-100 border-green-500 text-green-700'
+                            : isDarkMode
+                              ? 'bg-red-800 border-red-400 text-red-100'
+                              : 'bg-red-100 border-red-500 text-red-700'
                           : selectedAnswers[currentProblemIndex] !== null
-                            ? 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
-                            : 'bg-white border-neutral-300 hover:bg-neutral-50 text-neutral-700'
+                            ? isDarkMode
+                              ? 'bg-neutral-700 border-neutral-600 text-neutral-400 cursor-not-allowed'
+                              : 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
+                            : isDarkMode
+                              ? 'bg-neutral-800 border-neutral-600 text-neutral-200 hover:bg-neutral-700'
+                              : 'bg-white border-neutral-300 hover:bg-neutral-50 text-neutral-700'
                       }`}
                     >
                       {option}
@@ -332,14 +364,20 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
                 disabled={currentProblemIndex === 0}
                 className={`px-4 py-2 rounded border font-medium transition-colors ${
                   currentProblemIndex === 0
-                    ? 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
-                    : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50'
+                    ? isDarkMode
+                      ? 'bg-neutral-700 border-neutral-600 text-neutral-400 cursor-not-allowed'
+                      : 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
+                    : isDarkMode
+                      ? 'bg-neutral-800 border-neutral-600 text-neutral-200 hover:bg-neutral-700'
+                      : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50'
                 }`}
               >
-                ← Previous
+                ← Prev
               </button>
 
-              <div className="text-sm text-neutral-500">
+              <div className={`text-sm ${
+                isDarkMode ? 'text-neutral-400' : 'text-neutral-500'
+              }`}>
                 {answeredCount} of {multiCaptcha.totalProblems} completed
               </div>
 
@@ -349,8 +387,12 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
                 disabled={currentProblemIndex === multiCaptcha.totalProblems - 1}
                 className={`px-4 py-2 rounded border font-medium transition-colors ${
                   currentProblemIndex === multiCaptcha.totalProblems - 1
-                    ? 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
-                    : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50'
+                    ? isDarkMode
+                      ? 'bg-neutral-700 border-neutral-600 text-neutral-400 cursor-not-allowed'
+                      : 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
+                    : isDarkMode
+                      ? 'bg-neutral-800 border-neutral-600 text-neutral-200 hover:bg-neutral-700'
+                      : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50'
                 }`}
               >
                 Next →
@@ -359,7 +401,9 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
           )}
           
           {captchaVerified && (
-            <div className="flex items-center gap-2 text-sm mb-2 text-green-600">
+            <div className={`flex items-center gap-2 text-sm mb-2 ${
+              isDarkMode ? 'text-green-400' : 'text-green-600'
+            }`}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
@@ -369,12 +413,18 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
           
           {captchaError && (
             <div className="flex items-center justify-between">
-              <p className="text-sm text-red-600">{captchaError}</p>
+              <p className={`text-sm ${
+                isDarkMode ? 'text-red-400' : 'text-red-600'
+              }`}>{captchaError}</p>
               <button
                 type="button"
                 onClick={refreshCaptcha}
                 disabled={isCreating}
-                className="text-xs underline text-neutral-500 hover:text-neutral-700"
+                className={`text-xs underline ${
+                  isDarkMode 
+                    ? 'text-neutral-400 hover:text-neutral-300' 
+                    : 'text-neutral-500 hover:text-neutral-700'
+                }`}
               >
                 New Problems
               </button>
