@@ -1,0 +1,296 @@
+.go-board-container-enhanced {
+  position: relative;
+  padding: 5px;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  background: transparent;
+}
+
+.go-board-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0 auto;
+  min-height: 300px;
+  min-width: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+}
+
+.go-board-svg {
+  background-color: #e6c588;
+  border-radius: 8px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25), inset 0 -3px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  aspect-ratio: 1/1;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Board coordinates appearance */
+.go-board-svg text {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Stone overlay interactions */
+.stone-overlay {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  pointer-events: all;
+}
+
+.stone-overlay:hover {
+  opacity: 0.02;
+  fill: rgba(0, 0, 0, 0.01);
+}
+
+/* Hover stone preview styling */
+.hover-stone-preview {
+  pointer-events: none;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.hover-stone-preview circle {
+  transition: all 0.15s ease-in-out;
+}
+
+/* Enhance 3D effects for stones */
+.stone {
+  transition: all 0.3s ease;
+}
+
+/* Fullscreen mode enhancements */
+.kifu-fullscreen .go-board-container-enhanced {
+  padding: 0;
+  margin: 0 auto;
+  height: calc(100vh - 120px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.kifu-fullscreen .go-board-svg {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 -4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .go-board-container-enhanced {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .go-board-container-enhanced {
+    padding: 10px;
+  }
+  
+  .go-board-wrapper {
+    min-height: 250px;
+    min-width: 250px;
+  }
+  
+  /* Improve fullscreen mode */
+  .kifu-fullscreen .go-board-container-enhanced {
+    height: calc(100vh - 100px);
+  }
+}
+
+@media (max-width: 480px) {
+  .go-board-container-enhanced {
+    padding: 5px;
+  }
+  
+  .go-board-wrapper {
+    min-height: 200px;
+    min-width: 200px;
+  }
+  
+  /* Improve fullscreen mode */
+  .kifu-fullscreen .go-board-container-enhanced {
+    height: calc(100vh - 90px);
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 360px) {
+  .go-board-container-enhanced {
+    padding: 3px;
+  }
+  
+  /* Improve fullscreen mode */
+  .kifu-fullscreen .go-board-container-enhanced {
+    height: calc(100vh - 80px);
+  }
+}
+
+/* Animations */
+@keyframes pulsate {
+  0% { opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { opacity: 0.7; }
+}
+
+.latest-move-indicator {
+  animation: pulsate 2s infinite;
+}
+
+@keyframes pulse-highlight {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.4; }
+}
+
+.highlighted-move {
+  animation: pulse-highlight 1.5s infinite;
+}
+
+.handicap-indicator {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Review mode styling */
+.review-mode {
+  opacity: 0.95;
+}
+
+.review-mode .stone-overlay {
+  cursor: default;
+}
+
+.review-mode .stone-overlay:hover {
+  opacity: 0;
+  fill: transparent;
+}
+
+/* Mobile controls styling */
+.mobile-stone-controls {
+  z-index: 10;
+}
+
+.place-stone-btn {
+  min-width: 140px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.preview-position-indicator {
+  color: var(--text-primary, #374151);
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.9));
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.no-preview-indicator {
+  color: var(--text-secondary, #6b7280);
+}
+
+.touch-instruction {
+  color: var(--text-secondary, #9ca3af);
+  max-width: 200px;
+  line-height: 1.4;
+}
+
+.cancel-instruction {
+  color: var(--text-secondary, #9ca3af);
+}
+
+/* Theme-aware styling */
+.theme-modern .go-board-container-enhanced,
+.theme-modern-light .go-board-container-enhanced {
+  background: transparent;
+}
+
+.theme-modern .preview-position-indicator,
+.theme-modern-light .preview-position-indicator {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.theme-modern .no-preview-indicator,
+.theme-modern-light .no-preview-indicator {
+  color: var(--text-secondary);
+}
+
+.theme-modern .touch-instruction,
+.theme-modern-light .touch-instruction,
+.theme-modern .cancel-instruction,
+.theme-modern-light .cancel-instruction {
+  color: var(--text-secondary);
+}
+
+/* Accessibility improvements */
+.stone-overlay:focus {
+  outline: 2px solid var(--accent-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .go-board-svg {
+    border: 2px solid currentColor;
+  }
+  
+  .stone-overlay:hover {
+    opacity: 0.3;
+    fill: currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .stone,
+  .stone-overlay,
+  .go-board-svg {
+    transition: none;
+  }
+  
+  .latest-move-indicator,
+  .highlighted-move,
+  .handicap-indicator {
+    animation: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .go-board-container-enhanced {
+    padding: 0;
+    box-shadow: none;
+  }
+  
+  .go-board-svg {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .mobile-stone-controls {
+    display: none;
+  }
+} 
