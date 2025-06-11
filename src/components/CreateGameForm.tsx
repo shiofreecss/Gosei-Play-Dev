@@ -17,26 +17,7 @@ interface CreateGameFormProps {
   initialPlayerName?: string;
 }
 
-// Username validation function
-const validateUsername = (name: string): { isValid: boolean; error: string | null } => {
-  if (name.length < 4) {
-    return { isValid: false, error: 'Name must be at least 4 characters long' };
-  }
-  if (name.length > 32) {
-    return { isValid: false, error: 'Name must be no more than 32 characters long' };
-  }
-  
-  const allowedCharsRegex = /^[a-zA-Z0-9\s_-]+$/;
-  if (!allowedCharsRegex.test(name)) {
-    return { isValid: false, error: 'Name can only contain letters, numbers, spaces, underscores, and hyphens' };
-  }
-  
-  if (name.trim().length === 0) {
-    return { isValid: false, error: 'Name cannot be empty or only spaces' };
-  }
-  
-  return { isValid: true, error: null };
-};
+
 
 const CreateGameForm: React.FC<CreateGameFormProps> = ({
   onCreateGame,
@@ -47,10 +28,9 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
   initialPlayerName
 }) => {
   const { isDarkMode } = useAppTheme();
-  const [playerName, setPlayerName] = useState(() => 
+  const [playerName] = useState(() => 
     initialPlayerName || localStorage.getItem('gosei-player-name') || ''
   );
-  const [nameError, setNameError] = useState<string | null>(null);
   
   // Multi-captcha state
   const [multiCaptcha, setMultiCaptcha] = useState<MultiCaptchaChallenge>(() => generateMultiMathCaptcha(4));
@@ -58,6 +38,7 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
   const [captchaError, setCaptchaError] = useState<string | null>(null);
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
+  const [attemptCount, setAttemptCount] = useState(0);
 
   // Rate limiting - use the exported instance
   const rateLimit = captchaRateLimit;
@@ -97,23 +78,10 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
     setCaptchaError(null);
     setCaptchaVerified(false);
     setCurrentProblemIndex(0);
+    setAttemptCount(0);
   };
 
-  // Handle name input changes
-  const handleNameChange = (value: string) => {
-    setPlayerName(value);
-    
-    if (nameError) {
-      setNameError(null);
-    }
-    
-    if (value.length > 0) {
-      const validation = validateUsername(value);
-      if (!validation.isValid) {
-        setNameError(validation.error);
-      }
-    }
-  };
+
 
   // Handle captcha answer selection
   const handleCaptchaAnswer = async (problemIndex: number, answer: number) => {
@@ -146,53 +114,31 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
       if (validation.isValid) {
         setCaptchaVerified(true);
         setCaptchaError(null);
+        
+        // Auto-create game when captcha is solved
+        const playerNameToUse = initialPlayerName || playerName.trim();
+        const validAnswers = newAnswers.filter(ans => ans !== null) as number[];
+        onCreateGame(playerNameToUse, gameOptions, multiCaptcha, validAnswers);
       } else {
         setCaptchaVerified(false);
-        setCaptchaError(validation.error || 'Some answers are incorrect. Please try again.');
-        // Auto-refresh captcha after wrong answers
-        setTimeout(refreshCaptcha, 2000);
+        const newAttemptCount = attemptCount + 1;
+        setAttemptCount(newAttemptCount);
+        
+        if (newAttemptCount >= 3) {
+          setCaptchaError('Maximum attempts reached. Generating new problems...');
+          // Auto-refresh captcha after 3 failed attempts
+          setTimeout(refreshCaptcha, 2000);
+        } else {
+          setCaptchaError(`Some answers are incorrect. ${3 - newAttemptCount} attempts remaining.`);
+          // Reset answers for retry
+          setSelectedAnswers(new Array(4).fill(null));
+          setCurrentProblemIndex(0);
+        }
       }
     }
   };
 
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const trimmedName = playerName.trim();
-    
-    // Validate name
-    if (!trimmedName) {
-      setNameError('Please enter your name');
-      return;
-    }
-    
-    const nameValidation = validateUsername(trimmedName);
-    if (!nameValidation.isValid) {
-      setNameError(nameValidation.error);
-      return;
-    }
-    
-    // Validate captcha
-    if (!captchaVerified) {
-      const unansweredCount = selectedAnswers.filter(ans => ans === null).length;
-      if (unansweredCount > 0) {
-        setCaptchaError(`Please solve all ${multiCaptcha.totalProblems} math problems to continue`);
-      } else {
-        setCaptchaError('Please solve all math problems correctly');
-      }
-      return;
-    }
-    
-    // Clear errors and save name
-    setNameError(null);
-    setCaptchaError(null);
-    localStorage.setItem('gosei-player-name', trimmedName);
-    
-    // Create game with multi-captcha data
-    const validAnswers = selectedAnswers.filter(ans => ans !== null) as number[];
-    onCreateGame(trimmedName, gameOptions, multiCaptcha, validAnswers);
-  };
+
 
   // Calculate progress
   const answeredCount = selectedAnswers.filter(ans => ans !== null).length;
@@ -200,38 +146,13 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
 
   return (
     <div className="create-game-form">
-      <h2 className="text-2xl font-bold mb-6">Create New Game</h2>
-      
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-200 text-red-700 rounded-lg">
           <p>{error}</p>
         </div>
       )}
       
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Player Name Section */}
-        <div>
-          <label htmlFor="playerName" className="block text-sm font-medium text-neutral-700 mb-2">
-            Your Name
-          </label>
-          <input
-            type="text"
-            id="playerName"
-            value={playerName}
-            onChange={(e) => handleNameChange(e.target.value)}
-            className={`form-input w-full ${nameError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-            placeholder="Enter your name (4-32 characters)"
-            maxLength={32}
-            required
-            disabled={isCreating}
-          />
-          {nameError && (
-            <p className="mt-2 text-sm text-red-600">{nameError}</p>
-          )}
-          <p className="mt-1 text-xs text-neutral-500">
-            Name must be 4-32 characters. Only letters, numbers, spaces, underscores, and hyphens allowed.
-          </p>
-        </div>
+      <div className="space-y-6">
 
         {/* Anti-Bot Verification Section */}
         <div className={`p-4 rounded-lg border ${
@@ -307,7 +228,7 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
                           : 'bg-green-100 text-green-700'
                         : isDarkMode
                           ? 'bg-red-800 text-red-200'
-                          : 'bg-red-100 text-red-700'
+                        : 'bg-red-100 text-red-700'
                     }`}>
                       {captchaVerified ? '✓ Correct' : 'Answered'}
                     </div>
@@ -337,14 +258,14 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
                               : 'bg-green-100 border-green-500 text-green-700'
                             : isDarkMode
                               ? 'bg-red-800 border-red-400 text-red-100'
-                              : 'bg-red-100 border-red-500 text-red-700'
+                            : 'bg-red-100 border-red-500 text-red-700'
                           : selectedAnswers[currentProblemIndex] !== null
                             ? isDarkMode
                               ? 'bg-neutral-700 border-neutral-600 text-neutral-400 cursor-not-allowed'
                               : 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
                             : isDarkMode
                               ? 'bg-neutral-800 border-neutral-600 text-neutral-200 hover:bg-neutral-700'
-                              : 'bg-white border-neutral-300 hover:bg-neutral-50 text-neutral-700'
+                            : 'bg-white border-neutral-300 hover:bg-neutral-50 text-neutral-700'
                       }`}
                     >
                       {option}
@@ -369,7 +290,7 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
                       : 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
                     : isDarkMode
                       ? 'bg-neutral-800 border-neutral-600 text-neutral-200 hover:bg-neutral-700'
-                      : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50'
+                    : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50'
                 }`}
               >
                 ← Prev
@@ -392,7 +313,7 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
                       : 'bg-neutral-100 border-neutral-300 text-neutral-400 cursor-not-allowed'
                     : isDarkMode
                       ? 'bg-neutral-800 border-neutral-600 text-neutral-200 hover:bg-neutral-700'
-                      : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50'
+                    : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50'
                 }`}
               >
                 Next →
@@ -404,10 +325,22 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
             <div className={`flex items-center gap-2 text-sm mb-2 ${
               isDarkMode ? 'text-green-400' : 'text-green-600'
             }`}>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-{successMessage}
+              {isCreating ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating your game...
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {successMessage}
+                </>
+              )}
             </div>
           )}
           
@@ -432,27 +365,7 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
           )}
         </div>
 
-        {/* Submit Button */}
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={isCreating || !captchaVerified || !!nameError}
-            className="btn btn-primary px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isCreating ? (
-              <div className="flex items-center gap-2">
-                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Creating Game...
-              </div>
-            ) : (
-              'Create Game'
-            )}
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   );
 };

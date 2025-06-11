@@ -477,7 +477,7 @@ const HomePage: React.FC = () => {
     // Clear any errors and save username for future games
     setUsernameError(null);
     localStorage.setItem(STORAGE_KEYS.USERNAME, trimmedUsername);
-    setShowCreateForm(true);
+    setShowGameSettings(true);
   };
 
   // New handler for CreateGameForm
@@ -503,6 +503,9 @@ const HomePage: React.FC = () => {
           captchaAnswer
         })
       });
+      
+      // Close the captcha modal on successful creation
+      setShowCreateForm(false);
       
       // Set a timeout to check if navigation hasn't happened
       setTimeout(() => {
@@ -1039,37 +1042,7 @@ const HomePage: React.FC = () => {
         </header>
 
         <div className="max-w-6xl mx-auto">
-          {showCreateForm ? (
-            // Create Game Form with Captcha
-            <div className="bg-white rounded-xl shadow overflow-hidden">
-              <div className="p-6 md:p-10">
-                <div className="flex items-center justify-between mb-6">
-                  <button
-                    onClick={() => setShowCreateForm(false)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-200 hover:scale-105 ${
-                      isDarkMode
-                        ? 'bg-neutral-700 border-neutral-600 text-neutral-200 hover:bg-neutral-600 hover:border-neutral-500'
-                        : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 shadow-sm hover:shadow-md'
-                    }`}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    <span className="font-medium">Back</span>
-                  </button>
-                </div>
-                
-                <CreateGameForm
-                  onCreateGame={handleCreateGameWithCaptcha}
-                  gameOptions={gameOptions}
-                  onUpdateGameOptions={updateGameOption}
-                  isCreating={isCreatingGame}
-                  error={error || localError}
-                  initialPlayerName={username}
-                />
-              </div>
-            </div>
-          ) : !showGameSettings ? (
+          {!showGameSettings ? (
             // Initial screen with name input
             <div className="bg-white rounded-xl shadow overflow-hidden">
           <div className="lg:flex">
@@ -1209,13 +1182,13 @@ const HomePage: React.FC = () => {
                 {/* Game Options Panel */}
                 <GameOptionsPanel />
                 
-                {/* Let's Play button */}
+                {/* Create Game button */}
                 <div className="mt-8 flex justify-end">
                     <button
-                    onClick={handleStartGame}
+                    onClick={() => setShowCreateForm(true)}
                     className="btn btn-primary text-lg py-3 px-8"
                   >
-                    Let's Play
+                    Create Game
                     </button>
                 </div>
                 </div>
@@ -1224,6 +1197,46 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       
+      {/* Captcha Modal */}
+      {showCreateForm && (
+        <div className="fixed inset-0 z-[9999] overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={() => setShowCreateForm(false)}></div>
+            <div className={`relative rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto ${
+              isDarkMode ? 'bg-neutral-800' : 'bg-white'
+            }`}>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className={`text-2xl font-bold ${
+                  isDarkMode ? 'text-neutral-100' : 'text-neutral-900'
+                }`}>Anti-Bot Verification</h2>
+                <button
+                  onClick={() => setShowCreateForm(false)}
+                  className={`p-2 rounded-lg transition-colors ${
+                    isDarkMode 
+                      ? 'hover:bg-neutral-700 text-neutral-300 hover:text-neutral-100' 
+                      : 'hover:bg-neutral-100 text-neutral-700 hover:text-neutral-900'
+                  }`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <CreateGameForm
+                onCreateGame={handleCreateGameWithCaptcha}
+                gameOptions={gameOptions}
+                onUpdateGameOptions={updateGameOption}
+                isCreating={isCreatingGame}
+                error={error || localError}
+                initialPlayerName={username}
+              />
+            </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
