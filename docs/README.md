@@ -2,6 +2,10 @@
 
 A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js. Play Go online with friends around the world with advanced time controls, multiple board sizes, and intelligent game type management.
 
+## 🌐 **Play Now: [https://play.gosei.xyz](https://play.gosei.xyz)**
+
+**Try it live!** The production version is fully deployed and ready for tournament-quality Go games.
+
 ## Current Version: v1.1.0 🎯
 
 **Latest Update**: Play Again Feature - Seamlessly start new games with the same opponent while preserving all game settings and providing smooth state transitions.
@@ -161,11 +165,16 @@ A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js.
 
 ## Getting Started
 
-### Prerequisites
+### 🚀 **Quick Start - Play Online**
+Simply visit **[https://play.gosei.xyz](https://play.gosei.xyz)** to start playing immediately! No installation required.
+
+### 💻 **Local Development**
+
+#### Prerequisites
 - Node.js 16+ 
 - npm or yarn
 
-### Installation
+#### Installation
 
 1. **Clone the repository**
    ```bash
@@ -332,6 +341,10 @@ All game preferences are automatically saved to localStorage:
 5. Open a Pull Request
 
 ## Documentation
+
+### Getting Started
+- 🚀 **[Quick Start Guide](QUICK_START.md)** - Start playing in minutes!
+- 📋 [Project Status](PROJECT_STATUS.md) - Current development status
 
 ### Game Features
 - [Game Type Time Control Behavior](GAME_TYPE_TIME_CONTROL_BEHAVIOR.md)

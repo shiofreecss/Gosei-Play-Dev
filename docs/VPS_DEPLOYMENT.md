@@ -2,6 +2,10 @@
 
 This guide walks through setting up a Socket.IO server with database integration on an AlmaLinux 9 VPS.
 
+## 🌐 **Production Instance: [https://play.gosei.xyz](https://play.gosei.xyz)** ✅
+
+This deployment guide was used to successfully deploy the live production instance of Gosei Play.
+
 ## Server Setup
 
 ### Initial Setup

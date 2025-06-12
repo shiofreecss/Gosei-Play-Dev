@@ -2,6 +2,10 @@
 
 Complete deployment guide for Gosei Go game server on a 2GB RAM VPS with load balancing for 100 concurrent users.
 
+## 🌐 **Live Production: [https://play.gosei.xyz](https://play.gosei.xyz)** ✅
+
+This deployment guide was successfully used to deploy the live production instance.
+
 **Domain**: gosei-svr-01.beaver.foundation  
 **Target**: 100 concurrent users  
 **Server**: 2GB RAM VPS  

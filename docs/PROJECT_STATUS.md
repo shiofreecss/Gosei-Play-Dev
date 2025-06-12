@@ -4,6 +4,8 @@
 **Version**: v1.1.0  
 **Status**: 🟢 **PRODUCTION READY** - Complete Go Platform with Game Continuation  
 
+## 🌐 **Live Production: [https://play.gosei.xyz](https://play.gosei.xyz)**
+
 ## 📈 Project Overview
 
 Gosei Play is a **professional-grade, tournament-quality Go platform** that provides seamless real-time multiplayer gameplay with advanced time controls and comprehensive game management features.
