@@ -25,6 +25,7 @@ export interface Player {
   byoYomiPeriodsLeft?: number; // Number of byo-yomi periods remaining
   byoYomiTimeLeft?: number; // Time remaining in current byo-yomi period (seconds)
   isInByoYomi?: boolean; // Whether player is currently in byo-yomi
+  isSpectator?: boolean; // Whether this is a spectator
 }
 
 // Update ScoringRule to include new rule types
@@ -70,6 +71,7 @@ export interface GameState {
   code: string;
   board: Board;
   players: Player[];
+  spectators?: Player[]; // Array of spectating players
   currentTurn: StoneColor;
   capturedStones: {
     black: number;

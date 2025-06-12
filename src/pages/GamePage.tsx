@@ -75,6 +75,7 @@ const GamePage: React.FC = () => {
   } = useGame();
   const [username, setUsername] = useState<string>(() => localStorage.getItem('gosei-player-name') || '');
   const [showJoinForm, setShowJoinForm] = useState<boolean>(true);
+  const [joinAsSpectator, setJoinAsSpectator] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [syncing, setSyncing] = useState<boolean>(false);
   const [usernameError, setUsernameError] = useState<string | null>(null);
@@ -384,6 +385,16 @@ const GamePage: React.FC = () => {
       }
     });
 
+    // Listen for spectator joined (no notifications)
+    socket.on('spectatorJoined', (data: { gameId: string, playerId: string, username: string, isReconnect?: boolean }) => {
+      console.log(`Spectator ${data.username} ${data.isReconnect ? 'rejoined' : 'joined'} the game`);
+    });
+
+    // Listen for spectator left (no notifications)
+    socket.on('spectatorLeft', (data: { gameId: string, playerId: string, username: string }) => {
+      console.log(`Spectator ${data.username} left the game`);
+    });
+
     // Listen for score confirmation updates
     socket.on('scoreConfirmationUpdate', (data: { gameId: string, playerId: string, playerColor: string, confirmed: boolean, scoreConfirmation: { black: boolean, white: boolean } }) => {
       console.log(`Score confirmation update: ${data.playerColor} ${data.confirmed ? 'confirmed' : 'unconfirmed'}`);
@@ -569,7 +580,7 @@ const GamePage: React.FC = () => {
       setUsernameError(null);
       localStorage.setItem('gosei-player-name', trimmedUsername);
       // Join the game using the joinGame function
-      joinGame(gameId, trimmedUsername);
+      joinGame(gameId, trimmedUsername, joinAsSpectator);
       setShowJoinForm(false);
     }
   };
@@ -785,12 +796,31 @@ const GamePage: React.FC = () => {
                 Name must be 4-32 characters. Only letters, numbers, spaces, underscores, and hyphens allowed.
               </p>
             </div>
+            
+            {/* Spectator Mode Option */}
+            <div className="mb-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={joinAsSpectator}
+                  onChange={(e) => setJoinAsSpectator(e.target.checked)}
+                  className="form-checkbox h-4 w-4 text-primary-600 rounded border-neutral-300 focus:ring-primary-500 focus:ring-offset-0"
+                />
+                <span className="text-sm font-medium text-neutral-700">
+                  Join as spectator (watch only)
+                </span>
+              </label>
+              <p className="mt-1 text-xs text-neutral-500">
+                As a spectator, you can watch the game but cannot play moves.
+              </p>
+            </div>
+            
             <div className="flex gap-2">
               <button
                 type="submit"
                 className="flex-1 btn btn-primary"
               >
-                Join Game
+                {joinAsSpectator ? 'Watch Game' : 'Join Game'}
               </button>
               <button
                 type="button"

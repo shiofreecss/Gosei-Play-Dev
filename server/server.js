@@ -360,8 +360,8 @@ io.on('connection', (socket) => {
   });
 
   // Join an existing game
-  socket.on('joinGame', ({ gameId, playerId, username, isReconnect }) => {
-    log(`Player ${playerId} (${username}) joining game ${gameId}`);
+  socket.on('joinGame', ({ gameId, playerId, username, isReconnect, asSpectator }) => {
+    log(`Player ${playerId} (${username}) joining game ${gameId}${asSpectator ? ' as spectator' : ''}`);
     
     // Add socket to the game's room
     socket.join(gameId);
@@ -371,10 +371,16 @@ io.on('connection', (socket) => {
     const gameState = activeGames.get(gameId);
     
     if (gameState) {
-      // If this is a reconnect, ensure we keep the player's existing time
+      // Initialize spectators array if it doesn't exist
+      if (!gameState.spectators) {
+        gameState.spectators = [];
+      }
+      
+      // If this is a reconnection or spectator joining
       if (isReconnect) {
-        // Find the existing player in the game state
+        // Find the existing player in the game state (check both players and spectators)
         const existingPlayer = gameState.players.find(p => p.id === playerId);
+        const existingSpectator = gameState.spectators.find(p => p.id === playerId);
         
         if (existingPlayer) {
           log(`Reconnect: Preserving time for player ${playerId}: ${existingPlayer.timeRemaining} seconds remaining`);
@@ -396,12 +402,56 @@ io.on('connection', (socket) => {
             gameId,
             playerId,
             username,
-            isReconnect: true
+            isReconnect: true,
+            isSpectator: false
           });
+        } else if (existingSpectator) {
+          log(`Spectator reconnect: ${playerId}`);
+          socket.emit('gameState', gameState);
+          
+          // Spectators rejoin silently - no notifications
         } else {
-          log(`Warning: Reconnecting player ${playerId} not found in game ${gameId}`);
+          log(`Warning: Reconnecting player/spectator ${playerId} not found in game ${gameId}`);
           socket.emit('gameState', gameState);
         }
+      } else if (asSpectator || gameState.players.length >= 2) {
+        // Join as spectator if explicitly requested or if game already has 2 players
+        const spectator = {
+          id: playerId,
+          username,
+          color: null,
+          isSpectator: true
+        };
+        
+        // Check if spectator already exists
+        const existingSpectatorIndex = gameState.spectators.findIndex(s => s.id === playerId);
+        if (existingSpectatorIndex === -1) {
+          gameState.spectators.push(spectator);
+          log(`Added spectator ${username} to game ${gameId}`);
+        }
+        
+        // Update stored game state
+        activeGames.set(gameId, gameState);
+        
+        // Send acknowledgment
+        socket.emit('joinedGame', { 
+          success: true, 
+          gameId, 
+          playerId,
+          isSpectator: true,
+          numPlayers: gameState.players.length,
+          numSpectators: gameState.spectators.length,
+          status: gameState.status,
+          currentTurn: gameState.currentTurn
+        });
+        
+        // Spectators join silently - no notifications
+        
+        // Use the new broadcast function for game updates
+        broadcastGameUpdate(gameId, gameState);
+        
+        log(`Game ${gameId} now has ${gameState.players.length} players and ${gameState.spectators.length} spectators`);
+        return;
       } else {
         // Handle new player joining (not a reconnect)
         // Find the player in the game state
@@ -1369,18 +1419,33 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Handle player leaving
+  // Handle player/spectator leaving
   socket.on('leaveGame', ({ gameId, playerId }) => {
-    log(`Player ${playerId} leaving game ${gameId}`);
+    log(`Player/Spectator ${playerId} leaving game ${gameId}`);
     
-    // Get the game state to find player username
+    // Get the game state to find player/spectator username
     const gameState = activeGames.get(gameId);
     let username = 'A player'; // Default fallback
+    let isSpectator = false;
     
     if (gameState) {
+      // Check if it's a player leaving
       const leavingPlayer = gameState.players.find(p => p.id === playerId);
       if (leavingPlayer && leavingPlayer.username) {
         username = leavingPlayer.username;
+      } else {
+        // Check if it's a spectator leaving
+        const leavingSpectator = gameState.spectators?.find(s => s.id === playerId);
+        if (leavingSpectator && leavingSpectator.username) {
+          username = leavingSpectator.username;
+          isSpectator = true;
+          
+          // Remove spectator from the list
+          gameState.spectators = gameState.spectators.filter(s => s.id !== playerId);
+          activeGames.set(gameId, gameState);
+          
+          log(`Spectator ${username} removed from game ${gameId}`);
+        }
       }
     }
     
@@ -1388,18 +1453,24 @@ io.on('connection', (socket) => {
     socket.leave(gameId);
     socketToGame.delete(socket.id);
     
-    // Notify other players with username included
-    socket.to(gameId).emit('playerLeft', {
-      gameId,
-      playerId,
-      username
-    });
+    // Notify other players/spectators with username included
+    if (isSpectator) {
+      // Spectators leave silently - no notifications
+      // But we still need to broadcast the updated game state so spectator count updates
+      broadcastGameUpdate(gameId, gameState);
+    } else {
+      socket.to(gameId).emit('playerLeft', {
+        gameId,
+        playerId,
+        username
+      });
+    }
     
     // Check if there are any players left in the game room
     const room = io.sockets.adapter.rooms.get(gameId);
     const clientsCount = room ? room.size : 0;
     
-    log(`Game ${gameId} has ${clientsCount} clients remaining after player left`);
+    log(`Game ${gameId} has ${clientsCount} clients remaining after ${isSpectator ? 'spectator' : 'player'} left`);
     
     // If no players left in the room, remove the game immediately
     if (!room || clientsCount === 0) {

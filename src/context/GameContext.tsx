@@ -43,7 +43,7 @@ interface GameContextType {
   moveError: string | null;
   currentPlayer: Player | null;
   createGame: (options: GameOptions & { playerName?: string }) => void;
-  joinGame: (gameId: string, username: string) => void;
+  joinGame: (gameId: string, username: string, asSpectator?: boolean) => void;
   placeStone: (position: Position) => void;
   passTurn: () => void;
   leaveGame: () => void;
@@ -390,8 +390,16 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           }
         });
         
+        newSocket.on('spectatorJoined', (joinData) => {
+          console.log(`Spectator ${joinData.username} (${joinData.playerId}) joined the game`);
+        });
+        
         newSocket.on('playerLeft', (leaveData) => {
           console.log(`Player ${leaveData.playerId} left the game`);
+        });
+        
+        newSocket.on('spectatorLeft', (leaveData) => {
+          console.log(`Spectator ${leaveData.playerId} left the game`);
         });
         
         newSocket.on('playerDisconnected', (disconnectData) => {
@@ -1160,7 +1168,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   };
   
   // Join an existing game
-  const joinGame = async (gameIdOrCode: string, username: string) => {
+  const joinGame = async (gameIdOrCode: string, username: string, asSpectator: boolean = false) => {
     if (!gameIdOrCode || !username) {
       dispatch({ type: 'GAME_ERROR', payload: 'Game ID/link and username are required.' });
       return;
@@ -1169,7 +1177,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     dispatch({ type: 'JOIN_GAME_START' });
     
     try {
-      console.log(`Trying to join game with input: ${gameIdOrCode}`);
+      console.log(`Trying to join game with input: ${gameIdOrCode}${asSpectator ? ' as spectator' : ''}`);
       
       // Extract gameId from link if user pasted a URL
       let gameId = gameIdOrCode;
@@ -1197,8 +1205,13 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       
       console.log(`Found game: ${foundGame.code}, players: ${foundGame.players.length}, status: ${foundGame.status}`);
       
+      // Initialize spectators array if it doesn't exist
+      if (!foundGame.spectators) {
+        foundGame.spectators = [];
+      }
+      
       // Check if game already has two players and is in progress
-      if (foundGame.players.length >= 2) {
+      if (foundGame.players.length >= 2 && !asSpectator) {
         // If the player is trying to rejoin (e.g., after refresh)
         const existingPlayer = foundGame.players.find(p => 
           p.username.toLowerCase() === username.toLowerCase());
@@ -1227,8 +1240,48 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           return;
         }
         
-        console.log(`Game already has ${foundGame.players.length} players and username doesn't match any existing player`);
-        dispatch({ type: 'GAME_ERROR', payload: 'This game already has two players.' });
+        console.log(`Game already has ${foundGame.players.length} players and username doesn't match any existing player. Joining as spectator instead.`);
+        // Auto-switch to spectator mode if game is full
+        asSpectator = true;
+      }
+      
+      // Handle spectator joining
+      if (asSpectator || foundGame.players.length >= 2) {
+        // Check if already a spectator
+        const existingSpectator = foundGame.spectators.find(s => 
+          s.username.toLowerCase() === username.toLowerCase());
+        
+        let spectator: Player;
+        if (existingSpectator) {
+          spectator = existingSpectator;
+        } else {
+          spectator = {
+            id: uuidv4(),
+            username,
+            color: null,
+            isSpectator: true
+          };
+          foundGame.spectators.push(spectator);
+        }
+        
+        // If we have a socket connection, join as spectator
+        if (state.socket && state.socket.connected) {
+          state.socket.emit('joinGame', {
+            gameId: foundGame.id,
+            playerId: spectator.id,
+            username: spectator.username,
+            asSpectator: true,
+            isReconnect: !!existingSpectator
+          });
+        }
+        
+        dispatch({
+          type: 'JOIN_GAME_SUCCESS',
+          payload: { 
+            gameState: foundGame, 
+            player: spectator 
+          },
+        });
         return;
       }
       

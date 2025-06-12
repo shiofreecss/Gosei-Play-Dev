@@ -7,6 +7,7 @@ import BoardThemeButton from '../BoardThemeButton';
 import BoardCoordinateButton from '../BoardCoordinateButton';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import ConfirmationModal from '../ConfirmationModal';
+import SpectatorList from '../SpectatorList';
 import { useAppTheme } from '../../context/AppThemeContext';
 
 // Helper function to check if a move is a pass
@@ -96,6 +97,9 @@ const GameInfo: React.FC<GameInfoProps> = ({
   
   // Check if it's the current player's turn
   const isPlayerTurn = currentPlayer?.color === currentTurn;
+  
+  // Check if current user is a spectator
+  const isSpectator = currentPlayer?.isSpectator === true;
   
   // Check for recent passes
   const lastMove = history.length > 0 ? history[history.length - 1] : null;
@@ -370,7 +374,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
         <div className={`grid grid-cols-2 gap-2 ${isTablet ? 'gap-4' : 'sm:gap-3'}`}>
           <button
             onClick={onPassTurn}
-            disabled={status !== 'playing' || !isPlayerTurn}
+            disabled={status !== 'playing' || !isPlayerTurn || isSpectator}
             className={`flex items-center justify-center gap-1 ${
               isTablet 
                 ? 'text-base gap-3 px-6 py-4' 
@@ -385,7 +389,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
           
           <button
             onClick={onRequestUndo}
-            disabled={status !== 'playing' || history.length === 0 || !!undoRequest || isPlayerTurn}
+            disabled={status !== 'playing' || history.length === 0 || !!undoRequest || isPlayerTurn || isSpectator}
             className={`flex items-center justify-center gap-2 ${
               isTablet 
                 ? 'text-base gap-4 px-6 py-4' 
@@ -424,7 +428,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
           
           <button
             onClick={handleResignClick}
-            disabled={status !== 'playing'}
+            disabled={status !== 'playing' || isSpectator}
             className={`flex items-center justify-center gap-2 ${
               isTablet 
                 ? 'text-base gap-4 px-6 py-4' 
@@ -451,7 +455,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
             <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${isTablet ? 'h-5 w-5' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            Leave Game
+            {isSpectator ? 'Stop Watching' : 'Leave Game'}
           </button>
         </div>
       </div>
@@ -534,6 +538,16 @@ const GameInfo: React.FC<GameInfoProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Spectator Count */}
+      {gameState.spectators && gameState.spectators.length > 0 && (
+        <div className="mt-3 sm:mt-4">
+          <SpectatorList 
+            spectators={gameState.spectators} 
+            currentPlayer={currentPlayer || null} 
+          />
+        </div>
+      )}
 
       {/* Scoring Panel - Show only in scoring or finished state */}
       {(status === 'scoring' || status === 'finished') && (
