@@ -1037,16 +1037,22 @@ const HomePage: React.FC = () => {
     <div className="min-h-screen bg-neutral-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <header className="text-center mb-12 relative">
-          {/* Theme toggle button positioned at top right */}
-          <div className="absolute top-0 right-0 md:relative md:flex md:justify-end md:mb-4">
-            <ThemeToggleButton />
-          </div>
-          
-          {/* Logo and title - centered on all screens but with better mobile spacing */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-2 pt-12 md:pt-0">
-            <GoseiLogo size={48} />
-            <h1 className="text-3xl sm:text-4xl font-bold text-primary-700">Gosei Play</h1>
+        <header className="text-center mb-12">
+          {/* Logo, title, and theme toggle - all on same row */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-2">
+            {/* Left spacer for mobile centering */}
+            <div className="hidden sm:block w-20"></div>
+            
+            {/* Logo and title - centered */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <GoseiLogo size={48} />
+              <h1 className="text-3xl sm:text-4xl font-bold text-primary-700">Gosei Play</h1>
+            </div>
+            
+            {/* Theme toggle - right aligned on desktop, centered on mobile */}
+            <div className="flex justify-center sm:justify-end w-20">
+              <ThemeToggleButton />
+            </div>
           </div>
           <p className="text-lg sm:text-xl text-neutral-600">
             Play Go online with friends around the world
