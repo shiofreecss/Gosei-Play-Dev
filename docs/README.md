@@ -6,6 +6,20 @@ A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js.
 
 **Try it live!** The production version is fully deployed and ready for tournament-quality Go games.
 
+## Screenshots
+
+### 🏠 **Main Page - Welcome to Gosei Play**
+![Main Page](../example/1%20-%20mainpage.png)
+
+### 🏁 **Multiple Board Sizes - Choose Your Challenge**
+![Multiple Board Sizes](../example/2%20-%20support-multiple-go-board.png)
+
+### 🎮 **Game View - Professional Gaming Experience**
+![Game View](../example/3%20-%20play-view.png)
+
+### 📱 **Mobile Experience - Play Anywhere**
+![Mobile View](../example/4%20-%20mobile-play-view-and-place-button.png)
+
 ## Current Version: v1.1.0 🎯
 
 **Latest Update**: Play Again Feature - Seamlessly start new games with the same opponent while preserving all game settings and providing smooth state transitions.
