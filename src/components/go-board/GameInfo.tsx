@@ -524,7 +524,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
             {/* Board Coordinates Setting */}
             {onToggleCoordinates && (
               <div className={`flex items-center justify-between text-xs ${isTablet ? 'text-base' : ''}`}>
-                <span className={`${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'} ${isTablet ? 'text-base' : ''}`}>Coordinates</span>
+                <span className={`${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'} ${isTablet ? 'text-base' : ''}`}>Coords</span>
                 <BoardCoordinateButton 
                   showCoordinates={showCoordinates} 
                   onToggle={onToggleCoordinates} 

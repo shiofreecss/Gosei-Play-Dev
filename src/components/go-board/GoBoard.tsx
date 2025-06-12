@@ -142,7 +142,9 @@ const GoBoard: React.FC<GoBoardProps> = ({
       const minDimension = Math.min(width, height);
       
       // Calculate optimal cell size to fill the full container width
-      const maxBoardSize = Math.min(width * 0.95, height * 0.95); // Use 95% of available space
+      // Use 99% of screen width on mobile, 95% on other devices
+      const widthPercentage = isMobile ? 0.99 : 0.95;
+      const maxBoardSize = Math.min(width * widthPercentage, height * 0.95);
       let baseCellSize = Math.floor(maxBoardSize / (board.size + 1)); // +1 for minimal padding
       
       // Ensure minimum cell size for playability
@@ -177,7 +179,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [board.size]);
+  }, [board.size, isMobile]);
 
   const boardSize = (board.size - 1) * cellSize;
   const boardPadding = showCoordinates ? cellSize * 0.8 : cellSize * 0.3; // Reduce padding when coordinates are hidden
@@ -394,6 +396,8 @@ const GoBoard: React.FC<GoBoardProps> = ({
   // Render board grid lines
   const renderGrid = useCallback(() => {
     const lines = [];
+    // Make grid lines 40% thinner on mobile (60% of original width)
+    const gridLineWidth = isMobile ? themeConfig.borderWidth * 0.6 : themeConfig.borderWidth;
     
     // Vertical lines
     for (let x = 0; x < board.size; x++) {
@@ -405,7 +409,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
           x2={x * cellSize}
           y2={boardSize}
           stroke={themeConfig.lineColor}
-          strokeWidth={themeConfig.borderWidth}
+          strokeWidth={gridLineWidth}
         />
       );
     }
@@ -420,13 +424,13 @@ const GoBoard: React.FC<GoBoardProps> = ({
           x2={boardSize}
           y2={y * cellSize}
           stroke={themeConfig.lineColor}
-          strokeWidth={themeConfig.borderWidth}
+          strokeWidth={gridLineWidth}
         />
       );
     }
     
     return lines;
-  }, [board.size, cellSize, boardSize, themeConfig.lineColor, themeConfig.borderWidth]);
+  }, [board.size, cellSize, boardSize, themeConfig.lineColor, themeConfig.borderWidth, isMobile]);
 
   // Render star points (hoshi)
   const renderHoshiPoints = useCallback(() => {

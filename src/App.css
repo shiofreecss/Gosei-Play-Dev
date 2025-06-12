@@ -1194,8 +1194,8 @@
 
 .theme-modern .board-theme-option.selected,
 .theme-modern-light .board-theme-option.selected {
-  background-color: var(--accent-color);
-  color: var(--text-primary);
+  background-color: rgba(93, 93, 255, 0.15) !important;
+  color: #1e3a8a !important;
 }
 
 .theme-modern .board-theme-option-description,
@@ -1384,7 +1384,28 @@
   -webkit-backdrop-filter: blur(5px);
 }
 
+/* Fix Board Coordinate button in modern theme */
+.theme-modern .board-coordinate-button,
+.theme-modern-light .board-coordinate-button {
+  background-color: var(--button-secondary-bg);
+  border: 1px solid var(--border-color);
+  color: var(--button-secondary-text);
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
 .theme-modern .board-theme-dropdown {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.theme-modern .board-coordinate-dropdown,
+.theme-modern-light .board-coordinate-dropdown {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -1402,11 +1423,32 @@
 }
 
 .theme-modern .board-theme-option.selected {
-  background-color: var(--accent-color);
-  color: var(--text-primary);
+  background-color: rgba(93, 93, 255, 0.15) !important;
+  color: #1e3a8a !important;
 }
 
 .theme-modern .board-theme-option-description {
+  color: var(--text-secondary);
+}
+
+.theme-modern .board-coordinate-option,
+.theme-modern-light .board-coordinate-option {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.theme-modern .board-coordinate-option:hover,
+.theme-modern-light .board-coordinate-option:hover {
+  background-color: var(--bg-secondary);
+}
+
+.theme-modern .board-coordinate-option.selected,
+.theme-modern-light .board-coordinate-option.selected {
+  background-color: rgba(93, 93, 255, 0.15) !important;
+  color: #1e3a8a !important;
+}
+
+.theme-modern .board-coordinate-option-description,
+.theme-modern-light .board-coordinate-option-description {
   color: var(--text-secondary);
 }
 

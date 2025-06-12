@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useBoardTheme, BoardTheme } from '../context/BoardThemeContext';
-import { useAppTheme } from '../context/AppThemeContext';
+import useDeviceDetect from '../hooks/useDeviceDetect';
 
 const BoardThemeButton: React.FC = () => {
   const { currentTheme, setTheme, availableThemes } = useBoardTheme();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isMobile } = useDeviceDetect();
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -46,7 +47,7 @@ const BoardThemeButton: React.FC = () => {
       >
         <div className="flex items-center gap-2">
           <div 
-            className={`w-6 h-6 aspect-square flex-shrink-0 rounded border border-neutral-400 board-theme-${currentTheme}`}
+            className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'} aspect-square flex-shrink-0 rounded border border-neutral-400 board-theme-${currentTheme}`}
             style={{ position: 'relative' }}
           >
             {/* Preview stones */}
@@ -59,9 +60,9 @@ const BoardThemeButton: React.FC = () => {
               style={{ width: '35%', height: '35%', top: '45%', left: '45%' }} 
             />
           </div>
-          <span className="text-sm font-medium">Theme</span>
+          <span className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium`}>Theme</span>
         </div>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width={isMobile ? "14" : "16"} height={isMobile ? "14" : "16"} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="6 15 12 9 18 15"></polyline>
         </svg>
       </button>
@@ -72,7 +73,7 @@ const BoardThemeButton: React.FC = () => {
           style={dropdownStyle}
         >
           <div className="p-2">
-            <div className="text-sm font-medium text-neutral-700 px-3 py-2">
+            <div className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium text-neutral-700 px-3 py-2`}>
               Select Theme
             </div>
             {availableThemes.map((theme) => (
@@ -89,7 +90,7 @@ const BoardThemeButton: React.FC = () => {
                 }`}
               >
                 <div 
-                  className={`w-8 h-8 aspect-square flex-shrink-0 rounded border border-neutral-400 board-theme-${theme.id}`}
+                  className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} aspect-square flex-shrink-0 rounded border border-neutral-400 board-theme-${theme.id}`}
                   style={{ position: 'relative' }}
                 >
                   {/* Preview stones */}
@@ -103,8 +104,8 @@ const BoardThemeButton: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <div className="font-medium">{formatThemeName(theme.id)}</div>
-                  <div className="text-xs text-neutral-500 board-theme-option-description">{theme.description}</div>
+                  <div className={`${isMobile ? 'text-sm' : 'text-base'} font-medium`}>{formatThemeName(theme.id)}</div>
+                  <div className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-neutral-500 board-theme-option-description`}>{theme.description}</div>
                 </div>
               </button>
             ))}
