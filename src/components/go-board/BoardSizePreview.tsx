@@ -62,7 +62,7 @@ const BoardSizePreview: React.FC<BoardSizePreviewProps> = ({ size, className = '
     <div className={`relative aspect-square bg-amber-100 ${className}`}>
       <svg
         viewBox="0 0 100 100"
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full board-preview-svg"
         style={{ padding: '5%' }}
       >
         {gridLines}

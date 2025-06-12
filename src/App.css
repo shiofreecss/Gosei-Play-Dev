@@ -799,6 +799,20 @@
     width: calc(min(30%, 2.5vw)) !important;
     height: calc(min(30%, 2.5vw)) !important;
   }
+
+  /* Thinner gridlines on mobile */
+  .board-intersection::before {
+    height: 0.5px;
+  }
+
+  .board-intersection::after {
+    width: 0.5px;
+  }
+
+  /* Thinner preview board gridlines on mobile */
+  .board-preview-svg line {
+    stroke-width: 0.25 !important;
+  }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
@@ -809,6 +823,20 @@
   .stone .last-move-dot {
     width: calc(min(30%, 2vw)) !important;
     height: calc(min(30%, 2vw)) !important;
+  }
+
+  /* Slightly thinner gridlines on tablet */
+  .board-intersection::before {
+    height: 0.75px;
+  }
+
+  .board-intersection::after {
+    width: 0.75px;
+  }
+
+  /* Slightly thinner preview board gridlines on tablet */
+  .board-preview-svg line {
+    stroke-width: 0.35 !important;
   }
 }
 
