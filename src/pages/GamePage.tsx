@@ -19,6 +19,7 @@ import MobileStoneControls from '../components/go-board/MobileStoneControls';
 import { playStoneSound } from '../utils/soundUtils';
 import useDeviceDetect from '../hooks/useDeviceDetect';
 
+
 // Helper function to check game status safely
 const hasStatus = (gameState: GameState, status: 'waiting' | 'playing' | 'finished' | 'scoring'): boolean => {
   return gameState.status === status;
@@ -106,6 +107,20 @@ const GamePage: React.FC = () => {
     currentMoveIndex: number;
     isReviewing: boolean;
   } | null>(null);
+
+  // Get device type for coordinate default
+  const { isMobile, isTablet } = useDeviceDetect();
+
+  // Coordinate display state
+  const [showCoordinates, setShowCoordinates] = useState<boolean>(() => {
+    // Initialize from localStorage if available
+    const savedPref = localStorage.getItem('gosei-show-coordinates');
+    if (savedPref) {
+      return JSON.parse(savedPref);
+    }
+    // Default to false on mobile/tablet, true on desktop
+    return !(isMobile || isTablet);
+  });
 
   // Helper function to show notifications
   const showNotification = useCallback((message: string, type: 'info' | 'warning' | 'error' | 'resign' | 'leave', result?: string) => {
@@ -435,6 +450,11 @@ const GamePage: React.FC = () => {
         });
       }
     }
+  };
+
+  const handleToggleCoordinates = (show: boolean) => {
+    setShowCoordinates(show);
+    localStorage.setItem('gosei-show-coordinates', JSON.stringify(show));
   };
 
   const handleStonePlace = (position: Position) => {
@@ -898,6 +918,7 @@ const GamePage: React.FC = () => {
                   reviewStones={reviewBoardState?.stones || []}
                   onPreviewPositionChange={(pos) => setPreviewPosition(pos)}
                   previewPosition={previewPosition}
+                  showCoordinates={showCoordinates}
                 />
                 
                 {/* Game Review Controls - Only shown when game is finished */}
@@ -941,6 +962,8 @@ const GamePage: React.FC = () => {
                 onSaveNow={saveGameNow}
                 onConfirmScore={handleConfirmScore}
                 onCancelScoring={handleCancelScoring}
+                showCoordinates={showCoordinates}
+                onToggleCoordinates={handleToggleCoordinates}
               />
               
               {/* Debug Controls - Only shown when dev tools are enabled */}

@@ -4,6 +4,7 @@ import TimeControl from '../TimeControl';
 import SoundSettings from '../SoundSettings';
 import PlayerAvatar from '../PlayerAvatar';
 import BoardThemeButton from '../BoardThemeButton';
+import BoardCoordinateButton from '../BoardCoordinateButton';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import ConfirmationModal from '../ConfirmationModal';
 import { useAppTheme } from '../../context/AppThemeContext';
@@ -39,6 +40,8 @@ interface GameInfoProps {
   onSaveNow?: () => void;
   onConfirmScore?: () => void;
   onCancelScoring?: () => void;
+  showCoordinates?: boolean;
+  onToggleCoordinates?: (show: boolean) => void;
 }
 
 const GameInfo: React.FC<GameInfoProps> = ({ 
@@ -56,7 +59,9 @@ const GameInfo: React.FC<GameInfoProps> = ({
   onToggleAutoSave,
   onSaveNow,
   onConfirmScore,
-  onCancelScoring
+  onCancelScoring,
+  showCoordinates = true,
+  onToggleCoordinates
 }) => {
   const { isMobile, isTablet, isDesktop } = useDeviceDetect();
   const { isDarkMode } = useAppTheme();
@@ -515,6 +520,17 @@ const GameInfo: React.FC<GameInfoProps> = ({
               <span className={`${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'} ${isTablet ? 'text-base' : ''}`}>Board Theme</span>
               <BoardThemeButton />
             </div>
+            
+            {/* Board Coordinates Setting */}
+            {onToggleCoordinates && (
+              <div className={`flex items-center justify-between text-xs ${isTablet ? 'text-base' : ''}`}>
+                <span className={`${isDarkMode ? 'text-neutral-300' : 'text-neutral-600'} ${isTablet ? 'text-base' : ''}`}>Coordinates</span>
+                <BoardCoordinateButton 
+                  showCoordinates={showCoordinates} 
+                  onToggle={onToggleCoordinates} 
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

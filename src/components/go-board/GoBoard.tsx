@@ -28,6 +28,8 @@ interface GoBoardProps {
   showMobileControls?: boolean;
   onPreviewPositionChange?: (position: Position | null) => void;
   previewPosition?: Position | null;
+  // Coordinate display
+  showCoordinates?: boolean;
 }
 
 // Theme configurations for different board styles
@@ -112,6 +114,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
   showMobileControls = false,
   onPreviewPositionChange,
   previewPosition: externalPreviewPosition,
+  showCoordinates = true,
 }) => {
   const [hoverPosition, setHoverPosition] = useState<Position | null>(null);
   const [internalPreviewPosition, setInternalPreviewPosition] = useState<Position | null>(null);
@@ -177,7 +180,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
   }, [board.size]);
 
   const boardSize = (board.size - 1) * cellSize;
-  const boardPadding = cellSize * 0.8; // Increased padding for coordinate spacing
+  const boardPadding = showCoordinates ? cellSize * 0.8 : cellSize * 0.3; // Reduce padding when coordinates are hidden
 
   // Calculate positions for star points (hoshi)
   const getHoshiPoints = useCallback((boardSize: number) => {
@@ -748,7 +751,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
           </defs>
           
           {/* Coordinates - render behind the grid and stones */}
-          {cellSize > 14 && <g>{renderCoordinates()}</g>}
+          {showCoordinates && cellSize > 14 && <g>{renderCoordinates()}</g>}
           
           {/* Board grid */}
           <g>{renderGrid()}</g>
