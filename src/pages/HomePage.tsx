@@ -277,11 +277,22 @@ const HomePage: React.FC = () => {
         
         // Use utility function to update blitz time controls
         if (gameType === 'blitz') {
-          updateBlitzTimeControls(newState);
+          // Create a temporary object with the expected property names for the utility function
+          const blitzSettings = {
+            ...newState,
+            mainTime: newState.timeControl || 0
+          };
+          updateBlitzTimeControls(blitzSettings);
+          
+          // Apply the results back to newState
+          newState.timeControl = 0; // Blitz games always have 0 main time
+          newState.timePerMove = blitzSettings.timePerMove || 5;
+          
           // Sync with timeControlOptions
           newState.timeControlOptions = {
             ...prev.timeControlOptions,
-            timePerMove: newState.timePerMove || 5,
+            timeControl: 0,
+            timePerMove: newState.timePerMove,
             byoYomiPeriods: 0,
             byoYomiTime: 0
           };
@@ -862,15 +873,24 @@ const HomePage: React.FC = () => {
                   }}
                   min="0"
                   step="5"
+                  disabled={gameOptions.gameType === 'blitz'}
                   className="form-input w-full"
                 />
                 <div className="mt-1">
-                  <p className="text-sm text-neutral-500">
-                    Recommended {getRecommendedTimeForBoardSize(gameOptions.boardSize)} minutes for {gameOptions.boardSize}×{gameOptions.boardSize} board (you can set any time you want)
-                  </p>
-                  <p className="text-xs text-neutral-400 mt-1">
-                    Set to 0 minutes for unlimited time (no time counting)
-                  </p>
+                  {gameOptions.gameType === 'blitz' ? (
+                    <p className="text-sm text-neutral-500">
+                      Blitz games use 0 main time (time per move only)
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-sm text-neutral-500">
+                        Recommended {getRecommendedTimeForBoardSize(gameOptions.boardSize)} minutes for {gameOptions.boardSize}×{gameOptions.boardSize} board (you can set any time you want)
+                      </p>
+                      <p className="text-xs text-neutral-400 mt-1">
+                        Set to 0 minutes for unlimited time (no time counting)
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
