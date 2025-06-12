@@ -8,9 +8,8 @@ import CreateGameForm from '../components/CreateGameForm';
 import GoseiLogo from '../components/GoseiLogo';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import { useAppTheme } from '../context/AppThemeContext';
-import useDeviceDetect from '../hooks/useDeviceDetect';
-import { validateBlitzSettings, updateBlitzTimeControls, validateGameSettings } from '../utils/gameType';
-import { validateTimePerMove, updateTimeControls } from '../utils/timeControl';
+import { validateBlitzSettings, updateBlitzTimeControls } from '../utils/gameType';
+import { updateTimeControls } from '../utils/timeControl';
 
 // Define keys for localStorage
 const STORAGE_KEYS = {
@@ -24,111 +23,7 @@ const STORAGE_KEYS = {
   GAME_TYPE: 'gosei-game-type'
 };
 
-interface SavedGame {
-  id: string;
-  savedAt: number;
-}
 
-// Component to display and load saved offline games
-interface SavedGamesListProps {
-  username: string;
-  navigate: any;
-}
-
-const SavedGamesList: React.FC<SavedGamesListProps> = ({ username, navigate }) => {
-  const [savedGames, setSavedGames] = useState<Array<{
-    id: string,
-    savedAt: string,
-    status: string,
-    opponent: string
-  }>>([]);
-
-  useEffect(() => {
-    // Load saved games from localStorage
-    try {
-      const offlineGames: any[] = [];
-      
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('gosei-offline-game-')) {
-          try {
-            const savedData = JSON.parse(localStorage.getItem(key) || '');
-            if (savedData && savedData.gameState) {
-              const { gameState, savedAt } = savedData;
-              
-              // Only show games for the current user
-              const userInGame = gameState.players.some(
-                (p: { username: string }) => p.username === username
-              );
-              
-              if (userInGame) {
-                // Find opponent name
-                const opponent = gameState.players.find(
-                  (p: { username: string }) => p.username !== username
-                )?.username || 'Unknown';
-                
-                offlineGames.push({
-                  id: gameState.id,
-                  savedAt,
-                  status: gameState.status,
-                  opponent
-                });
-              }
-            }
-          } catch (err) {
-            console.error('Error parsing saved game:', err);
-          }
-        }
-      }
-      
-      // Sort by most recently saved
-      offlineGames.sort((a, b) => 
-        new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime()
-      );
-      
-      setSavedGames(offlineGames);
-    } catch (err) {
-      console.error('Error loading saved games:', err);
-    }
-  }, [username]);
-
-  if (savedGames.length === 0) {
-    return (
-      <div className="bg-neutral-50 rounded-lg p-4 text-center">
-        <p className="text-neutral-500">No saved games found</p>
-        <p className="text-sm text-neutral-400 mt-1">
-          Enable Auto-Save during gameplay to access games offline
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-neutral-50 rounded-lg p-3">
-      <div className="space-y-2">
-        {savedGames.map(game => (
-          <div 
-            key={game.id} 
-            className="bg-white rounded p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-neutral-100"
-            onClick={() => navigate(`/game/${game.id}`)}
-          >
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="font-medium">Game with {game.opponent}</div>
-                <div className="text-xs text-neutral-500">
-                  Status: <span className="font-medium capitalize">{game.status}</span>
-                </div>
-              </div>
-              <div className="text-xs text-neutral-400">
-                {new Date(game.savedAt).toLocaleString()}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 // Helper function to safely get items from localStorage
 const getStoredValue = (key: string, defaultValue: any): any => {
@@ -199,7 +94,7 @@ const HomePage: React.FC = () => {
   const [showGameSettings, setShowGameSettings] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [savedGames, setSavedGames] = useState<SavedGame[]>([]);
+
   const [showCustomSizes, setShowCustomSizes] = useState(false);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [gameOptions, setGameOptions] = useState<GameOptions>({
@@ -533,34 +428,7 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleStartGame = () => {
-    // Clear any previous errors
-    setLocalError(null);
 
-    // Update the player's username before creating the game
-    const options = {
-      ...gameOptions,
-      playerName: username,
-    };
-    
-    console.log('Creating game with options:', options);
-    
-    try {
-      // Create game through context
-      createGame(options);
-      
-      // Set a timeout to check if navigation hasn't happened
-      setTimeout(() => {
-        if (!gameState?.id) {
-          console.log('Navigation did not occur through context');
-          setLocalError('Could not navigate to the game. Please try again or check your connection.');
-        }
-      }, 3000); // Wait 3 seconds before showing error
-    } catch (err) {
-      console.error('Error in game creation:', err);
-      setLocalError('Failed to create game. Please try again.');
-    }
-  };
 
   const handleJoinGame = async () => {
     const trimmedUsername = username.trim();
