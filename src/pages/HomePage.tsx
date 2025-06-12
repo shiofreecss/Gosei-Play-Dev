@@ -925,20 +925,42 @@ const HomePage: React.FC = () => {
           <p className="text-lg sm:text-xl text-neutral-600">
             Play Go online with friends around the world
           </p>
-          <div className="mt-4 flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6">
-            <Link to="/board-demo" className="text-primary-600 underline hover:text-primary-800 transition-colors">
+          <div className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
+            <Link 
+              to="/board-demo" 
+              className="inline-flex items-center px-4 py-2 bg-white border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:border-primary-300 hover:text-primary-700 transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+              </svg>
               View Board Size Comparison
             </Link>
-            <Link to="/rules" className="text-primary-600 underline hover:text-primary-800 transition-colors">
+            <Link 
+              to="/rules" 
+              className="inline-flex items-center px-4 py-2 bg-white border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:border-primary-300 hover:text-primary-700 transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
               Learn Go Rules
             </Link>
             <a 
               href="https://kifu.gosei.xyz" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-primary-600 underline hover:text-primary-800 transition-colors"
+              className={`inline-flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 ${
+                isDarkMode
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 border border-blue-500 text-white hover:from-blue-600 hover:to-indigo-700 hover:border-blue-600'
+                  : 'bg-gradient-to-r from-primary-500 to-primary-600 border border-primary-500 text-white hover:from-primary-600 hover:to-primary-700 hover:border-primary-600'
+              }`}
             >
-              Gosei - Kifu Reader
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span className="whitespace-nowrap">Gosei - Kifu Reader</span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1 flex-shrink-0 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
             </a>
           </div>
         </header>
