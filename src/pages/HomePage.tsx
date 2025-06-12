@@ -1064,6 +1064,14 @@ const HomePage: React.FC = () => {
             <Link to="/rules" className="text-primary-600 underline hover:text-primary-800 transition-colors">
               Learn Go Rules
             </Link>
+            <a 
+              href="https://kifu.gosei.xyz" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary-600 underline hover:text-primary-800 transition-colors"
+            >
+              Gosei - Kifu Reader
+            </a>
           </div>
         </header>
 
@@ -1143,7 +1151,7 @@ const HomePage: React.FC = () => {
                   <h2 className="text-3xl font-bold mb-6">About Go</h2>
                   <div className="prose prose-neutral max-w-none">
                     <p className="text-lg mb-6">
-                      Go is an ancient board game that originated in China more than 2,500 years ago. The game is played by two players who take turns placing black and white stones on the intersections of the grid.
+                      Go originated in China more than 2,500 years ago and is believed to be the oldest board game continuously played today. The game is played by two players who take turns placing black and white stones on the intersections of the grid.
                     </p>
                     <p className="text-lg mb-6">
                       The objective is to control more territory than your opponent by surrounding empty areas with your stones. Stones that are completely surrounded by the opponent's stones are captured and removed from the board.
