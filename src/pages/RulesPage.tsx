@@ -343,19 +343,29 @@ const RulesPage: React.FC = () => {
 
           {/* Call to Action */}
           <div className="text-center py-8">
-            <h3 className="text-2xl font-semibold mb-4">Ready to Play?</h3>
+            <h3 className="text-2xl font-semibold mb-4 text-neutral-800">Ready to Play?</h3>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/board-demo"
-                className="px-6 py-3 bg-indigo-500 text-white font-medium rounded-lg hover:bg-indigo-600 transition-colors shadow-md"
+                className="group px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 focus:from-indigo-600 focus:to-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 rounded-lg"
               >
-                Practice on Demo Board
+                <span className="flex items-center justify-center gap-2 text-white font-semibold">
+                  <svg className="w-5 h-5 group-hover:rotate-12 transition-transform duration-200 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm6 2a1 1 0 11-2 0 1 1 0 012 0z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-white">Practice on Demo Board</span>
+                </span>
               </Link>
               <Link
                 to="/"
-                className="px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 transition-colors shadow-md"
+                className="group px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 focus:from-emerald-600 focus:to-teal-600 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 rounded-lg"
               >
-                Start a Real Game
+                <span className="flex items-center justify-center gap-2 text-white font-semibold">
+                  <svg className="w-5 h-5 group-hover:rotate-12 transition-transform duration-200 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-white">Start a Real Game</span>
+                </span>
               </Link>
             </div>
           </div>
