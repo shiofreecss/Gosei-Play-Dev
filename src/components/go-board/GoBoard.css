@@ -293,4 +293,50 @@
   .mobile-stone-controls {
     display: none;
   }
+}
+
+/* Finished game state - container for board + review panel */
+.game-finished-container {
+  height: calc(min(90vw, 90vh) * 1.2) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.game-finished-container .go-board-container-enhanced {
+  flex: 0 0 auto;
+  height: auto !important;
+  max-height: 70% !important;
+  width: calc(min(90vw, 90vh) * 0.7) !important; /* Make width equal to effective height */
+  max-width: calc(min(90vw, 90vh) * 0.7) !important;
+  margin: 0 auto !important;
+}
+
+.game-finished-container .go-board-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: 1/1 !important;
+}
+
+/* Responsive adjustments for finished game */
+@media (max-width: 768px) {
+  .game-finished-container {
+    height: calc(min(95vw, 85vh) * 1.2) !important;
+  }
+  
+  .game-finished-container .go-board-container-enhanced {
+    width: calc(min(95vw, 85vh) * 0.7) !important;
+    max-width: calc(min(95vw, 85vh) * 0.7) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-finished-container {
+    height: calc(min(98vw, 80vh) * 1.2) !important;
+  }
+  
+  .game-finished-container .go-board-container-enhanced {
+    width: calc(min(98vw, 80vh) * 0.7) !important;
+    max-width: calc(min(98vw, 80vh) * 0.7) !important;
+  }
 } 

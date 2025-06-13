@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GameState, Player, GameMove, Position, StoneColor, Stone, GameType } from '../../types/go';
 import TimeControl from '../TimeControl';
 import SoundSettings from '../SoundSettings';
@@ -43,6 +43,7 @@ interface GameInfoProps {
   onCancelScoring?: () => void;
   showCoordinates?: boolean;
   onToggleCoordinates?: (show: boolean) => void;
+  onReviewBoardChange?: (stones: Stone[], moveIndex: number, isReviewing: boolean) => void;
 }
 
 const GameInfo: React.FC<GameInfoProps> = ({ 
@@ -62,7 +63,8 @@ const GameInfo: React.FC<GameInfoProps> = ({
   onConfirmScore,
   onCancelScoring,
   showCoordinates = true,
-  onToggleCoordinates
+  onToggleCoordinates,
+  onReviewBoardChange
 }) => {
   const { isMobile, isTablet, isDesktop } = useDeviceDetect();
   const { isDarkMode } = useAppTheme();
@@ -71,6 +73,10 @@ const GameInfo: React.FC<GameInfoProps> = ({
   // State for confirmation modals
   const [showResignConfirm, setShowResignConfirm] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  
+  // Spectator review state
+  const [moveIndex, setMoveIndex] = useState<number>(gameState.history.length);
+  const [isReviewing, setIsReviewing] = useState<boolean>(false);
   
   // Find black and white players
   const blackPlayer = players.find(player => player.color === 'black');
@@ -225,6 +231,96 @@ const GameInfo: React.FC<GameInfoProps> = ({
     setShowLeaveConfirm(false);
     if (onLeaveGame) onLeaveGame();
   };
+
+  // Spectator review functions
+  const calculateBoardState = (moveIndex: number): Stone[] => {
+    // If moveIndex is 0, show empty board or only handicap stones
+    if (moveIndex === 0) {
+      if (gameState.gameType === 'handicap' && gameState.handicap > 0) {
+        // For handicap games, show only the handicap stones at move 0
+        const handicapStones = gameState.board.stones.filter(stone => {
+          return !gameState.history.some(move => {
+            if (isPassMove(move)) return false;
+            let pos: Position;
+            if ((move as any).position) {
+              pos = (move as any).position;
+            } else if (typeof move === 'object' && 'x' in move && 'y' in move) {
+              pos = move as Position;
+            } else {
+              return false;
+            }
+            return pos.x === stone.position.x && pos.y === stone.position.y;
+          });
+        });
+        return handicapStones;
+      } else {
+        // For regular games, show empty board at move 0
+        return [];
+      }
+    }
+
+    let stones: Stone[] = [];
+    let currentTurn: StoneColor = 'black';
+    
+    // Add handicap stones if it's a handicap game
+    if (gameState.gameType === 'handicap' && gameState.handicap > 0) {
+      const handicapStones = gameState.board.stones.filter(stone => {
+        return !gameState.history.some(move => {
+          if (isPassMove(move)) return false;
+          let pos: Position;
+          if ((move as any).position) {
+            pos = (move as any).position;
+          } else if (typeof move === 'object' && 'x' in move && 'y' in move) {
+            pos = move as Position;
+          } else {
+            return false;
+          }
+          return pos.x === stone.position.x && pos.y === stone.position.y;
+        });
+      });
+      stones = [...handicapStones];
+      currentTurn = 'white'; // White plays first in handicap games
+    }
+    
+    // Add moves up to the specified moveIndex
+    for (let i = 0; i < moveIndex && i < gameState.history.length; i++) {
+      const move = gameState.history[i];
+      if (!isPassMove(move)) {
+        let pos: Position;
+        if ((move as any).position) {
+          pos = (move as any).position;
+        } else if (typeof move === 'object' && 'x' in move && 'y' in move) {
+          pos = move as Position;
+        } else {
+          continue;
+        }
+        if (typeof pos.x !== 'number' || typeof pos.y !== 'number') continue;
+        stones.push({ position: pos, color: currentTurn });
+        // No capture logic for simplicity (can be added if needed)
+      }
+      currentTurn = currentTurn === 'black' ? 'white' : 'black';
+    }
+    return stones;
+  };
+
+  // Update board state when move index changes - only for spectators
+  useEffect(() => {
+    if (onReviewBoardChange && isSpectator) {
+      if (moveIndex === gameState.history.length) {
+        onReviewBoardChange(gameState.board.stones, moveIndex, false);
+        setIsReviewing(false);
+      } else {
+        onReviewBoardChange(calculateBoardState(moveIndex), moveIndex, true);
+        setIsReviewing(true);
+      }
+    }
+    // eslint-disable-next-line
+  }, [moveIndex, gameState.history.length, onReviewBoardChange, isSpectator]);
+
+  const goToStart = () => setMoveIndex(0);
+  const goToPrev = () => setMoveIndex(idx => Math.max(0, idx - 1));
+  const goToNext = () => setMoveIndex(idx => Math.min(gameState.history.length, idx + 1));
+  const goToEnd = () => setMoveIndex(gameState.history.length);
 
   return (
     <div className={`game-info bg-white text-neutral-900 p-3 sm:p-4 rounded-lg shadow-lg border border-neutral-200 ${
@@ -539,6 +635,92 @@ const GameInfo: React.FC<GameInfoProps> = ({
         </div>
       </div>
 
+      {/* Spectator Review Panel - Only show for spectators when game is not finished */}
+      {isSpectator && gameState.history.length > 0 && status !== 'finished' && (
+        <div className="mt-3 sm:mt-4">
+          <div className={`p-3 rounded-lg border ${
+            isDarkMode 
+              ? 'bg-neutral-800/80 border-neutral-700' 
+              : 'bg-neutral-50 border-neutral-200'
+          }`}>
+            <div className={`font-semibold mb-2 ${
+              isDarkMode ? 'text-neutral-200' : 'text-neutral-800'
+            }`}>
+              Review Game
+            </div>
+            <div className="flex flex-wrap gap-1 mb-2 justify-center">
+              <button 
+                className={`btn btn-xs px-2 py-1 text-xs ${
+                  isDarkMode 
+                    ? 'bg-neutral-700 hover:bg-neutral-600 text-neutral-200 border-neutral-600' 
+                    : 'bg-white hover:bg-neutral-100 text-neutral-700 border-neutral-300'
+                }`}
+                onClick={goToStart} 
+                disabled={moveIndex === 0} 
+                title="To Start"
+              >
+                |&lt;&lt;
+              </button>
+              <button 
+                className={`btn btn-xs px-2 py-1 text-xs ${
+                  isDarkMode 
+                    ? 'bg-neutral-700 hover:bg-neutral-600 text-neutral-200 border-neutral-600' 
+                    : 'bg-white hover:bg-neutral-100 text-neutral-700 border-neutral-300'
+                }`}
+                onClick={goToPrev} 
+                disabled={moveIndex === 0} 
+                title="Prev"
+              >
+                &lt;
+              </button>
+              <span className={`px-2 py-1 text-xs font-medium ${
+                isDarkMode ? 'text-neutral-300' : 'text-neutral-600'
+              }`}>
+                {moveIndex} / {gameState.history.length}
+              </span>
+              <button 
+                className={`btn btn-xs px-2 py-1 text-xs ${
+                  isDarkMode 
+                    ? 'bg-neutral-700 hover:bg-neutral-600 text-neutral-200 border-neutral-600' 
+                    : 'bg-white hover:bg-neutral-100 text-neutral-700 border-neutral-300'
+                }`}
+                onClick={goToNext} 
+                disabled={moveIndex === gameState.history.length} 
+                title="Next"
+              >
+                &gt;
+              </button>
+              <button 
+                className={`btn btn-xs px-2 py-1 text-xs ${
+                  isDarkMode 
+                    ? 'bg-neutral-700 hover:bg-neutral-600 text-neutral-200 border-neutral-600' 
+                    : 'bg-white hover:bg-neutral-100 text-neutral-700 border-neutral-300'
+                }`}
+                onClick={goToEnd} 
+                disabled={moveIndex === gameState.history.length} 
+                title="To End"
+              >
+                &gt;&gt;|
+              </button>
+            </div>
+            {isReviewing && (
+              <div className="text-center">
+                <button 
+                  className={`btn btn-xs px-3 py-1 text-xs ${
+                    isDarkMode 
+                      ? 'bg-blue-700 hover:bg-blue-600 text-white border-blue-600' 
+                      : 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600'
+                  }`}
+                  onClick={goToEnd}
+                >
+                  Go to Live
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Spectator Count */}
       {gameState.spectators && gameState.spectators.length > 0 && (
         <div className="mt-3 sm:mt-4">
@@ -673,7 +855,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
           )}
 
           {/* Scoring actions */}
-          {status === 'scoring' && (
+          {status === 'scoring' && !isSpectator && (
             <div className={`mt-4 grid grid-cols-2 gap-3 ${isTablet ? 'gap-4' : 'gap-3'}`}>
               <button
                 onClick={onConfirmScore}
@@ -707,6 +889,19 @@ const GameInfo: React.FC<GameInfoProps> = ({
                 </svg>
                 Resume Game
               </button>
+            </div>
+          )}
+
+          {/* Spectator message during scoring */}
+          {status === 'scoring' && isSpectator && (
+            <div className={`mt-4 p-3 rounded-md text-center ${
+              isDarkMode 
+                ? 'bg-blue-900/20 border border-blue-800/50 text-blue-300' 
+                : 'bg-blue-50 border border-blue-200 text-blue-700'
+            }`}>
+              <p className="text-sm font-medium">
+                Players are scoring the game. You can only watch.
+              </p>
             </div>
           )}
         </div>

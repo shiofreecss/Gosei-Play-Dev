@@ -1459,11 +1459,11 @@ io.on('connection', (socket) => {
       // But we still need to broadcast the updated game state so spectator count updates
       broadcastGameUpdate(gameId, gameState);
     } else {
-      socket.to(gameId).emit('playerLeft', {
-        gameId,
-        playerId,
-        username
-      });
+    socket.to(gameId).emit('playerLeft', {
+      gameId,
+      playerId,
+      username
+    });
     }
     
     // Check if there are any players left in the game room

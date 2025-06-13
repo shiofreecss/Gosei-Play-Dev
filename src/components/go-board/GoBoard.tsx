@@ -196,10 +196,12 @@ const GoBoard: React.FC<GoBoardProps> = ({
   
   const hoshiPoints = useMemo(() => getHoshiPoints(board.size), [getHoshiPoints, board.size]);
 
+  // Use reviewStones if in review mode, otherwise use board.stones
+  const stonesToDisplay = isReviewing && reviewStones && reviewStones.length > 0 ? reviewStones : board.stones;
+
   // Helper to get stone at position
   const getStoneAtPosition = (x: number, y: number): Stone | undefined => {
-    const stones = isReviewing ? reviewStones : board.stones;
-    return stones.find(
+    return stonesToDisplay.find(
       (stone) => stone.position.x === x && stone.position.y === y
     );
   };
@@ -476,7 +478,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
 
   // Render stones
   const renderStones = useCallback(() => {
-    const stones = isReviewing ? reviewStones : board.stones;
+    const stones = stonesToDisplay;
     const stoneRadius = cellSize <= 15 ? cellSize * 0.48 : cellSize * 0.45;
     
     return stones.map((stone) => {
@@ -551,7 +553,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
         </g>
       );
     });
-  }, [isReviewing, reviewStones, board.stones, cellSize, lastMove, isDeadStone, themeConfig]);
+  }, [isReviewing, reviewStones, stonesToDisplay, cellSize, lastMove, isDeadStone, themeConfig]);
 
   // Render interactive cell overlays
   const renderCellOverlays = useCallback(() => {

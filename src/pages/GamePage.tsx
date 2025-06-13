@@ -20,6 +20,7 @@ import { playStoneSound } from '../utils/soundUtils';
 import useDeviceDetect from '../hooks/useDeviceDetect';
 
 
+
 // Helper function to check game status safely
 const hasStatus = (gameState: GameState, status: 'waiting' | 'playing' | 'finished' | 'scoring'): boolean => {
   return gameState.status === status;
@@ -157,6 +158,11 @@ const GamePage: React.FC = () => {
     type: 'info'
   });
 
+  // Spectator review state
+  const [spectatorReviewStones, setSpectatorReviewStones] = useState<Stone[] | null>(null);
+  const [spectatorReviewMoveIndex, setSpectatorReviewMoveIndex] = useState<number | null>(null);
+  const [spectatorIsReviewing, setSpectatorIsReviewing] = useState<boolean>(false);
+
   // Check if there's a gameId in the URL and try to load that game
   useEffect(() => {
     // If we have a gameId/code from the URL but no gameState, show join form
@@ -173,9 +179,18 @@ const GamePage: React.FC = () => {
   // Show game complete modal when game finishes
   useEffect(() => {
     if (gameState?.status === 'finished') {
-      setShowGameCompleteModal(true);
+      // Check if current user is a spectator
+      const isSpectator = currentPlayer && currentPlayer.isSpectator === true;
+      
+      if (isSpectator) {
+        // Show special notification for spectators
+        showNotification('Game has ended. You can review the game or leave.', 'info');
+      } else {
+        // Show modal for players
+        setShowGameCompleteModal(true);
+      }
     }
-  }, [gameState?.status]);
+  }, [gameState?.status, currentPlayer, showNotification]);
 
   // Set up or clear autosave interval based on autoSaveEnabled state
   useEffect(() => {
@@ -860,6 +875,7 @@ const GamePage: React.FC = () => {
   }
 
   // Game board and UI
+  const isSpectator = currentPlayer && currentPlayer.isSpectator === true;
   return (
     <>
       <div className="min-h-screen bg-neutral-100 relative">
@@ -894,7 +910,7 @@ const GamePage: React.FC = () => {
               {/* Game Status Indicators - positioned outside the board */}
               <div className="w-full max-w-full mb-4 flex flex-col sm:flex-row justify-between items-center gap-2">
                 {/* Review Mode Indicator */}
-                {reviewBoardState?.isReviewing && (
+                {(reviewBoardState?.isReviewing || (isSpectator && spectatorIsReviewing)) && (
                   <div className="game-status-panel review-mode-panel">
                     <div className="flex items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -906,7 +922,7 @@ const GamePage: React.FC = () => {
                 )}
 
                 {/* Territory Legend */}
-                {(gameState.status === 'finished' || gameState.status === 'scoring') && !(reviewBoardState?.isReviewing) && (
+                {(gameState.status === 'finished' || gameState.status === 'scoring') && !(reviewBoardState?.isReviewing || (isSpectator && spectatorIsReviewing)) && (
                   <div className="game-status-panel territory-legend-panel">
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-2">
@@ -922,9 +938,22 @@ const GamePage: React.FC = () => {
                 )}
               </div>
 
-              <div className="w-full max-w-full overflow-auto">
+              <div 
+                className={`w-full max-w-full ${
+                  gameState.status === 'finished' 
+                    ? 'game-finished-container' 
+                    : 'overflow-auto'
+                }`}
+              >
                 <GoBoard
-                  board={gameState.board}
+                  board={{
+                    ...gameState.board,
+                    stones: (isSpectator && spectatorIsReviewing) 
+                      ? (spectatorReviewStones || [])
+                      : reviewBoardState?.isReviewing 
+                        ? (reviewBoardState.stones || [])
+                        : gameState.board.stones
+                  }}
                   currentTurn={gameState.currentTurn}
                   onPlaceStone={(position) => {
                     // Add debug for handicap games
@@ -943,12 +972,13 @@ const GamePage: React.FC = () => {
                   deadStones={gameState.deadStones}
                   onToggleDeadStone={handleToggleDeadStone}
                   territory={gameState.territory}
-                  showTerritory={(gameState.status === 'finished' || gameState.status === 'scoring') && !(reviewBoardState?.isReviewing)}
-                  isReviewing={reviewBoardState?.isReviewing || false}
-                  reviewStones={reviewBoardState?.stones || []}
+                  showTerritory={(gameState.status === 'finished' || gameState.status === 'scoring') && !(reviewBoardState?.isReviewing || (isSpectator && spectatorIsReviewing && gameState.status !== 'finished'))}
+                  isReviewing={reviewBoardState?.isReviewing || (isSpectator && spectatorIsReviewing && gameState.status !== 'finished') || false}
+                  reviewStones={reviewBoardState?.stones || (isSpectator && spectatorIsReviewing ? (spectatorReviewStones || []) : [])}
                   onPreviewPositionChange={(pos) => setPreviewPosition(pos)}
                   previewPosition={previewPosition}
                   showCoordinates={showCoordinates}
+                  isHandicapPlacement={gameState.gameType === 'handicap'}
                 />
                 
                 {/* Game Review Controls - Only shown when game is finished */}
@@ -994,6 +1024,11 @@ const GamePage: React.FC = () => {
                 onCancelScoring={handleCancelScoring}
                 showCoordinates={showCoordinates}
                 onToggleCoordinates={handleToggleCoordinates}
+                onReviewBoardChange={(stones: Stone[], moveIndex: number, isReviewing: boolean) => {
+                  setSpectatorReviewStones(stones);
+                  setSpectatorReviewMoveIndex(moveIndex);
+                  setSpectatorIsReviewing(isReviewing);
+                }}
               />
               
               {/* Debug Controls - Only shown when dev tools are enabled */}
@@ -1062,6 +1097,8 @@ const GamePage: React.FC = () => {
           messages={chatMessages}
         />
       )}
+
+
     </>
   );
 };
