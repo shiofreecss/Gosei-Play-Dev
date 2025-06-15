@@ -107,6 +107,14 @@ const GameInfo: React.FC<GameInfoProps> = ({
   // Check if current user is a spectator
   const isSpectator = currentPlayer?.isSpectator === true;
   
+  // Keep spectators synchronized with the latest move when new moves are made
+  useEffect(() => {
+    if (isSpectator && !isReviewing) {
+      // Only auto-update if spectator is not actively reviewing
+      setMoveIndex(gameState.history.length);
+    }
+  }, [gameState.history.length, isSpectator, isReviewing]);
+  
   // Check for recent passes
   const lastMove = history.length > 0 ? history[history.length - 1] : null;
   const secondLastMove = history.length > 1 ? history[history.length - 2] : null;
