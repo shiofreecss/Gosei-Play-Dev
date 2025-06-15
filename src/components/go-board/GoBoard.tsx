@@ -543,10 +543,10 @@ const GoBoard: React.FC<GoBoardProps> = ({
             <circle
               cx={stone.position.x * cellSize}
               cy={stone.position.y * cellSize}
-              r={stoneRadius * 0.35}
+              r={stoneRadius * 0.42}
               fill="none"
               stroke={stone.color === 'black' ? 'white' : 'black'}
-              strokeWidth={2}
+              strokeWidth={4}
               opacity={0.8}
             />
           )}

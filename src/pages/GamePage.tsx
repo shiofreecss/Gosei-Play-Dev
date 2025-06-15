@@ -979,10 +979,7 @@ const GamePage: React.FC = () => {
                     handleStonePlace(position);
                   }}
                   isPlayerTurn={gameState.status === 'playing' && currentPlayer?.color === gameState.currentTurn}
-                  lastMove={gameState.history.length > 0 ? 
-                    isPassMove(gameState.history[gameState.history.length - 1]) ? 
-                      undefined : gameState.history[gameState.history.length - 1] as Position 
-                    : undefined}
+                  lastMove={gameState.lastMove}
                   isScoring={gameState.status === 'scoring'}
                   deadStones={gameState.deadStones}
                   onToggleDeadStone={handleToggleDeadStone}

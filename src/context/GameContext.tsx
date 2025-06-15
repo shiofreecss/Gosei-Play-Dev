@@ -1483,6 +1483,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       ...gameState,
       currentTurn: gameState.currentTurn === 'black' ? 'white' : 'black',
       history: [...gameState.history, passMove],
+      lastMove: undefined  // Clear lastMove for pass moves since there's no position to highlight
     };
     
     // Check for two consecutive passes to transition to scoring phase

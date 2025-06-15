@@ -113,6 +113,7 @@ export interface GameState {
   handicap: number;
   socket?: Socket | null;
   koPosition?: Position;
+  lastMove?: Position; // Position of the last move made for highlighting
 }
 
 export type GameMove = Position | { pass: true }; 

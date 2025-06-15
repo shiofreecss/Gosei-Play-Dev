@@ -768,7 +768,8 @@ export const applyGoRules = (
     // Toggle turn normally after the first move
     currentTurn: color === 'black' ? 'white' : 'black',
     history: [...gameState.history, position],
-    koPosition: newKoPosition
+    koPosition: newKoPosition,
+    lastMove: position  // Set the last move position to show the ring indicator
   };
   
   return { valid: true, updatedGameState };
