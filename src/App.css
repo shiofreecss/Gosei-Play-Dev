@@ -2511,6 +2511,52 @@
   }
 }
 
+/* Ensure tablet touch targets are optimized for touch interaction */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .board-intersection {
+    min-width: 32px;
+    min-height: 32px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .mobile-stone-controls {
+    position: sticky;
+    bottom: 0;
+    padding: 16px;
+    margin: 0 -16px;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+  }
+  
+  .place-stone-btn {
+    font-size: 18px;
+    padding: 16px 32px;
+    min-height: 52px;
+  }
+  
+  .preview-position-indicator,
+  .no-preview-indicator {
+    font-size: 16px;
+    padding: 12px 24px;
+  }
+  
+  .cancel-instruction,
+  .touch-instruction {
+    font-size: 14px;
+  }
+  
+  /* Theme-specific tablet responsiveness */
+  .theme-modern .mobile-stone-controls,
+  .theme-modern-light .mobile-stone-controls {
+    box-shadow: var(--card-shadow);
+  }
+  
+  .theme-traditional .mobile-stone-controls {
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  }
+}
+
 /* Game Status Indicator Panels - Theme Aware */
 .game-status-panel {
   backdrop-filter: blur(10px);

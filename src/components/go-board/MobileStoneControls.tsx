@@ -21,10 +21,10 @@ const MobileStoneControls: React.FC<MobileStoneControlsProps> = ({
   onPlaceStone,
   boardSize,
 }) => {
-  const { isMobile } = useDeviceDetect();
+  const { isMobile, isTablet } = useDeviceDetect();
 
-  // Don't render if not mobile or if not in the right game state
-  if (!isMobile || !isPlayerTurn || isScoring || isReviewing) {
+  // Don't render if not mobile/tablet or if not in the right game state
+  if ((!isMobile && !isTablet) || !isPlayerTurn || isScoring || isReviewing) {
     return null;
   }
 

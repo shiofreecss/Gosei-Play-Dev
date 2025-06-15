@@ -121,7 +121,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
   const [cellSize, setCellSize] = useState(32);
   const { currentTheme } = useBoardTheme();
   const { gameState } = useGame();
-  const { isMobile } = useDeviceDetect();
+  const { isMobile, isTablet } = useDeviceDetect();
 
   // Use external preview position if provided, otherwise use internal
   const previewPosition = externalPreviewPosition || internalPreviewPosition;
@@ -142,8 +142,8 @@ const GoBoard: React.FC<GoBoardProps> = ({
       const minDimension = Math.min(width, height);
       
       // Calculate optimal cell size to fill the full container width
-      // Use 99% of screen width on mobile, 95% on other devices
-      const widthPercentage = isMobile ? 0.99 : 0.95;
+      // Use 99% of screen width on mobile, 97% on tablet, 95% on desktop
+      const widthPercentage = isMobile ? 0.99 : isTablet ? 0.97 : 0.95;
       const maxBoardSize = Math.min(width * widthPercentage, height * 0.95);
       let baseCellSize = Math.floor(maxBoardSize / (board.size + 1)); // +1 for minimal padding
       
@@ -179,7 +179,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [board.size, isMobile]);
+  }, [board.size, isMobile, isTablet]);
 
   const boardSize = (board.size - 1) * cellSize;
   const boardPadding = showCoordinates ? cellSize * 0.8 : cellSize * 0.3; // Reduce padding when coordinates are hidden
@@ -238,18 +238,18 @@ const GoBoard: React.FC<GoBoardProps> = ({
       if (stone && onToggleDeadStone) {
         onToggleDeadStone({ x, y });
       }
-    } else if (isMobile && isPlayerTurn && isValidPlacement(x, y)) {
-      // Set preview position for mobile
+    } else if ((isMobile || isTablet) && isPlayerTurn && isValidPlacement(x, y)) {
+      // Set preview position for mobile and tablet
       if (onPreviewPositionChange) {
         onPreviewPositionChange({ x, y });
       } else {
         setInternalPreviewPosition({ x, y });
       }
-    } else if (!isMobile && isPlayerTurn && isValidPlacement(x, y)) {
+    } else if (!isMobile && !isTablet && isPlayerTurn && isValidPlacement(x, y)) {
       playStoneSound();
       onPlaceStone({ x, y });
     }
-  }, [isReviewing, isScoring, isMobile, isPlayerTurn, onToggleDeadStone, onPlaceStone, getStoneAtPosition, isValidPlacement, onPreviewPositionChange]);
+  }, [isReviewing, isScoring, isMobile, isTablet, isPlayerTurn, onToggleDeadStone, onPlaceStone, getStoneAtPosition, isValidPlacement, onPreviewPositionChange]);
 
   // Handle mouse over board intersection
   const handleMouseOver = (x: number, y: number) => {
@@ -284,7 +284,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
     }
   };
 
-  // Handle touch events for mobile
+  // Handle touch events for mobile and tablet
   const handleTouchStart = (e: React.TouchEvent, x: number, y: number) => {
     e.preventDefault();
     if (!isReviewing && isPlayerTurn && isValidPlacement(x, y) && !isScoring) {
@@ -301,7 +301,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
 
   // Clear preview when user touches outside the board
   const handleContainerTouchStart = (e: React.TouchEvent) => {
-    if (isMobile && previewPosition) {
+    if ((isMobile || isTablet) && previewPosition) {
       const target = e.target as HTMLElement;
       if (!target.closest('.go-board') && !target.closest('.mobile-stone-controls')) {
         if (onPreviewPositionChange) {
@@ -398,8 +398,8 @@ const GoBoard: React.FC<GoBoardProps> = ({
   // Render board grid lines
   const renderGrid = useCallback(() => {
     const lines = [];
-    // Make grid lines 40% thinner on mobile (60% of original width)
-    const gridLineWidth = isMobile ? themeConfig.borderWidth * 0.6 : themeConfig.borderWidth;
+    // Make grid lines 40% thinner on mobile and tablet (60% of original width)
+    const gridLineWidth = (isMobile || isTablet) ? themeConfig.borderWidth * 0.6 : themeConfig.borderWidth;
     
     // Vertical lines
     for (let x = 0; x < board.size; x++) {
@@ -432,7 +432,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
     }
     
     return lines;
-  }, [board.size, cellSize, boardSize, themeConfig.lineColor, themeConfig.borderWidth, isMobile]);
+  }, [board.size, cellSize, boardSize, themeConfig.lineColor, themeConfig.borderWidth, isMobile, isTablet]);
 
   // Render star points (hoshi)
   const renderHoshiPoints = useCallback(() => {
@@ -561,8 +561,8 @@ const GoBoard: React.FC<GoBoardProps> = ({
     
     for (let y = 0; y < board.size; y++) {
       for (let x = 0; x < board.size; x++) {
-        const isHovered = !isMobile && hoverPosition && hoverPosition.x === x && hoverPosition.y === y;
-        const isPreview = isMobile && previewPosition && previewPosition.x === x && previewPosition.y === y;
+        const isHovered = !isMobile && !isTablet && hoverPosition && hoverPosition.x === x && hoverPosition.y === y;
+        const isPreview = (isMobile || isTablet) && previewPosition && previewPosition.x === x && previewPosition.y === y;
         const territoryOwner = getTerritoryOwner(x, y);
         const isValidHandicap = isValidHandicapPoint(x, y);
         const hasStone = getStoneAtPosition(x, y);
@@ -577,10 +577,10 @@ const GoBoard: React.FC<GoBoardProps> = ({
             fill="transparent"
             className="stone-overlay"
             onClick={() => handleCellClick(x, y)}
-            onMouseEnter={() => !isMobile && handleMouseOver(x, y)}
-            onMouseMove={() => !isMobile && handleMouseOver(x, y)}
-            onMouseLeave={!isMobile ? handleMouseLeave : undefined}
-            onTouchStart={(e) => isMobile && handleTouchStart(e, x, y)}
+            onMouseEnter={() => !isMobile && !isTablet && handleMouseOver(x, y)}
+            onMouseMove={() => !isMobile && !isTablet && handleMouseOver(x, y)}
+            onMouseLeave={!isMobile && !isTablet ? handleMouseLeave : undefined}
+            onTouchStart={(e) => (isMobile || isTablet) && handleTouchStart(e, x, y)}
             style={{ cursor: isPlayerTurn && isValidPlacement(x, y) ? 'pointer' : 'default' }}
           />
         );
@@ -696,7 +696,7 @@ const GoBoard: React.FC<GoBoardProps> = ({
     }
     
     return overlays;
-  }, [board.size, cellSize, isMobile, hoverPosition, previewPosition, showTerritory, getTerritoryOwner, 
+  }, [board.size, cellSize, isMobile, isTablet, hoverPosition, previewPosition, showTerritory, getTerritoryOwner, 
       isValidHandicapPoint, getStoneAtPosition, handleCellClick, handleMouseOver, handleMouseLeave, 
       handleTouchStart, isPlayerTurn, isValidPlacement, isScoring, currentTurn]);
 

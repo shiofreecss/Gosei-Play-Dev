@@ -1,6 +1,50 @@
 # Gosei Play Version History
 
-## v1.1.0 - Play Again Feature (Current) ✅
+## v1.1.1 - Tablet Stone Placement Enhancement (Current) ✅
+
+**Release Date**: December 2024  
+**Status**: Production Ready - Enhanced Tablet Experience  
+**Feature**: Mobile stone placement features now available on tablet devices
+
+### 🎯 Tablet Touch Interface Enhancement
+**Unified stone placement experience across all touch devices**
+
+#### Core Functionality ✅
+- **Touch-to-Preview System**: Tablets now use mobile's intuitive stone placement workflow
+- **Mobile Stone Controls**: Component enabled for tablet devices (768px-1024px breakpoint)
+- **Confirmation Workflow**: "Place" button prevents accidental stone placement on tablets
+- **Position Indicators**: Clear Go coordinate display (e.g., "D4") for preview positions
+- **Visual Feedback**: Enhanced touch interaction with preview stone rendering
+
+#### Technical Implementation ✅
+- **Device Detection**: Updated `useDeviceDetect` hook integration to include tablets
+- **GoBoard Component**: Modified click/touch event handlers for tablet support
+- **CSS Enhancements**: Added tablet-specific media queries with optimized touch targets
+- **Touch Events**: Unified touch event handling across mobile and tablet devices
+- **Grid Optimization**: Thinner grid lines (60% width) for better touch device visibility
+
+#### User Experience Improvements ✅
+- **Consistent Interface**: Tablets share mobile's proven touch-friendly stone placement
+- **Enhanced Accessibility**: 32px minimum touch targets for comfortable tablet interaction
+- **Prevented Accidents**: Confirmation button workflow eliminates accidental placements
+- **Cross-Device Consistency**: Unified experience across all touch-enabled devices
+- **Responsive Design**: Optimized button sizing and spacing for tablet screens
+
+#### Files Modified ✅
+- **`src/components/go-board/MobileStoneControls.tsx`**: Added tablet device support
+- **`src/components/go-board/GoBoard.tsx`**: Updated touch/click handlers for tablets
+- **`src/App.css`**: Added tablet-specific CSS media queries and touch optimizations
+- **`docs/MOBILE_RESPONSIVENESS.md`**: Updated documentation with tablet features
+
+#### CSS Enhancements ✅
+- **Tablet Media Query**: Added `@media (min-width: 768px) and (max-width: 1024px)`
+- **Touch Targets**: 32px minimum touch areas for comfortable tablet interaction
+- **Button Sizing**: 18px font, 16px padding for optimal tablet button experience
+- **Visual Feedback**: Enhanced button and indicator styling for tablet screens
+
+---
+
+## v1.1.0 - Play Again Feature ✅
 
 **Release Date**: June 4, 2025  
 **Status**: Production Ready - Seamless Game Continuation  

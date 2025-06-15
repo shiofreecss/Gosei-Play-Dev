@@ -4,10 +4,11 @@ This document outlines the responsive design approach used in the Gosei Play app
 
 ## Current Implementation Status ✅
 
-**Version**: v1.0.8  
+**Version**: v1.1.1  
 **Mobile Support**: Fully responsive design with optimized touch interfaces  
 **Device Coverage**: Mobile phones, tablets, and desktop computers  
-**Framework**: Tailwind CSS with custom responsive utilities
+**Framework**: Tailwind CSS with custom responsive utilities  
+**Latest Update**: Tablet stone placement features now match mobile functionality
 
 ## Device Detection
 
@@ -58,6 +59,8 @@ const YourComponent = () => {
 - **Enhanced touch targets** with adequate spacing
 - **Balanced layouts** between mobile and desktop approaches
 - **All board sizes supported** with good visibility
+- **Touch-to-preview stone placement** with confirmation button
+- **Mobile-style stone controls** optimized for tablet screens
 
 ### Desktop View (≥ 1024px)
 - **Sidebar layouts** for efficient information display
@@ -80,9 +83,12 @@ The Go board (`src/components/go-board/GoBoard.tsx`) implements responsive desig
 
 #### Tablet Optimizations
 - **Balanced grid sizing** for optimal visibility
+- **Touch-to-preview stone placement** matching mobile behavior
 - **Enhanced touch interaction** with improved feedback
 - **Comfortable spacing** between grid intersections
 - **Smooth animations** optimized for tablet performance
+- **Mobile Stone Controls** component enabled for tablets
+- **Touch-friendly interface** with confirmation workflow
 
 #### Desktop Features
 - **Full-size board display** with maximum detail
@@ -128,6 +134,23 @@ The TimeControl component (`src/components/TimeControl.tsx`) features:
 - **Compact byo-yomi period indicators**
 - **Touch-optimized controls** for time management
 - **Clear visual feedback** for time pressure
+
+### Mobile Stone Controls Component ✅
+The Mobile Stone Controls component (`src/components/go-board/MobileStoneControls.tsx`) provides touch-optimized stone placement:
+
+#### Mobile & Tablet Features (768px and below + 768px-1024px)
+- **Touch-to-Preview System**: Tap any intersection to preview stone placement
+- **Position Indicator**: Shows Go coordinate (e.g., "D4") of preview position
+- **Confirmation Button**: Large "Place" button to confirm stone placement
+- **Cancel Instruction**: Clear guidance on canceling preview by touching outside board
+- **Turn Indicator**: Shows current player and stone color when no preview active
+- **Visual Feedback**: Clear visual distinction between preview and actual stones
+- **Optimized Sizing**: Responsive button and text sizes for different screen sizes
+
+#### Desktop Behavior (1024px and above)
+- **Direct Placement**: Click to place stones immediately (no preview/confirmation)
+- **Hover Effects**: Visual feedback on hover for desktop users
+- **Mouse Interaction**: Traditional point-and-click gameplay
 
 ### Board Size Selection ✅
 The board size selection interface includes:
@@ -188,10 +211,12 @@ The board size selection interface includes:
 ## Touch Interface Features ✅
 
 ### Stone Placement
-- **Large touch targets** for accurate placement
-- **Visual feedback** for touch interactions
+- **Large touch targets** for accurate placement on mobile and tablet
+- **Touch-to-preview system** for mobile and tablet devices
+- **Confirmation button workflow** preventing accidental stone placement
+- **Visual feedback** for touch interactions with position indicators
 - **Gesture support** for board navigation
-- **Haptic feedback** (where supported)
+- **Haptic feedback** (where supported on mobile devices)
 
 ### Game Controls
 - **Touch-optimized buttons** with adequate spacing
@@ -214,9 +239,9 @@ The board size selection interface includes:
 - **Samsung Internet**: Tested and supported
 
 ### Tablet Browsers
-- **iPad Safari**: Optimized for tablet interface
-- **Chrome on Android tablets**: Full feature support
-- **Edge on Surface**: Complete compatibility
+- **iPad Safari**: Optimized for tablet interface with touch-to-preview stone placement
+- **Chrome on Android tablets**: Full feature support including mobile stone controls
+- **Edge on Surface**: Complete compatibility with touch-optimized gameplay
 
 ### Progressive Web App Features
 - **Responsive design** works offline
@@ -262,13 +287,40 @@ const componentSize = isMobile ? 'sm' : isTablet ? 'md' : 'lg';
 - **Minimum 44x44px** for touch targets on mobile and tablet
 - **Adequate spacing** between interactive elements (8px minimum)
 - **Clear visual feedback** for touch interactions
+- **Touch-to-preview workflow** for mobile and tablet stone placement
 - **Gesture support** for enhanced navigation
+- **Responsive touch areas** optimized for different screen densities
 
 ### Performance Guidelines
 - **Throttle resize** event listeners for smooth performance
 - **Clean up event listeners** in useEffect cleanup
 - **Use CSS transforms** for animations when possible
 - **Optimize images** for different screen densities
+
+## Recent Enhancements ✅
+
+### v1.1.1 - Tablet Stone Placement Features
+**Enhanced tablet experience with mobile-optimized stone placement**
+
+#### What's New ✅
+- **Touch-to-Preview System**: Tablets now use the same intuitive stone placement as mobile
+- **Mobile Stone Controls**: Component now renders for tablet devices (768px-1024px)
+- **Enhanced Touch Targets**: Optimized touch areas (32px minimum) for tablet screens
+- **Visual Feedback**: Clear position indicators and confirmation workflow
+- **Responsive Styling**: Tablet-specific CSS for optimal button sizing and spacing
+
+#### Technical Implementation ✅
+- **Device Detection**: Updated `useDeviceDetect` hook integration for tablets
+- **GoBoard Component**: Modified click/touch handlers to include tablet devices
+- **CSS Enhancements**: Added tablet-specific media queries (768px-1024px)
+- **Touch Events**: Unified touch event handling for mobile and tablet
+- **Grid Optimization**: Thinner grid lines for better visibility on touch devices
+
+#### User Experience Improvements ✅
+- **Consistent Interface**: Tablets now share mobile's proven touch-friendly workflow
+- **Prevented Accidents**: Confirmation button prevents accidental stone placement
+- **Better Accessibility**: Larger touch targets and clearer visual feedback
+- **Cross-Device Consistency**: Unified experience across all touch devices
 
 ## Future Improvements
 

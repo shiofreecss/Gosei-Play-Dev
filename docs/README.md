@@ -20,13 +20,28 @@ A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js.
 ### 📱 **Mobile Experience - Play Anywhere**
 ![Mobile View](../example/4%20-%20mobile-play-view-and-place-button.png)
 
-## Current Version: v1.1.0 🎯
+## Current Version: v1.1.1 🎯
 
-**Latest Update**: Play Again Feature - Seamlessly start new games with the same opponent while preserving all game settings and providing smooth state transitions.
+**Latest Update**: Tablet Stone Placement Enhancement - Mobile-style touch-to-preview stone placement now available on tablet devices for consistent cross-device experience.
 
-**Status**: Production Ready ✅ | **Last Updated**: June 4, 2025
+**Status**: Production Ready ✅ | **Last Updated**: December 2024
 
-## 🎮 New in v1.1.0: Play Again Feature ✅
+## 🎮 New in v1.1.1: Tablet Stone Placement Enhancement ✅
+
+### ✅ Unified Touch Experience
+- **Touch-to-Preview**: Tablets now use mobile's proven stone placement workflow
+- **Confirmation Button**: "Place" button prevents accidental stone placement on tablets
+- **Position Indicators**: Clear Go coordinate display (e.g., "D4") for preview positions
+- **Enhanced Touch Targets**: 32px minimum touch areas for comfortable tablet interaction
+- **Responsive Design**: Optimized button sizing and visual feedback for tablet screens
+
+### ✅ Technical Implementation
+- **Device Detection**: Tablets (768px-1024px) now included in touch device logic
+- **Unified Event Handling**: Consistent touch/click behavior across mobile and tablet
+- **CSS Optimization**: Tablet-specific media queries with enhanced touch targets
+- **Cross-Device Consistency**: Unified experience across all touch-enabled devices
+
+## 🎮 Recent: Play Again Feature (v1.1.0) ✅
 
 ### ✅ Seamless Game Continuation
 - **One-Click Restart**: Request "play again" directly from the game completion modal
@@ -100,7 +115,8 @@ A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js.
 
 ### 🎨 User Experience
 - **Real-time Multiplayer**: Instant synchronization between players
-- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Responsive Design**: Works on desktop, tablet, and mobile with unified touch experience
+- **Touch-Optimized Gameplay**: Mobile and tablet devices use touch-to-preview stone placement
 - **Auto-save**: Automatic game state preservation
 - **Board Themes**: Multiple visual themes for the board
 - **Sound Effects**: Audio feedback for stone placement
