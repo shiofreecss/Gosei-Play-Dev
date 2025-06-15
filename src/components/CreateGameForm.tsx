@@ -33,8 +33,8 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
   );
   
   // Multi-captcha state
-  const [multiCaptcha, setMultiCaptcha] = useState<MultiCaptchaChallenge>(() => generateMultiMathCaptcha(4));
-  const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>(new Array(4).fill(null));
+  const [multiCaptcha, setMultiCaptcha] = useState<MultiCaptchaChallenge>(() => generateMultiMathCaptcha(2));
+  const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>(new Array(2).fill(null));
   const [captchaError, setCaptchaError] = useState<string | null>(null);
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -45,12 +45,12 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
 
   // Fun captcha messages
   const captchaMessages = [
-    "🧠 Prove your strategic mind! Solve these 4 math problems to show you're smarter than the bots:",
-    "🎯 Ready to outsmart the machines? Complete these 4 math challenges to prove your worth:",
-    "⚡ Time to flex those brain muscles! Solve 4 problems to show you're a true Go master:",
-    "🏆 Think you can beat the bots? Prove it by solving these 4 mathematical challenges:",
-    "🎲 Roll up your sleeves! Show your mental prowess with these 4 strategic calculations:",
-    "🔥 Bring the heat! Demonstrate your superior intellect with these 4 math problems:"
+    "🧠 Prove your strategic mind! Solve these 2 math problems to show you're smarter than the bots:",
+    "🎯 Ready to outsmart the machines? Complete these 2 math challenges to prove your worth:",
+    "⚡ Time to flex those brain muscles! Solve 2 problems to show you're a true Go master:",
+    "🏆 Think you can beat the bots? Prove it by solving these 2 mathematical challenges:",
+    "🎲 Roll up your sleeves! Show your mental prowess with these 2 strategic calculations:",
+    "🔥 Bring the heat! Demonstrate your superior intellect with these 2 math problems:"
   ];
 
   const [captchaMessage] = useState(() => 
@@ -73,8 +73,8 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
 
   // Generate new multi-captcha
   const refreshCaptcha = () => {
-    setMultiCaptcha(generateMultiMathCaptcha(4));
-    setSelectedAnswers(new Array(4).fill(null));
+    setMultiCaptcha(generateMultiMathCaptcha(2));
+    setSelectedAnswers(new Array(2).fill(null));
     setCaptchaError(null);
     setCaptchaVerified(false);
     setCurrentProblemIndex(0);
@@ -131,7 +131,7 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
         } else {
           setCaptchaError(`Some answers are incorrect. ${3 - newAttemptCount} attempts remaining.`);
           // Reset answers for retry
-          setSelectedAnswers(new Array(4).fill(null));
+          setSelectedAnswers(new Array(2).fill(null));
           setCurrentProblemIndex(0);
         }
       }

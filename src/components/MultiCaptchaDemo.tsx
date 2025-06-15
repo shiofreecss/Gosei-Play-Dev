@@ -8,8 +8,8 @@ import { useAppTheme } from '../context/AppThemeContext';
 
 const MultiCaptchaDemo: React.FC = () => {
   const { isDarkMode, toggleTheme } = useAppTheme();
-  const [multiCaptcha, setMultiCaptcha] = useState<MultiCaptchaChallenge>(() => generateMultiMathCaptcha(4));
-  const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>(new Array(4).fill(null));
+  const [multiCaptcha, setMultiCaptcha] = useState<MultiCaptchaChallenge>(() => generateMultiMathCaptcha(2));
+  const [selectedAnswers, setSelectedAnswers] = useState<(number | null)[]>(new Array(2).fill(null));
   const [validationResult, setValidationResult] = useState<string | null>(null);
   const [isVerified, setIsVerified] = useState(false);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -65,15 +65,15 @@ const MultiCaptchaDemo: React.FC = () => {
   };
 
   const handleRefresh = () => {
-    setMultiCaptcha(generateMultiMathCaptcha(4));
-    setSelectedAnswers(new Array(4).fill(null));
+    setMultiCaptcha(generateMultiMathCaptcha(2));
+    setSelectedAnswers(new Array(2).fill(null));
     setValidationResult(null);
     setIsVerified(false);
     setCurrentProblemIndex(0);
   };
 
   const answeredCount = selectedAnswers.filter(ans => ans !== null).length;
-  const progressPercentage = (answeredCount / 4) * 100;
+  const progressPercentage = (answeredCount / 2) * 100;
 
   return (
     <div className={`max-w-4xl mx-auto p-6 rounded-lg shadow-lg ${
