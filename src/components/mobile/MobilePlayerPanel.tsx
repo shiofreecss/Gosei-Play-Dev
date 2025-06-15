@@ -30,7 +30,7 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
       {/* Players Row */}
       <div className="flex items-center justify-between mb-3">
         {/* Black Player */}
-        <div className={`flex items-center gap-3 flex-1 p-2 rounded-lg transition-all duration-200 ${
+        <div className={`flex items-center gap-3 flex-1 min-w-0 p-2 rounded-lg transition-all duration-200 ${
           currentTurn === 'black' ? 'bg-neutral-100 ring-2 ring-blue-500' : 'bg-neutral-50'
         }`}>
           <PlayerAvatar 
@@ -38,11 +38,9 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
             size={isMobile ? 48 : 56}
           />
           <div className="flex-1 min-w-0 text-center">
-            <div className="mb-1">
-              <span className={`font-semibold text-neutral-900 truncate ${isMobile ? 'text-sm' : 'text-base'}`}>
-                {blackPlayer?.username || 'Waiting...'}
-                {blackPlayer && currentPlayer && blackPlayer.id === currentPlayer.id && ' (You)'}
-              </span>
+            <div className={`mb-1 font-semibold text-neutral-900 truncate ${isMobile ? 'text-sm' : 'text-base'}`}>
+              {blackPlayer?.username || 'Waiting...'}
+              {blackPlayer && currentPlayer && blackPlayer.id === currentPlayer.id && ' (You)'}
             </div>
             <div className={`text-neutral-600 ${isMobile ? 'text-xs' : 'text-sm'}`}>
               Captured: {capturedStones?.white || 0}
@@ -54,7 +52,7 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
         <div className="mx-2 text-neutral-400 font-bold">VS</div>
 
         {/* White Player */}
-        <div className={`flex items-center gap-3 flex-1 p-2 rounded-lg transition-all duration-200 ${
+        <div className={`flex items-center gap-3 flex-1 min-w-0 p-2 rounded-lg transition-all duration-200 ${
           currentTurn === 'white' ? 'bg-neutral-100 ring-2 ring-blue-500' : 'bg-neutral-50'
         }`}>
           <PlayerAvatar 
@@ -62,11 +60,9 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
             size={isMobile ? 48 : 56}
           />
           <div className="flex-1 min-w-0 text-center">
-            <div className="mb-1">
-              <span className={`font-semibold text-neutral-900 truncate ${isMobile ? 'text-sm' : 'text-base'}`}>
-                {whitePlayer?.username || 'Waiting...'}
-                {whitePlayer && currentPlayer && whitePlayer.id === currentPlayer.id && ' (You)'}
-              </span>
+            <div className={`mb-1 font-semibold text-neutral-900 truncate ${isMobile ? 'text-sm' : 'text-base'}`}>
+              {whitePlayer?.username || 'Waiting...'}
+              {whitePlayer && currentPlayer && whitePlayer.id === currentPlayer.id && ' (You)'}
             </div>
             <div className={`text-neutral-600 ${isMobile ? 'text-xs' : 'text-sm'}`}>
               Captured: {capturedStones?.black || 0}
