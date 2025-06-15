@@ -1170,7 +1170,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   // Join an existing game
   const joinGame = async (gameIdOrCode: string, username: string, asSpectator: boolean = false) => {
     if (!gameIdOrCode || !username) {
-      dispatch({ type: 'GAME_ERROR', payload: 'Game ID/link and username are required.' });
+      dispatch({ type: 'GAME_ERROR', payload: 'Game code/link and username are required.' });
       return;
     }
     

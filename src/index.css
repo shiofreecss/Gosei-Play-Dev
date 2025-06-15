@@ -34,6 +34,14 @@
     @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
   }
 
+  .btn-disabled {
+    @apply bg-neutral-300 text-neutral-500 cursor-not-allowed;
+  }
+
+  .btn-disabled:hover {
+    @apply bg-neutral-300 text-neutral-500;
+  }
+
   .card {
     @apply bg-white rounded-xl shadow-soft p-6;
   }

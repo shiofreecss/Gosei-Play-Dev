@@ -432,23 +432,30 @@ const HomePage: React.FC = () => {
 
 
   const handleJoinGame = async () => {
-    const trimmedUsername = username.trim();
     const trimmedGameId = gameId.trim();
     
-    if (!trimmedUsername) {
-      setUsernameError('Please enter your username');
+    if (!trimmedGameId) {
+      setLocalError('Please enter a game code or share link');
       return;
     }
+
+    // If no username is entered, focus on the username field and show helper
+    if (!username.trim()) {
+      setUsernameError('Please enter your username to join the game');
+      // Focus on username input
+      const usernameInput = document.getElementById('username');
+      if (usernameInput) {
+        usernameInput.focus();
+      }
+      return;
+    }
+
+    const trimmedUsername = username.trim();
     
     // Validate username
     const validation = validateUsername(trimmedUsername);
     if (!validation.isValid) {
       setUsernameError(validation.error);
-      return;
-    }
-    
-    if (!trimmedGameId) {
-      setLocalError('Please enter a game ID or code');
       return;
     }
 
@@ -467,7 +474,7 @@ const HomePage: React.FC = () => {
       // Set a timeout to check if navigation hasn't happened
       setTimeout(() => {
         if (!gameState?.id) {
-          setLocalError('Could not join the game. Please check the game ID and try again.');
+          setLocalError('Could not join the game. Please check the game code and try again.');
         }
       }, 3000);
     } catch (error) {
@@ -988,7 +995,13 @@ const HomePage: React.FC = () => {
                 <input
                   type="text"
                   id="username"
-                  className={`form-input text-lg py-3 ${usernameError ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
+                  className={`form-input text-lg py-3 transition-all duration-300 ${
+                    usernameError 
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                      : gameId.trim() && !username.trim()
+                      ? 'border-amber-400 focus:border-amber-500 focus:ring-amber-500 bg-amber-50 animate-pulse'
+                      : ''
+                  }`}
                   value={username}
                   onChange={(e) => handleUsernameChange(e.target.value)}
                   placeholder="Enter your name (4-32 characters)"
@@ -1019,20 +1032,39 @@ const HomePage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex space-x-2">
-                    <input
-                      type="text"
-                        className="form-input flex-1"
-                      value={gameId}
-                      onChange={(e) => setGameId(e.target.value)}
-                      placeholder="Enter game link or ID"
-                    />
-                    <button
-                      onClick={handleJoinGame}
-                        className="btn btn-secondary whitespace-nowrap"
-                    >
-                      Join Game
-                    </button>
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        className="form-input w-full"
+                        value={gameId}
+                        onChange={(e) => setGameId(e.target.value)}
+                        placeholder="Enter game code or share link"
+                      />
+                      <button
+                        onClick={handleJoinGame}
+                        disabled={!username.trim() || !gameId.trim()}
+                        className={`btn w-full whitespace-nowrap ${
+                          !username.trim() || !gameId.trim() 
+                            ? 'btn-disabled cursor-not-allowed opacity-60' 
+                            : 'btn-secondary hover:btn-primary'
+                        }`}
+                      >
+                        Join Game
+                      </button>
+                      {(!username.trim() || !gameId.trim()) && (
+                        <p className={`text-xs text-center ${
+                          gameId.trim() && !username.trim() 
+                            ? 'text-amber-600 font-medium' 
+                            : 'text-neutral-500'
+                        }`}>
+                          {!username.trim() && !gameId.trim() 
+                            ? 'Enter your name and game code to join'
+                            : !username.trim()
+                            ? '⚠️ Missing: Your name is required to join this game'
+                            : 'Enter a game code or share link to join'
+                          }
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

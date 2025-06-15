@@ -16,6 +16,7 @@ import GoseiLogo from '../components/GoseiLogo';
 import GameNotification from '../components/GameNotification';
 import UndoNotification from '../components/UndoNotification';
 import MobileStoneControls from '../components/go-board/MobileStoneControls';
+import ShareModal from '../components/ShareModal';
 import { playStoneSound } from '../utils/soundUtils';
 import useDeviceDetect from '../hooks/useDeviceDetect';
 import { useAppTheme } from '../context/AppThemeContext';
@@ -79,7 +80,7 @@ const GamePage: React.FC = () => {
   const [username, setUsername] = useState<string>(() => localStorage.getItem('gosei-player-name') || '');
   const [showJoinForm, setShowJoinForm] = useState<boolean>(true);
   const [joinAsSpectator, setJoinAsSpectator] = useState<boolean>(false);
-  const [copied, setCopied] = useState<boolean>(false);
+
   const [syncing, setSyncing] = useState<boolean>(false);
   const [usernameError, setUsernameError] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<Array<{
@@ -101,6 +102,7 @@ const GamePage: React.FC = () => {
   const [showDevTools, setShowDevTools] = useState(false);
   const [confirmingScore, setConfirmingScore] = useState<boolean>(false);
   const [showGameCompleteModal, setShowGameCompleteModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   
   // Mobile controls preview position state
   const [previewPosition, setPreviewPosition] = useState<Position | null>(null);
@@ -602,11 +604,8 @@ const GamePage: React.FC = () => {
     }
   };
 
-  const copyGameLink = () => {
-    const gameLink = window.location.href;
-    navigator.clipboard.writeText(gameLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 3000);
+  const handleShareGame = () => {
+    setShowShareModal(true);
   };
   
   const handleSyncGame = () => {
@@ -795,7 +794,7 @@ const GamePage: React.FC = () => {
         <div className="card max-w-md w-full">
           <h2 className="text-2xl font-bold mb-4">Join Game</h2>
           <p className="mb-4">
-            You've been invited to play a game of Go. Enter your name to join.
+            You've been invited to play a game of Go. Enter your name to join this game.
           </p>
           <form onSubmit={handleJoinGame}>
             <div className="mb-4">
@@ -1031,8 +1030,7 @@ const GamePage: React.FC = () => {
                 onRejectUndo={handleRejectUndo}
                 onPassTurn={handlePassTurn}
                 onLeaveGame={handleLeaveGame}
-                onCopyGameLink={copyGameLink}
-                copied={copied}
+                onCopyGameLink={handleShareGame}
                 autoSaveEnabled={autoSaveEnabled}
                 onToggleAutoSave={toggleAutoSave}
                 onSaveNow={saveGameNow}
@@ -1078,6 +1076,13 @@ const GamePage: React.FC = () => {
             }}
           />
         )}
+
+        {/* Share Modal */}
+        <ShareModal 
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          gameCode={gameState.code}
+        />
         
         {/* Add connection status component - HIDDEN */}
         {/* <ConnectionStatus /> */}
