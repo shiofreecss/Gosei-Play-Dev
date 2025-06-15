@@ -16,6 +16,8 @@ import GoseiLogo from '../components/GoseiLogo';
 import GameNotification from '../components/GameNotification';
 import UndoNotification from '../components/UndoNotification';
 import MobileStoneControls from '../components/go-board/MobileStoneControls';
+import MobilePlayerPanel from '../components/mobile/MobilePlayerPanel';
+import MobileGameTools from '../components/mobile/MobileGameTools';
 import ShareModal from '../components/ShareModal';
 import { playStoneSound } from '../utils/soundUtils';
 import useDeviceDetect from '../hooks/useDeviceDetect';
@@ -917,6 +919,12 @@ const GamePage: React.FC = () => {
             </div>
           )}
           
+          {/* Mobile Player Panel - Show at top on mobile/tablet */}
+          <MobilePlayerPanel
+            gameState={gameState}
+            currentPlayer={currentPlayer || undefined}
+          />
+          
           {/* Mobile-first responsive grid */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Go Board - adjust to be full width on mobile and take 3/4 on larger screens */}
@@ -1001,12 +1009,9 @@ const GamePage: React.FC = () => {
                   />
                 )}
               </div>
-            </div>
-
-            {/* Game Info Panel - Make responsive with proper width constraints */}
-            <div className="lg:col-span-1 w-full">
-              {/* Mobile Stone Controls - centered with proper spacing above game info */}
-              <div className="w-full flex justify-center mb-6">
+              
+              {/* Mobile Stone Controls - Show on mobile/tablet only, positioned after the board */}
+              <div className="w-full flex justify-center mt-4">
                 <MobileStoneControls
                   currentTurn={gameState.currentTurn}
                   isPlayerTurn={gameState.status === 'playing' && currentPlayer?.color === gameState.currentTurn}
@@ -1017,45 +1022,69 @@ const GamePage: React.FC = () => {
                   boardSize={gameState.board.size}
                 />
               </div>
-              
-              <GameInfo
-                gameState={gameState}
-                currentPlayer={currentPlayer || undefined}
-                onResign={handleResignGame}
-                onRequestUndo={handleRequestUndo}
-                onAcceptUndo={handleAcceptUndo}
-                onRejectUndo={handleRejectUndo}
-                onPassTurn={handlePassTurn}
-                onLeaveGame={handleLeaveGame}
-                onCopyGameLink={handleShareGame}
-                autoSaveEnabled={autoSaveEnabled}
-                onToggleAutoSave={toggleAutoSave}
-                onSaveNow={saveGameNow}
-                onConfirmScore={handleConfirmScore}
-                onCancelScoring={handleCancelScoring}
-                showCoordinates={showCoordinates}
-                onToggleCoordinates={handleToggleCoordinates}
-                onReviewBoardChange={(stones: Stone[], moveIndex: number, isReviewing: boolean) => {
-                  setSpectatorReviewStones(stones);
-                  setSpectatorReviewMoveIndex(moveIndex);
-                  setSpectatorIsReviewing(isReviewing);
-                }}
-              />
-              
-              {/* Debug Controls - Only shown when dev tools are enabled */}
-              {showDevTools && (
-                <div className="mt-4 sm:mt-6">
-                  <button
-                    onClick={handleSyncGame}
-                    className="btn bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:ring-neutral-400 w-full"
-                    disabled={syncing}
-                  >
-                    {syncing ? 'Syncing...' : 'Sync Game'}
-                  </button>
-                </div>
-              )}
             </div>
+
+            {/* Game Info Panel - Hide on mobile/tablet, show on desktop */}
+            {!(isMobile || isTablet) && (
+              <div className="lg:col-span-1 w-full">
+                
+                <GameInfo
+                  gameState={gameState}
+                  currentPlayer={currentPlayer || undefined}
+                  onResign={handleResignGame}
+                  onRequestUndo={handleRequestUndo}
+                  onAcceptUndo={handleAcceptUndo}
+                  onRejectUndo={handleRejectUndo}
+                  onPassTurn={handlePassTurn}
+                  onLeaveGame={handleLeaveGame}
+                  onCopyGameLink={handleShareGame}
+                  autoSaveEnabled={autoSaveEnabled}
+                  onToggleAutoSave={toggleAutoSave}
+                  onSaveNow={saveGameNow}
+                  onConfirmScore={handleConfirmScore}
+                  onCancelScoring={handleCancelScoring}
+                  showCoordinates={showCoordinates}
+                  onToggleCoordinates={handleToggleCoordinates}
+                  onReviewBoardChange={(stones: Stone[], moveIndex: number, isReviewing: boolean) => {
+                    setSpectatorReviewStones(stones);
+                    setSpectatorReviewMoveIndex(moveIndex);
+                    setSpectatorIsReviewing(isReviewing);
+                  }}
+                />
+                
+                {/* Debug Controls - Only shown when dev tools are enabled */}
+                {showDevTools && (
+                  <div className="mt-4 sm:mt-6">
+                    <button
+                      onClick={handleSyncGame}
+                      className="btn bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:ring-neutral-400 w-full"
+                      disabled={syncing}
+                    >
+                      {syncing ? 'Syncing...' : 'Sync Game'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
+          
+          {/* Mobile Game Tools - Show at bottom on mobile/tablet */}
+          <MobileGameTools
+            gameState={gameState}
+            currentPlayer={currentPlayer || undefined}
+            onPassTurn={handlePassTurn}
+            onRequestUndo={handleRequestUndo}
+            onResign={handleResignGame}
+            onLeaveGame={handleLeaveGame}
+            onCopyGameLink={handleShareGame}
+            onConfirmScore={handleConfirmScore}
+            onCancelScoring={handleCancelScoring}
+            autoSaveEnabled={autoSaveEnabled}
+            onToggleAutoSave={toggleAutoSave}
+            onSaveNow={saveGameNow}
+            showCoordinates={showCoordinates}
+            onToggleCoordinates={handleToggleCoordinates}
+          />
         </div>
         
         {/* Game error messages */}

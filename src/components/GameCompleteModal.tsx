@@ -109,6 +109,13 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
       onClose?.();
     }, 300); // Wait for exit animation
   };
+
+  // Handle backdrop click to close modal
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  };
   
   const handlePlayAgain = () => {
     if (!gameState?.socket || !currentPlayer) return;
@@ -155,7 +162,13 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
   // If waiting for new game, always show the waiting modal regardless of game status
   if (waitingForNewGame) {
     return createPortal(
-      <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 z-[9999] ${visible ? 'scale-100' : 'scale-95'}`}>
+      <div 
+        className={`fixed inset-0 bg-black transition-opacity duration-300 z-[9999] ${
+          visible ? 'bg-opacity-50' : 'bg-opacity-0'
+        }`}
+        onClick={handleBackdropClick}
+      >
+        <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 ${visible ? 'scale-100' : 'scale-95'}`}>
         {/* Header */}
         <div className="bg-green-600 dark:bg-green-800 text-white py-4 px-6">
           <h2 className="text-xl font-bold text-center">Starting New Game...</h2>
@@ -170,6 +183,7 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
             Setting up your new game...
           </p>
         </div>
+        </div>
       </div>,
       document.body
     );
@@ -178,7 +192,13 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
   // Render play again confirmation dialog
   if (showPlayAgainDialog && playAgainRequestReceived) {
     return createPortal(
-      <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 z-[9999] ${visible ? 'scale-100' : 'scale-95'}`}>
+      <div 
+        className={`fixed inset-0 bg-black transition-opacity duration-300 z-[9999] ${
+          visible ? 'bg-opacity-50' : 'bg-opacity-0'
+        }`}
+        onClick={handleBackdropClick}
+      >
+        <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 ${visible ? 'scale-100' : 'scale-95'}`}>
           {/* Header */}
           <div className="bg-blue-600 dark:bg-blue-800 text-white py-4 px-6">
             <h2 className="text-xl font-bold text-center">Play Again?</h2>
@@ -206,13 +226,20 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
               </button>
             </div>
           </div>
-        </div>,
-        document.body
+        </div>
+      </div>,
+      document.body
     );
   }
 
   return createPortal(
-    <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 z-[9999] ${visible ? 'scale-100' : 'scale-95'}`}>
+    <div 
+      className={`fixed inset-0 bg-black transition-opacity duration-300 z-[9999] ${
+        visible ? 'bg-opacity-50' : 'bg-opacity-0'
+      }`}
+      onClick={handleBackdropClick}
+    >
+      <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 ${visible ? 'scale-100' : 'scale-95'}`}>
         {/* Header */}
         <div className="bg-indigo-600 dark:bg-indigo-800 text-white py-4 px-6">
           <h2 className="text-xl font-bold text-center">Game Complete!</h2>
@@ -296,8 +323,9 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
             </button>
           </div>
         </div>
-      </div>,
-      document.body
+      </div>
+    </div>,
+    document.body
   );
 };
 
