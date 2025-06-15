@@ -623,17 +623,7 @@ const GameReview: React.FC<GameReviewProps> = ({ gameState, onBoardStateChange }
           )}
         </div>
 
-        {/* Keyboard Shortcuts Help */}
-        <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-700">
-          <div className={`text-xs ${isDarkMode ? 'text-neutral-400' : 'text-neutral-600'}`}>
-            <div className="font-medium mb-2">Keyboard Shortcuts:</div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-1">
-              <div>← Previous move</div>
-              <div>→ Next move</div>
-              <div>Space Play/Pause</div>
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   );
