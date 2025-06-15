@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import GoseiLogo from '../components/GoseiLogo';
 import ThemeToggleButton from '../components/ThemeToggleButton';
+import { useAppTheme } from '../context/AppThemeContext';
 
 interface RulesSectionProps {
   title: string;
@@ -34,6 +35,7 @@ const RulesSection: React.FC<RulesSectionProps> = ({ title, children, isOpen, on
 );
 
 const RulesPage: React.FC = () => {
+  const { isDarkMode } = useAppTheme();
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(['basic-rules']));
 
   const toggleSection = (sectionId: string) => {
@@ -67,7 +69,14 @@ const RulesPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <Link 
               to="/board-demo" 
-              className="inline-flex items-center text-primary-600 hover:text-primary-700"
+              className={`
+                inline-flex items-center px-4 py-2.5 rounded-lg font-medium transition-all duration-200 
+                ${isDarkMode 
+                  ? 'bg-slate-700/50 hover:bg-slate-600/60 text-slate-200 hover:text-white border border-slate-600/50 hover:border-slate-500' 
+                  : 'bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md'
+                }
+                backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+              `}
             >
               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />

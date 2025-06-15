@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import BoardSizeComparison from '../components/go-board/BoardSizeComparison';
 import GoseiLogo from '../components/GoseiLogo';
@@ -10,6 +10,7 @@ import ThemeToggleButton from '../components/ThemeToggleButton';
 import RulesSidebar from '../components/RulesSidebar';
 import MobileStoneControls from '../components/go-board/MobileStoneControls';
 import { playStoneSound } from '../utils/soundUtils';
+import { useAppTheme } from '../context/AppThemeContext';
 
 // Helper functions for capturing logic
 const getAdjacentPositions = (pos: Position, size: number): Position[] => {
@@ -122,6 +123,7 @@ const getSamplePositions = (size: number): Stone[] => {
 const BoardDemoPage: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const { currentTheme } = useBoardTheme();
+  const { isDarkMode } = useAppTheme();
   
   // Create a demo board with sample positions
   const [board, setBoard] = useState<Board>({
@@ -221,7 +223,14 @@ const BoardDemoPage: React.FC = () => {
             {selectedSize ? (
               <button 
                 onClick={handleBack}
-                className="inline-flex items-center text-primary-600 hover:text-primary-700"
+                className={`
+                  inline-flex items-center px-4 py-2.5 rounded-lg font-medium transition-all duration-200 
+                  ${isDarkMode 
+                    ? 'bg-slate-700/50 hover:bg-slate-600/60 text-slate-200 hover:text-white border border-slate-600/50 hover:border-slate-500' 
+                    : 'bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md'
+                  }
+                  backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+                `}
               >
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
@@ -231,7 +240,14 @@ const BoardDemoPage: React.FC = () => {
             ) : (
               <Link 
                 to="/" 
-                className="inline-flex items-center text-primary-600 hover:text-primary-700"
+                className={`
+                  inline-flex items-center px-4 py-2.5 rounded-lg font-medium transition-all duration-200 
+                  ${isDarkMode 
+                    ? 'bg-slate-700/50 hover:bg-slate-600/60 text-slate-200 hover:text-white border border-slate-600/50 hover:border-slate-500' 
+                    : 'bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md'
+                  }
+                  backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+                `}
               >
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />

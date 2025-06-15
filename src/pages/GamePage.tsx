@@ -18,6 +18,7 @@ import UndoNotification from '../components/UndoNotification';
 import MobileStoneControls from '../components/go-board/MobileStoneControls';
 import { playStoneSound } from '../utils/soundUtils';
 import useDeviceDetect from '../hooks/useDeviceDetect';
+import { useAppTheme } from '../context/AppThemeContext';
 
 
 
@@ -53,6 +54,7 @@ const validateUsername = (name: string): { isValid: boolean; error: string | nul
 const GamePage: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
+  const { isDarkMode } = useAppTheme();
     const {
     gameState, 
     loading, 
@@ -765,7 +767,14 @@ const GamePage: React.FC = () => {
           <p className="mb-4">{error}</p>
           <button
             onClick={() => navigate('/')}
-            className="btn btn-primary w-full"
+            className={`
+              w-full px-4 py-2.5 rounded-lg font-medium transition-all duration-200 
+              ${isDarkMode 
+                ? 'bg-slate-700/50 hover:bg-slate-600/60 text-slate-200 hover:text-white border border-slate-600/50 hover:border-slate-500' 
+                : 'bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md'
+              }
+              backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+            `}
           >
             Back to Home
           </button>
@@ -865,7 +874,14 @@ const GamePage: React.FC = () => {
           <p className="mb-4">We couldn't find the requested game.</p>
           <button
             onClick={() => navigate('/')}
-            className="btn btn-primary w-full"
+            className={`
+              w-full px-4 py-2.5 rounded-lg font-medium transition-all duration-200 
+              ${isDarkMode 
+                ? 'bg-slate-700/50 hover:bg-slate-600/60 text-slate-200 hover:text-white border border-slate-600/50 hover:border-slate-500' 
+                : 'bg-white hover:bg-gray-50 text-gray-700 hover:text-gray-900 border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md'
+              }
+              backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+            `}
           >
             Back to Home
           </button>

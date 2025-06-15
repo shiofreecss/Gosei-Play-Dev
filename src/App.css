@@ -2629,3 +2629,49 @@
   opacity: 0.9;
   border-color: rgba(156, 163, 175, 0.8);
 }
+
+/* Back Navigation Button Styling */
+.back-nav-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.theme-modern .back-nav-button {
+  background-color: rgba(51, 65, 85, 0.5);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  color: rgba(203, 213, 225, 1);
+}
+
+.theme-modern .back-nav-button:hover {
+  background-color: rgba(51, 65, 85, 0.7);
+  border-color: rgba(71, 85, 105, 1);
+  color: rgba(255, 255, 255, 1);
+}
+
+.theme-modern-light .back-nav-button {
+  background-color: rgba(255, 255, 255, 1);
+  border: 1px solid rgba(229, 231, 235, 1);
+  color: rgba(55, 65, 81, 1);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.theme-modern-light .back-nav-button:hover {
+  background-color: rgba(249, 250, 251, 1);
+  border-color: rgba(209, 213, 219, 1);
+  color: rgba(17, 24, 39, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.theme-modern .back-nav-button:focus,
+.theme-modern-light .back-nav-button:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: rgba(93, 93, 255, 0.5);
+  ring-offset: 2px;
+}
