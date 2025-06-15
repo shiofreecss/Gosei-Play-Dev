@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, Link } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 import { GameOptions, ColorPreference, ScoringRule, GameType } from '../types/go';
@@ -1122,13 +1123,10 @@ const HomePage: React.FC = () => {
       </div>
       
       {/* Captcha Modal */}
-      {showCreateForm && (
-        <div className="fixed inset-0 z-[9999] overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={() => setShowCreateForm(false)}></div>
-            <div className={`relative rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto ${
-              isDarkMode ? 'bg-neutral-800' : 'bg-white'
-            }`}>
+      {showCreateForm && createPortal(
+        <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-xl shadow-xl max-w-2xl w-[90%] max-h-[90vh] overflow-y-auto z-[9999] ${
+          isDarkMode ? 'bg-neutral-800' : 'bg-white'
+        }`}>
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className={`text-2xl font-bold ${
@@ -1156,10 +1154,9 @@ const HomePage: React.FC = () => {
                 error={error || localError}
                 initialPlayerName={username}
               />
-            </div>
-            </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>

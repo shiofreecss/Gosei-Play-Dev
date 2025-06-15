@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 
@@ -153,41 +154,31 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
 
   // If waiting for new game, always show the waiting modal regardless of game status
   if (waitingForNewGame) {
-    return (
-      <div className={`absolute top-0 left-0 w-full min-h-screen flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-        {/* Backdrop */}
-        <div className="fixed inset-0"></div>
-        
-        {/* Modal */}
-        <div className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
-          {/* Header */}
-          <div className="bg-green-600 dark:bg-green-800 text-white py-4 px-6">
-            <h2 className="text-xl font-bold text-center">Starting New Game...</h2>
-          </div>
-          
-          {/* Content */}
-          <div className="p-6 text-center">
-            <div className="mb-4">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-            </div>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              Setting up your new game...
-            </p>
-          </div>
+    return createPortal(
+      <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 z-[9999] ${visible ? 'scale-100' : 'scale-95'}`}>
+        {/* Header */}
+        <div className="bg-green-600 dark:bg-green-800 text-white py-4 px-6">
+          <h2 className="text-xl font-bold text-center">Starting New Game...</h2>
         </div>
-      </div>
+        
+        {/* Content */}
+        <div className="p-6 text-center">
+          <div className="mb-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+          </div>
+          <p className="text-lg text-gray-600 dark:text-gray-300">
+            Setting up your new game...
+          </p>
+        </div>
+      </div>,
+      document.body
     );
   }
 
   // Render play again confirmation dialog
   if (showPlayAgainDialog && playAgainRequestReceived) {
-    return (
-      <div className={`absolute top-0 left-0 w-full min-h-screen flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-        {/* Backdrop */}
-        <div className="fixed inset-0"></div>
-        
-        {/* Modal */}
-        <div className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
+    return createPortal(
+      <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 z-[9999] ${visible ? 'scale-100' : 'scale-95'}`}>
           {/* Header */}
           <div className="bg-blue-600 dark:bg-blue-800 text-white py-4 px-6">
             <h2 className="text-xl font-bold text-center">Play Again?</h2>
@@ -215,18 +206,13 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
               </button>
             </div>
           </div>
-        </div>
-      </div>
+        </div>,
+        document.body
     );
   }
 
-  return (
-    <div className={`absolute top-0 left-0 w-full min-h-screen flex items-center justify-center z-50 transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-      {/* Backdrop */}
-      <div className="fixed inset-0" onClick={handleClose}></div>
-      
-      {/* Modal */}
-      <div className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 transform ${visible ? 'scale-100' : 'scale-95'}`}>
+  return createPortal(
+    <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 z-[9999] ${visible ? 'scale-100' : 'scale-95'}`}>
         {/* Header */}
         <div className="bg-indigo-600 dark:bg-indigo-800 text-white py-4 px-6">
           <h2 className="text-xl font-bold text-center">Game Complete!</h2>
@@ -310,8 +296,8 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </div>,
+      document.body
   );
 };
 
