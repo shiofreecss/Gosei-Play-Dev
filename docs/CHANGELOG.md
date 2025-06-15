@@ -7,7 +7,7 @@ All notable changes to Gosei Play will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.1] - 2025-01-08
+## [1.1.2] - 2025-01-08
 
 ### Added
 - **Unlimited Time Display Enhancement**: Professional display for unlimited time games
@@ -27,6 +27,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced `src/components/TimeControl.tsx` with infinity symbol display logic
 - Updated `src/components/go-board/GameInfo.tsx` timer display condition
 - Added comprehensive test coverage for all time display scenarios
+
+## [1.1.1] - 2024-12-15
+
+### Added
+- **Tablet Stone Placement Enhancement**: Mobile-style touch interface extended to tablet devices
+  - **Touch-to-Preview System**: Tablets now use mobile's proven stone placement workflow
+  - **Mobile Stone Controls**: Component enabled for tablet devices (768px-1024px breakpoint)
+  - **Position Indicators**: Clear Go coordinate display (e.g., "D4") for preview positions
+  - **Confirmation Workflow**: "Place" button prevents accidental stone placement on tablets
+  - **Enhanced Touch Targets**: 32px minimum touch areas for comfortable tablet interaction
+
+### Changed
+- **Device Detection**: Updated `useDeviceDetect` hook integration to include tablet support
+- **Event Handling**: Unified touch/click event handling across mobile and tablet devices
+- **CSS Optimization**: Added tablet-specific media queries with optimized touch targets
+- **Grid Rendering**: Thinner grid lines (60% width) for better visibility on touch devices
+
+### Fixed
+- **Touch Interaction**: Tablets now receive proper touch event handling instead of mouse events
+- **Stone Placement**: Eliminated accidental stone placement through confirmation workflow
+- **Visual Feedback**: Enhanced stone preview rendering for tablet screens
+
+### Technical
+- Enhanced `src/components/go-board/MobileStoneControls.tsx` with tablet device support
+- Updated `src/components/go-board/GoBoard.tsx` touch/click handlers for tablet inclusion
+- Added tablet-specific CSS media queries in `src/App.css` with enhanced touch styling
+- Updated documentation in `docs/MOBILE_RESPONSIVENESS.md` with tablet features
 
 ## [1.1.0] - 2025-06-04
 
