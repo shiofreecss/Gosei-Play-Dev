@@ -52,12 +52,7 @@ const RulesPage: React.FC = () => {
     <div className="min-h-screen bg-neutral-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <header className="text-center mb-8 relative">
-          {/* Theme Toggle Button - positioned in top right */}
-          <div className="absolute top-0 right-0">
-            <ThemeToggleButton />
-          </div>
-          
+        <header className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-2">
             <GoseiLogo size={48} />
             <h1 className="text-4xl font-bold text-primary-700">Go Rules & Guide</h1>
@@ -69,15 +64,22 @@ const RulesPage: React.FC = () => {
 
         {/* Navigation */}
         <div className="max-w-4xl mx-auto mb-6">
-          <Link 
-            to="/board-demo" 
-            className="inline-flex items-center text-primary-600 hover:text-primary-700"
-          >
-            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-            </svg>
-            Back to Board Demo
-          </Link>
+          <div className="flex items-center justify-between">
+            <Link 
+              to="/board-demo" 
+              className="inline-flex items-center text-primary-600 hover:text-primary-700"
+            >
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+              </svg>
+              Back to Board Demo
+            </Link>
+            
+            {/* Theme Toggle Button - positioned on the same row as navigation */}
+            <div className="flex-shrink-0">
+              <ThemeToggleButton />
+            </div>
+          </div>
         </div>
 
         {/* Rules Content */}

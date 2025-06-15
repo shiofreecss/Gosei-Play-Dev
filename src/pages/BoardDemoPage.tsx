@@ -203,12 +203,7 @@ const BoardDemoPage: React.FC = () => {
     <div className="min-h-screen bg-neutral-100">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <header className="text-center mb-8 relative">
-          {/* Theme Toggle Button - positioned in top right */}
-          <div className="absolute top-0 right-0">
-            <ThemeToggleButton />
-          </div>
-          
+        <header className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-2">
             <GoseiLogo size={48} />
             <h1 className="text-4xl font-bold text-primary-700">
@@ -222,27 +217,34 @@ const BoardDemoPage: React.FC = () => {
 
         {/* Navigation */}
         <div className="max-w-6xl mx-auto mb-6">
-          {selectedSize ? (
-            <button 
-              onClick={handleBack}
-              className="inline-flex items-center text-primary-600 hover:text-primary-700"
-            >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-              </svg>
-              Back to Size Selection
-            </button>
-          ) : (
-            <Link 
-              to="/" 
-              className="inline-flex items-center text-primary-600 hover:text-primary-700"
-            >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
-              </svg>
-              Back to Home
-            </Link>
-          )}
+          <div className="flex items-center justify-between">
+            {selectedSize ? (
+              <button 
+                onClick={handleBack}
+                className="inline-flex items-center text-primary-600 hover:text-primary-700"
+              >
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                </svg>
+                Back to Size Selection
+              </button>
+            ) : (
+              <Link 
+                to="/" 
+                className="inline-flex items-center text-primary-600 hover:text-primary-700"
+              >
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+                </svg>
+                Back to Home
+              </Link>
+            )}
+            
+            {/* Theme Toggle Button - positioned on the same row as navigation */}
+            <div className="flex-shrink-0">
+              <ThemeToggleButton />
+            </div>
+          </div>
         </div>
 
         {/* Main Content */}
@@ -313,15 +315,7 @@ const BoardDemoPage: React.FC = () => {
                   </div>
                 </div>
                 
-                <div className="bg-white p-4 rounded-xl shadow">
-                  <h2 className="text-xl font-semibold mb-2">Instructions</h2>
-                  <ul className="list-disc pl-5 space-y-2 text-neutral-700">
-                    <li>Click on the board to place stones</li>
-                    <li>Try completing the capture in the top-left</li>
-                    <li>Experiment with the Ko situation in the center</li>
-                    <li>Your theme selection will be saved for all games</li>
-                  </ul>
-                </div>
+
               </div>
             </div>
           ) : (

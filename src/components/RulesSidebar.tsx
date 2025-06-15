@@ -179,20 +179,12 @@ const RulesSidebar: React.FC<RulesSidebarProps> = ({ className = '' }) => {
 
       {/* Quick Actions */}
       <div className="mt-6 pt-4 border-t border-neutral-200">
-        <div className="flex flex-col gap-2">
-          <Link
-            to="/board-demo"
-            className="text-center px-3 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors"
-          >
-            Try Demo Board
-          </Link>
-          <Link
-            to="/rules"
-            className="text-center px-3 py-2 bg-neutral-100 text-neutral-700 text-sm rounded-lg hover:bg-neutral-200 transition-colors"
-          >
-            Read Complete Rules
-          </Link>
-        </div>
+        <Link
+          to="/rules"
+          className="block text-center px-3 py-2 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 transition-colors"
+        >
+          Read Complete Rules
+        </Link>
       </div>
     </div>
   );

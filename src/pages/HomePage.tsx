@@ -1038,7 +1038,7 @@ const HomePage: React.FC = () => {
                 </div>
                 
                 {/* Right panel - About Go */}
-                <div className="lg:w-1/2 bg-neutral-50 p-6 md:p-10">
+                <div className="hidden lg:block lg:w-1/2 bg-neutral-50 p-6 md:p-10">
                   <h2 className="text-3xl font-bold mb-6">About Go</h2>
                   <div className="prose prose-neutral max-w-none">
                     <p className="text-lg mb-6">
