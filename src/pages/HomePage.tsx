@@ -1140,7 +1140,7 @@ const HomePage: React.FC = () => {
                 <GameOptionsPanel />
                 
                 {/* Create Game button */}
-                <div className="mt-8 flex justify-end">
+                <div className="mt-8 flex justify-center md:justify-end">
                     <button
                     onClick={() => setShowCreateForm(true)}
                     className="btn btn-primary text-lg py-3 px-8"

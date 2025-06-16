@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
+import useDeviceDetect from '../hooks/useDeviceDetect';
 
 // List of available music tracks
 const musicTracks = [
@@ -27,10 +28,13 @@ const FloatingMusicPlayer: React.FC = () => {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(globalTrackIndex);
   const [volume, setVolume] = useState(0.3); // Default to 30% volume
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isFaded, setIsFaded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const playerRef = useRef<HTMLDivElement | null>(null);
+  const fadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const location = useLocation();
   const { gameState } = useGame();
+  const { isMobile, isTablet } = useDeviceDetect();
   
   // Only show on active game pages where a game is in progress or finished
   // Don't show on board demo, join page, or during game setup/waiting
@@ -110,6 +114,44 @@ const FloatingMusicPlayer: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isActivePage, isExpanded]);
+
+  // Auto-fade functionality for mobile/tablet
+  useEffect(() => {
+    if (!isActivePage || (!isMobile && !isTablet)) return;
+
+    const startFadeTimer = () => {
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+      }
+      
+      setIsFaded(false);
+      fadeTimeoutRef.current = setTimeout(() => {
+        setIsFaded(true);
+      }, 5000); // 5 seconds
+    };
+
+    // Start initial timer
+    startFadeTimer();
+
+    // Cleanup on unmount
+    return () => {
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+      }
+    };
+  }, [isActivePage, isMobile, isTablet]);
+
+  // Reset fade timer on user interaction
+  const handleUserInteraction = () => {
+    if ((isMobile || isTablet) && fadeTimeoutRef.current) {
+      clearTimeout(fadeTimeoutRef.current);
+      setIsFaded(false);
+      
+      fadeTimeoutRef.current = setTimeout(() => {
+        setIsFaded(true);
+      }, 5000);
+    }
+  };
   
   // Don't render if not on an active game page
   if (!isActivePage) return null;
@@ -157,7 +199,17 @@ const FloatingMusicPlayer: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-8 right-8 z-40" ref={playerRef}>
+    <div 
+      className={`fixed bottom-8 right-8 z-40 transition-opacity duration-500 ${
+        isFaded && (isMobile || isTablet) ? 'opacity-20' : 'opacity-100'
+      }`} 
+      ref={playerRef}
+      onMouseEnter={handleUserInteraction}
+      onMouseMove={handleUserInteraction}
+      onTouchStart={handleUserInteraction}
+      onTouchMove={handleUserInteraction}
+      onClick={handleUserInteraction}
+    >
       {/* Floating music panel - theme-aware styling */}
       <div className={`${
         isExpanded 

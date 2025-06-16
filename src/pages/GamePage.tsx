@@ -1027,6 +1027,7 @@ const GamePage: React.FC = () => {
                   isScoring={gameState.status === 'scoring'}
                   isReviewing={reviewBoardState?.isReviewing || false}
                   isThinking={isThinking}
+                  isFinished={gameState.status === 'finished'}
                   previewPosition={previewPosition}
                   onPlaceStone={handleMobilePlaceStone}
                   boardSize={gameState.board.size}

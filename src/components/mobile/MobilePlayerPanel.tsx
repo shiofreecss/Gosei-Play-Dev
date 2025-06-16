@@ -67,10 +67,16 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
         <div className={`flex items-center flex-1 min-w-0 p-2 rounded-lg transition-all duration-200 ${
           currentTurn === 'black' ? 'bg-neutral-100 ring-2 ring-blue-500' : 'bg-neutral-50'
         }`}>
-          <PlayerAvatar 
-            username={blackPlayer?.username || 'Waiting...'} 
-            size={isMobile ? 48 : 56}
-          />
+          <div className="flex flex-col items-center mr-3">
+            <PlayerAvatar 
+              username={blackPlayer?.username || 'Waiting...'} 
+              size={isMobile ? 48 : 56}
+            />
+                         <div className="text-4xl mt-1 text-black">
+               <span className="dark:hidden">●</span>
+               <span className="hidden dark:inline" style={{ textShadow: '0 0 0 1px white, 1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white' }}>●</span>
+             </div>
+          </div>
           <div className="flex-1 min-w-0 text-center">
             <div className={`mb-1 font-semibold text-neutral-900 truncate ${isMobile ? 'text-sm' : 'text-base'}`}>
               {blackPlayer?.username || 'Waiting...'}
@@ -81,7 +87,7 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
             </div>
             {showTimer && (
               <>
-                <div className={`font-mono font-bold ${isMobile ? 'text-lg' : 'text-xl'} ${
+                <div className={`font-mono font-bold ${isMobile ? 'text-2xl' : 'text-3xl'} ${
                   blackTimeDisplay.isWarning ? 'text-red-600' : 'text-orange-600'
                 }`}>
                   {blackTimeDisplay.time}
@@ -101,10 +107,13 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
         <div className={`flex items-center flex-1 min-w-0 p-2 rounded-lg transition-all duration-200 ${
           currentTurn === 'white' ? 'bg-neutral-100 ring-2 ring-blue-500' : 'bg-neutral-50'
         }`}>
-          <PlayerAvatar 
-            username={whitePlayer?.username || 'Waiting...'} 
-            size={isMobile ? 48 : 56}
-          />
+          <div className="flex flex-col items-center mr-3">
+            <PlayerAvatar 
+              username={whitePlayer?.username || 'Waiting...'} 
+              size={isMobile ? 48 : 56}
+            />
+                         <div className="text-4xl mt-1 text-white dark:text-gray-100" style={{ textShadow: '1px 1px 1px rgba(0,0,0,0.8), -1px -1px 1px rgba(0,0,0,0.8), 1px -1px 1px rgba(0,0,0,0.8), -1px 1px 1px rgba(0,0,0,0.8)' }}>●</div>
+          </div>
           <div className="flex-1 min-w-0 text-center">
             <div className={`mb-1 font-semibold text-neutral-900 truncate ${isMobile ? 'text-sm' : 'text-base'}`}>
               {whitePlayer?.username || 'Waiting...'}
@@ -115,7 +124,7 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
             </div>
             {showTimer && (
               <>
-                <div className={`font-mono font-bold ${isMobile ? 'text-lg' : 'text-xl'} ${
+                <div className={`font-mono font-bold ${isMobile ? 'text-2xl' : 'text-3xl'} ${
                   whiteTimeDisplay.isWarning ? 'text-red-600' : 'text-orange-600'
                 }`}>
                   {whiteTimeDisplay.time}

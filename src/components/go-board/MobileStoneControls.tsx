@@ -8,6 +8,7 @@ interface MobileStoneControlsProps {
   isScoring?: boolean;
   isReviewing?: boolean;
   isThinking?: boolean;
+  isFinished?: boolean;
   previewPosition: Position | null;
   onPlaceStone: () => void;
   boardSize: number;
@@ -19,14 +20,15 @@ const MobileStoneControls: React.FC<MobileStoneControlsProps> = ({
   isScoring = false,
   isReviewing = false,
   isThinking = false,
+  isFinished = false,
   previewPosition,
   onPlaceStone,
   boardSize,
 }) => {
   const { isMobile, isTablet } = useDeviceDetect();
 
-  // Don't render if not mobile/tablet or if in scoring/reviewing mode
-  if ((!isMobile && !isTablet) || isScoring || isReviewing) {
+  // Don't render if not mobile/tablet or if in scoring/reviewing/finished mode
+  if ((!isMobile && !isTablet) || isScoring || isReviewing || isFinished) {
     return null;
   }
 
@@ -55,12 +57,12 @@ const MobileStoneControls: React.FC<MobileStoneControlsProps> = ({
         <button
           onClick={onPlaceStone}
           disabled={!previewPosition || !isPlayerTurn}
-          className={`place-stone-btn px-6 py-3 text-white font-medium rounded-lg shadow-md transition-colors duration-200 flex items-center gap-2 ${
+          className={`place-stone-btn px-6 py-3 font-medium rounded-lg shadow-md transition-colors duration-200 flex items-center gap-2 ${
             !isPlayerTurn
-              ? 'bg-gray-700 dark:bg-gray-600 cursor-not-allowed animate-pulse'
+              ? 'bg-gray-700 dark:bg-gray-600 text-white cursor-not-allowed animate-pulse'
               : previewPosition && isPlayerTurn
-                ? 'bg-green-600 hover:bg-green-700' 
-                : 'bg-gray-400 cursor-not-allowed'
+                ? 'bg-green-600 hover:bg-green-700 text-white' 
+                : 'bg-gray-400 text-gray-700 dark:text-gray-200 cursor-not-allowed'
           }`}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

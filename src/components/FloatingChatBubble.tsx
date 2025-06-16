@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ChatBox from './ChatBox';
+import useDeviceDetect from '../hooks/useDeviceDetect';
 
 interface ChatMessage {
   id: string;
@@ -28,13 +29,62 @@ const FloatingChatBubble: React.FC<FloatingChatBubbleProps> = ({
   const [unreadCount, setUnreadCount] = useState(0);
   const [lastReadIndex, setLastReadIndex] = useState(messages.length);
   const [lastNotificationSound, setLastNotificationSound] = useState(0);
+  const [isFaded, setIsFaded] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
   const notificationSound = useRef<HTMLAudioElement | null>(null);
+  const fadeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { isMobile, isTablet } = useDeviceDetect();
 
   // Initialize notification sound
   useEffect(() => {
     notificationSound.current = new Audio('/sounds/notification.mp3');
   }, []);
+
+  // Auto-fade functionality for mobile/tablet
+  useEffect(() => {
+    if (!isMobile && !isTablet) return;
+
+    const startFadeTimer = () => {
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+      }
+      
+      setIsFaded(false);
+      fadeTimeoutRef.current = setTimeout(() => {
+        setIsFaded(true);
+      }, 5000); // 5 seconds
+    };
+
+    const resetFadeTimer = () => {
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+      }
+      setIsFaded(false);
+      startFadeTimer();
+    };
+
+    // Start initial timer
+    startFadeTimer();
+
+    // Cleanup on unmount
+    return () => {
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+      }
+    };
+  }, [isMobile, isTablet]);
+
+  // Reset fade timer on user interaction
+  const handleUserInteraction = () => {
+    if ((isMobile || isTablet) && fadeTimeoutRef.current) {
+      clearTimeout(fadeTimeoutRef.current);
+      setIsFaded(false);
+      
+      fadeTimeoutRef.current = setTimeout(() => {
+        setIsFaded(true);
+      }, 5000);
+    }
+  };
 
   // Track unread messages and play notification sound
   useEffect(() => {
@@ -73,7 +123,17 @@ const FloatingChatBubble: React.FC<FloatingChatBubbleProps> = ({
   }, [isOpen]);
 
   return (
-    <div className="fixed bottom-24 right-8 z-30" ref={chatRef}>
+    <div 
+      className={`fixed bottom-24 right-8 z-30 transition-opacity duration-500 ${
+        isFaded && (isMobile || isTablet) ? 'opacity-20' : 'opacity-100'
+      }`} 
+      ref={chatRef}
+      onMouseEnter={handleUserInteraction}
+      onMouseMove={handleUserInteraction}
+      onTouchStart={handleUserInteraction}
+      onTouchMove={handleUserInteraction}
+      onClick={handleUserInteraction}
+    >
       {/* Chat floating button - theme-aware styling */}
       <button 
         className="w-14 h-14 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300 flex items-center justify-center cursor-pointer shadow-lg transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-slate-300 relative floating-chat-button"

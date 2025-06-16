@@ -2136,106 +2136,31 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     // Clear any previous move errors
     dispatch({ type: 'CLEAR_MOVE_ERROR' });
     
-    if (accept) {
-      // If accepted, revert to the requested move index
-      const moveIndex = gameState.undoRequest.moveIndex;
-      const historyToKeep = gameState.history.slice(0, moveIndex);
-      
-      // Get the stones on the board at that point in history
-      // We need to recreate the board state
-      const boardSize = gameState.board.size;
-      let stones: Stone[] = [];
-      
-      // Add handicap stones first if any
-      if (historyToKeep.length === 0) {
-        // No moves yet, check if there were handicap stones
-        if (gameState.currentTurn === 'white' && gameState.board.stones.some(s => s.color === 'black')) {
-          // If white goes first, there must have been handicap stones
-          stones = gameState.board.stones.filter(s => s.color === 'black');
-        }
-      } else {
-        // Replay history to create the board state
-        let currentTurn: StoneColor = 'black'; // Black goes first by default
-        
-        historyToKeep.forEach(move => {
-          if (!isPassMove(move)) {
-            // Add a stone for this move
-            stones.push({
-              position: move,
-              color: currentTurn
-            });
-            
-            // Check for captures
-            // This is a simplified version - in practice you'd need to fully reapply rules
-            // to account for captures at each step
-            
-            // Toggle turn
-            currentTurn = currentTurn === 'black' ? 'white' : 'black';
-          } else {
-            // Just toggle turn for passes
-            currentTurn = currentTurn === 'black' ? 'white' : 'black';
-          }
-        });
-      }
-      
-      // Calculate the current turn after undo
-      const nextTurn = historyToKeep.length === 0 ? 
-        (gameState.board.stones.some(s => s.color === 'black') ? 'white' : 'black') : // Handicap logic
-        (historyToKeep.length % 2 === 0 ? 'black' : 'white');
-      
-      // Create the updated game state
-      const updatedGameState: GameState = {
-        ...gameState,
-        board: {
-          ...gameState.board,
-          stones
-        },
-        currentTurn: nextTurn,
-        history: historyToKeep,
-        undoRequest: undefined // Clear the undo request
+    // Always emit the response to the server - let the server handle the actual undo logic
+    const moveIndex = gameState.undoRequest.moveIndex;
+    
+    if (state.socket && state.socket.connected) {
+      const undoResponseData = {
+        gameId: gameState.id,
+        playerId: currentPlayer.id,
+        accepted: accept,
+        moveIndex
       };
       
-      // Update local state
-      dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGameState });
-      
-      // Emit response to server if socket is available
-      if (state.socket && state.socket.connected) {
-        const undoResponseData = {
-          gameId: gameState.id,
-          playerId: currentPlayer.id,
-          accepted: true,
-          moveIndex
-        };
-        
-        console.log('Emitting undo response to server:', undoResponseData);
-        state.socket.emit('respondToUndoRequest', undoResponseData);
-      }
-    } else {
-      // If rejected, just clear the undo request
-      const updatedGameState: GameState = {
+      console.log('Emitting undo response to server:', undoResponseData);
+      state.socket.emit('respondToUndoRequest', undoResponseData);
+    }
+    
+    // Don't update local state here - wait for server response
+    // The server will send back the correct game state
+    
+    // Update in localStorage as backup (just clear the undo request for now)
+    try {
+      const tempGameState = {
         ...gameState,
         undoRequest: undefined
       };
-      
-      // Update local state
-      dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGameState });
-      
-      // Emit response to server if socket is available
-      if (state.socket && state.socket.connected) {
-        const undoResponseData = {
-          gameId: gameState.id,
-          playerId: currentPlayer.id,
-          accepted: false
-        };
-        
-        console.log('Emitting undo response to server:', undoResponseData);
-        state.socket.emit('respondToUndoRequest', undoResponseData);
-      }
-    }
-    
-    // Update in localStorage
-    try {
-      localStorage.setItem(`gosei-game-${gameState.code}`, JSON.stringify(gameState));
+      localStorage.setItem(`gosei-game-${gameState.code}`, JSON.stringify(tempGameState));
     } catch (e) {
       console.error('Failed to save game state after undo response:', e);
     }

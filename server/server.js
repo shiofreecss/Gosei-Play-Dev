@@ -1741,21 +1741,40 @@ io.on('connection', (socket) => {
         let currentTurn = 'black'; // Black always starts first
         let capturedStones = { black: 0, white: 0 };
         
-        // Add handicap stones first if this is a handicap game
-        if (gameState.gameType === 'handicap' && gameState.handicap > 0) {
+        // ONLY add handicap stones if this is actually a handicap game AND we're going back to the beginning
+        if (gameState.gameType === 'handicap' && gameState.handicap > 0 && historyToKeep.length === 0) {
           // Find handicap stones from the original board setup
           const handicapStones = getHandicapStones(gameState.board.size, gameState.handicap);
           stones = handicapStones;
           currentTurn = 'white'; // White plays first in handicap games
-          log(`Added ${handicapStones.length} handicap stones`);
+          log(`Added ${handicapStones.length} handicap stones for handicap game`);
         }
         
         // Replay each move in the history with proper capture logic
         historyToKeep.forEach((move, index) => {
           if (!move.pass) {
+            // Extract position from move - handle both formats safely
+            let position;
+            if (move.position && typeof move.position === 'object' && typeof move.position.x === 'number' && typeof move.position.y === 'number') {
+              // Server format: { position: { x, y }, ... }
+              position = move.position;
+            } else if (typeof move === 'object' && typeof move.x === 'number' && typeof move.y === 'number') {
+              // Client format: { x, y }
+              position = move;
+            } else {
+              log(`ERROR: Invalid move format during undo replay at index ${index}:`, move);
+              return; // Skip this invalid move
+            }
+            
+            // Validate position is within bounds
+            if (position.x < 0 || position.x >= gameState.board.size || position.y < 0 || position.y >= gameState.board.size) {
+              log(`ERROR: Invalid position during undo replay at index ${index}: (${position.x}, ${position.y})`);
+              return; // Skip this invalid move
+            }
+            
             // Add the stone
             const newStone = {
-              position: move.position || move, // Handle both old and new move formats
+              position: position,
               color: currentTurn
             };
             stones.push(newStone);
@@ -1772,11 +1791,7 @@ io.on('connection', (socket) => {
             stones = captureResult.remainingStones;
             
             // Update captured count
-            if (currentTurn === 'black') {
-              capturedStones.black += captureResult.capturedCount;
-            } else {
-              capturedStones.white += captureResult.capturedCount;
-            }
+            capturedStones[currentTurn] += captureResult.capturedCount;
             
             log(`Replayed move ${index + 1}: ${currentTurn} at (${newStone.position.x}, ${newStone.position.y}), captured ${captureResult.capturedCount} stones`);
           }
@@ -1788,10 +1803,16 @@ io.on('connection', (socket) => {
         // Calculate the current turn after undo
         let nextTurn;
         if (gameState.gameType === 'handicap' && gameState.handicap > 0) {
-          // In handicap games, determine turn based on remaining moves
+          // In handicap games, white starts first, so:
+          // historyToKeep.length = 0 -> white's turn
+          // historyToKeep.length = 1 -> black's turn  
+          // historyToKeep.length = 2 -> white's turn
           nextTurn = historyToKeep.length % 2 === 0 ? 'white' : 'black';
         } else {
-          // In normal games, black starts first
+          // In normal games, black starts first, so:
+          // historyToKeep.length = 0 -> black's turn
+          // historyToKeep.length = 1 -> white's turn
+          // historyToKeep.length = 2 -> black's turn
           nextTurn = historyToKeep.length % 2 === 0 ? 'black' : 'white';
         }
         
