@@ -296,7 +296,7 @@ const CreateGameForm: React.FC<CreateGameFormProps> = ({
                 ← Prev
               </button>
 
-              <div className={`text-sm ${
+              <div className={`text-sm text-center ${
                 isDarkMode ? 'text-neutral-400' : 'text-neutral-500'
               }`}>
                 {answeredCount} of {multiCaptcha.totalProblems} completed

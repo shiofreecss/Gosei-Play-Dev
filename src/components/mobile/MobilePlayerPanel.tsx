@@ -1,7 +1,6 @@
 import React from 'react';
 import { GameState, Player } from '../../types/go';
 import PlayerAvatar from '../PlayerAvatar';
-import TimeControl from '../TimeControl';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 
 interface MobilePlayerPanelProps {
@@ -25,12 +24,47 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
     return null;
   }
 
+  // Helper function to format time
+  const formatTime = (seconds: number | undefined): string => {
+    if (seconds === undefined || seconds < 0) return '--:--';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Get time display for a player
+  const getTimeDisplay = (player: Player | undefined): { time: string; label: string; isWarning: boolean } => {
+    if (!player) return { time: '--:--', label: 'Main Time', isWarning: false };
+    
+    if (player.isInByoYomi && player.byoYomiPeriodsLeft && player.byoYomiTimeLeft !== undefined) {
+      // Player is in byo-yomi
+      return {
+        time: formatTime(player.byoYomiTimeLeft),
+        label: `Byo-Yomi (${player.byoYomiPeriodsLeft})`,
+        isWarning: player.byoYomiTimeLeft <= 10
+      };
+    } else {
+      // Player is in main time
+      return {
+        time: formatTime(player.timeRemaining),
+        label: 'Main Time',
+        isWarning: (player.timeRemaining || 0) <= 30
+      };
+    }
+  };
+
+  // Check if we should show timer info
+  const showTimer = gameState.timeControl && (gameState.timeControl.timeControl >= 0 || gameState.gameType === 'blitz' || (gameState.timePerMove && gameState.timePerMove > 0));
+
+  const blackTimeDisplay = getTimeDisplay(blackPlayer);
+  const whiteTimeDisplay = getTimeDisplay(whitePlayer);
+
   return (
     <div className="w-full bg-white rounded-lg shadow-lg border border-neutral-200 p-3 mb-4">
       {/* Players Row */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between">
         {/* Black Player */}
-        <div className={`flex items-center gap-3 flex-1 min-w-0 p-2 rounded-lg transition-all duration-200 ${
+        <div className={`flex items-center flex-1 min-w-0 p-2 rounded-lg transition-all duration-200 ${
           currentTurn === 'black' ? 'bg-neutral-100 ring-2 ring-blue-500' : 'bg-neutral-50'
         }`}>
           <PlayerAvatar 
@@ -45,6 +79,18 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
             <div className={`text-neutral-600 ${isMobile ? 'text-xs' : 'text-sm'}`}>
               Captured: {capturedStones?.white || 0}
             </div>
+            {showTimer && (
+              <>
+                <div className={`font-mono font-bold ${isMobile ? 'text-lg' : 'text-xl'} ${
+                  blackTimeDisplay.isWarning ? 'text-red-600' : 'text-orange-600'
+                }`}>
+                  {blackTimeDisplay.time}
+                </div>
+                <div className={`text-neutral-500 font-medium ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                  {blackTimeDisplay.label}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -52,7 +98,7 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
         <div className="mx-2 text-neutral-400 font-bold">VS</div>
 
         {/* White Player */}
-        <div className={`flex items-center gap-3 flex-1 min-w-0 p-2 rounded-lg transition-all duration-200 ${
+        <div className={`flex items-center flex-1 min-w-0 p-2 rounded-lg transition-all duration-200 ${
           currentTurn === 'white' ? 'bg-neutral-100 ring-2 ring-blue-500' : 'bg-neutral-50'
         }`}>
           <PlayerAvatar 
@@ -67,37 +113,21 @@ const MobilePlayerPanel: React.FC<MobilePlayerPanelProps> = ({
             <div className={`text-neutral-600 ${isMobile ? 'text-xs' : 'text-sm'}`}>
               Captured: {capturedStones?.black || 0}
             </div>
+            {showTimer && (
+              <>
+                <div className={`font-mono font-bold ${isMobile ? 'text-lg' : 'text-xl'} ${
+                  whiteTimeDisplay.isWarning ? 'text-red-600' : 'text-orange-600'
+                }`}>
+                  {whiteTimeDisplay.time}
+                </div>
+                <div className={`text-neutral-500 font-medium ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                  {whiteTimeDisplay.label}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
-
-      {/* Timer Section */}
-      {gameState.timeControl && (gameState.timeControl.timeControl >= 0 || gameState.gameType === 'blitz' || (gameState.timePerMove && gameState.timePerMove > 0)) && (
-        <div className="border-t border-neutral-200 pt-3">
-          <TimeControl
-            timeControl={gameState.timeControl.timeControl}
-            timePerMove={gameState.timePerMove || gameState.timeControl.timePerMove || 0}
-            byoYomiPeriods={gameState.timeControl.byoYomiPeriods || 0}
-            byoYomiTime={gameState.timeControl.byoYomiTime || 30}
-            fischerTime={gameState.timeControl.fischerTime || 0}
-            currentTurn={currentTurn}
-            isPlaying={status === 'playing'}
-            blackTimeRemaining={blackPlayer?.timeRemaining}
-            whiteTimeRemaining={whitePlayer?.timeRemaining}
-            blackByoYomiPeriodsLeft={blackPlayer?.byoYomiPeriodsLeft}
-            whiteByoYomiPeriodsLeft={whitePlayer?.byoYomiPeriodsLeft}
-            blackByoYomiTimeLeft={blackPlayer?.byoYomiTimeLeft}
-            whiteByoYomiTimeLeft={whitePlayer?.byoYomiTimeLeft}
-            blackIsInByoYomi={blackPlayer?.isInByoYomi}
-            whiteIsInByoYomi={whitePlayer?.isInByoYomi}
-            onTimeout={(color) => {
-              console.log(`Player ${color} has timed out`);
-            }}
-          />
-        </div>
-      )}
-
-
     </div>
   );
 };

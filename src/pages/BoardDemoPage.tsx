@@ -291,6 +291,7 @@ const BoardDemoPage: React.FC = () => {
                         isPlayerTurn={true}
                         isScoring={false}
                         isReviewing={false}
+                        isThinking={false}
                         previewPosition={previewPosition}
                         onPlaceStone={() => {
                           if (previewPosition) {

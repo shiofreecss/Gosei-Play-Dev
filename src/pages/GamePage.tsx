@@ -108,6 +108,7 @@ const GamePage: React.FC = () => {
   
   // Mobile controls preview position state
   const [previewPosition, setPreviewPosition] = useState<Position | null>(null);
+  const [isThinking, setIsThinking] = useState(false);
   
   // Review mode state
   const [reviewBoardState, setReviewBoardState] = useState<{
@@ -719,9 +720,14 @@ const GamePage: React.FC = () => {
 
   // Mobile stone placement handler
   const handleMobilePlaceStone = () => {
-    if (previewPosition && currentPlayer && gameState && currentPlayer.color === gameState.currentTurn) {
+    if (previewPosition) {
+      setIsThinking(true);
       handleStonePlace(previewPosition);
       setPreviewPosition(null);
+      // Reset thinking state after a short delay
+      setTimeout(() => {
+        setIsThinking(false);
+      }, 1000);
     }
   };
   
@@ -899,15 +905,18 @@ const GamePage: React.FC = () => {
 
         
         <div className="max-w-7xl mx-auto p-2 sm:p-4 md:p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
+          <div className="flex justify-between items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
+            {/* Left spacer on mobile for centering logo */}
+            <div className="w-12 sm:hidden"></div>
+            
             {/* Logo and title - centered on mobile, left-aligned on larger screens */}
-            <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
+            <div className="flex items-center gap-3 flex-1 sm:flex-none justify-center sm:justify-start">
               <GoseiLogo size={40} />
               <h1 className="text-2xl sm:text-3xl font-bold text-primary-700">Gosei Play</h1>
             </div>
             
-            {/* Theme Toggle Button - positioned on the right on larger screens, centered below on mobile */}
-            <div className="flex items-center justify-center sm:justify-end w-full sm:w-auto">
+            {/* Theme Toggle Button - always on the right */}
+            <div className="flex items-center justify-end">
               <ThemeToggleButton />
             </div>
           </div>
@@ -1008,8 +1017,8 @@ const GamePage: React.FC = () => {
                     onBoardStateChange={setReviewBoardState}
                   />
                 )}
-              </div>
-              
+            </div>
+
               {/* Mobile Stone Controls - Show on mobile/tablet only, positioned after the board */}
               <div className="w-full flex justify-center mt-4">
                 <MobileStoneControls
@@ -1017,54 +1026,55 @@ const GamePage: React.FC = () => {
                   isPlayerTurn={gameState.status === 'playing' && currentPlayer?.color === gameState.currentTurn}
                   isScoring={gameState.status === 'scoring'}
                   isReviewing={reviewBoardState?.isReviewing || false}
+                  isThinking={isThinking}
                   previewPosition={previewPosition}
                   onPlaceStone={handleMobilePlaceStone}
                   boardSize={gameState.board.size}
                 />
               </div>
-            </div>
+              </div>
 
             {/* Game Info Panel - Hide on mobile/tablet, show on desktop */}
             {!(isMobile || isTablet) && (
               <div className="lg:col-span-1 w-full">
-                
-                <GameInfo
-                  gameState={gameState}
-                  currentPlayer={currentPlayer || undefined}
-                  onResign={handleResignGame}
-                  onRequestUndo={handleRequestUndo}
-                  onAcceptUndo={handleAcceptUndo}
-                  onRejectUndo={handleRejectUndo}
-                  onPassTurn={handlePassTurn}
-                  onLeaveGame={handleLeaveGame}
-                  onCopyGameLink={handleShareGame}
-                  autoSaveEnabled={autoSaveEnabled}
-                  onToggleAutoSave={toggleAutoSave}
-                  onSaveNow={saveGameNow}
-                  onConfirmScore={handleConfirmScore}
-                  onCancelScoring={handleCancelScoring}
-                  showCoordinates={showCoordinates}
-                  onToggleCoordinates={handleToggleCoordinates}
-                  onReviewBoardChange={(stones: Stone[], moveIndex: number, isReviewing: boolean) => {
-                    setSpectatorReviewStones(stones);
-                    setSpectatorReviewMoveIndex(moveIndex);
-                    setSpectatorIsReviewing(isReviewing);
-                  }}
-                />
-                
-                {/* Debug Controls - Only shown when dev tools are enabled */}
-                {showDevTools && (
-                  <div className="mt-4 sm:mt-6">
-                    <button
-                      onClick={handleSyncGame}
-                      className="btn bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:ring-neutral-400 w-full"
-                      disabled={syncing}
-                    >
-                      {syncing ? 'Syncing...' : 'Sync Game'}
-                    </button>
-                  </div>
-                )}
-              </div>
+              
+              <GameInfo
+                gameState={gameState}
+                currentPlayer={currentPlayer || undefined}
+                onResign={handleResignGame}
+                onRequestUndo={handleRequestUndo}
+                onAcceptUndo={handleAcceptUndo}
+                onRejectUndo={handleRejectUndo}
+                onPassTurn={handlePassTurn}
+                onLeaveGame={handleLeaveGame}
+                onCopyGameLink={handleShareGame}
+                autoSaveEnabled={autoSaveEnabled}
+                onToggleAutoSave={toggleAutoSave}
+                onSaveNow={saveGameNow}
+                onConfirmScore={handleConfirmScore}
+                onCancelScoring={handleCancelScoring}
+                showCoordinates={showCoordinates}
+                onToggleCoordinates={handleToggleCoordinates}
+                onReviewBoardChange={(stones: Stone[], moveIndex: number, isReviewing: boolean) => {
+                  setSpectatorReviewStones(stones);
+                  setSpectatorReviewMoveIndex(moveIndex);
+                  setSpectatorIsReviewing(isReviewing);
+                }}
+              />
+              
+              {/* Debug Controls - Only shown when dev tools are enabled */}
+              {showDevTools && (
+                <div className="mt-4 sm:mt-6">
+                  <button
+                    onClick={handleSyncGame}
+                    className="btn bg-neutral-200 text-neutral-800 hover:bg-neutral-300 focus:ring-neutral-400 w-full"
+                    disabled={syncing}
+                  >
+                    {syncing ? 'Syncing...' : 'Sync Game'}
+                  </button>
+                </div>
+              )}
+            </div>
             )}
           </div>
           

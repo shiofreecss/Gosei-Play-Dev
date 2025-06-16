@@ -109,7 +109,7 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
       onClose?.();
     }, 300); // Wait for exit animation
   };
-
+  
   // Handle backdrop click to close modal
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -225,10 +225,10 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
                 Yes, Let's Play!
               </button>
             </div>
+            </div>
           </div>
-        </div>
-      </div>,
-      document.body
+        </div>,
+        document.body
     );
   }
 
@@ -322,10 +322,10 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
               {playAgainRequestSent ? 'Request Sent' : 'Play Again'}
             </button>
           </div>
+          </div>
         </div>
-      </div>
-    </div>,
-    document.body
+      </div>,
+      document.body
   );
 };
 

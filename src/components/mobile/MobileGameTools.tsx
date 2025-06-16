@@ -154,8 +154,12 @@ const MobileGameTools: React.FC<MobileGameToolsProps> = ({
               className={`flex items-center justify-center gap-2 ${
                 isMobile ? 'py-3' : 'py-4'
               } ${!!undoRequest 
-                ? 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border border-yellow-300' 
-                : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300'
+                ? (isDarkMode 
+                  ? 'bg-yellow-900/30 hover:bg-yellow-900/40 text-yellow-300 border border-yellow-700' 
+                  : 'bg-yellow-100 hover:bg-yellow-200 text-yellow-700 border border-yellow-300') 
+                : (isDarkMode
+                  ? 'bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-600 hover:border-neutral-500'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300')
               } rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-sm hover:shadow-md`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
