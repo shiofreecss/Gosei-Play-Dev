@@ -242,21 +242,7 @@ const MobileGameTools: React.FC<MobileGameToolsProps> = ({
 
         {/* Game Stats and Settings */}
         <div className={`grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-neutral-200`}>
-          {/* Game Stats */}
-          <div className={`p-3 bg-neutral-50 rounded-md`}>
-            <h3 className={`${isMobile ? 'text-sm' : 'text-base'} font-semibold mb-2 text-neutral-800`}>
-              Game Stats
-            </h3>
-            <div className={`grid grid-cols-1 gap-1 ${isMobile ? 'text-xs' : 'text-sm'} text-neutral-600`}>
-              <div>Moves: {totalStones}</div>
-              <div>Board: {board.size}×{board.size}</div>
-              <div>Komi: {gameState.komi}</div>
-              <div>Scoring: {getScoringRuleName()}</div>
-              <div>Type: {getGameTypeDescription()}</div>
-            </div>
-          </div>
-
-          {/* Settings */}
+          {/* Settings (Tools) - moved to left column */}
           <div className={`p-3 rounded-md ${
             isDarkMode ? 'bg-neutral-800/80' : 'bg-neutral-50'
           }`}>
@@ -316,6 +302,20 @@ const MobileGameTools: React.FC<MobileGameToolsProps> = ({
                   />
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Game Stats - moved to right column */}
+          <div className={`p-3 bg-neutral-50 rounded-md`}>
+            <h3 className={`${isMobile ? 'text-sm' : 'text-base'} font-semibold mb-2 text-neutral-800`}>
+              Game Stats
+            </h3>
+            <div className={`grid grid-cols-1 gap-1 ${isMobile ? 'text-xs' : 'text-sm'} text-neutral-600`}>
+              <div>Moves: {totalStones}</div>
+              <div>Board: {board.size}×{board.size}</div>
+              <div>Komi: {gameState.komi}</div>
+              <div>Scoring: {getScoringRuleName()}</div>
+              <div>Type: {getGameTypeDescription()}</div>
             </div>
           </div>
         </div>
