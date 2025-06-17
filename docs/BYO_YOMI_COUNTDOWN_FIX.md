@@ -128,7 +128,7 @@ if (elapsedTime > 0) {
 
 The server-authoritative timer system now works perfectly with live byo-yomi countdown! 🎯
 
-## Issue Resolution: v1.0.9
+## Issue Resolution: v0.0.9
 
 **Status**: FIXED | **Date**: December 2025  
 **Priority**: CRITICAL - App breaking issue

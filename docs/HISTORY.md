@@ -1,6 +1,6 @@
 # Gosei Play - Change History
 
-## Current Version: v1.0.9 ✅
+## Current Version: v0.0.9 ✅
 
 **Status**: Production Ready - Tournament Grade | **Last Updated**: March 6, 2025
 
@@ -60,7 +60,7 @@
 
 ---
 
-## Version 1.1.0 - Time Control Intelligence Update (Previously Planned, Now Superseded)
+## Version 0.1.0 - Time Control Intelligence Update (Previously Planned, Now Superseded)
 
 ### 🎯 Major Features
 

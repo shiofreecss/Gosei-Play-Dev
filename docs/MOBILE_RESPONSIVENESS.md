@@ -4,7 +4,7 @@ This document outlines the responsive design approach used in the Gosei Play app
 
 ## Current Implementation Status ✅
 
-**Version**: v1.1.1  
+**Version**: v0.1.1  
 **Mobile Support**: Fully responsive design with optimized touch interfaces  
 **Device Coverage**: Mobile phones, tablets, and desktop computers  
 **Framework**: Tailwind CSS with custom responsive utilities  
@@ -299,7 +299,7 @@ const componentSize = isMobile ? 'sm' : isTablet ? 'md' : 'lg';
 
 ## Recent Enhancements ✅
 
-### v1.1.1 - Tablet Stone Placement Features
+### v0.1.1 - Tablet Stone Placement Features
 **Enhanced tablet experience with mobile-optimized stone placement**
 
 #### What's New ✅

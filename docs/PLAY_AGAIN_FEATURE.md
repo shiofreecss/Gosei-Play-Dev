@@ -1,7 +1,7 @@
 # Play Again Feature Implementation
 
 **Release Date**: June 4, 2025  
-**Version**: v1.1.0  
+**Version**: v0.1.0  
 **Status**: ✅ COMPLETE - Production Ready  
 
 ## Overview
@@ -186,7 +186,7 @@ The Play Again feature is now complete and production-ready. Future enhancements
 ## 📚 Related Documentation
 
 - `README.md` - Updated with Play Again feature information
-- `VERSION.md` - Version history including v1.1.0 release
+- `VERSION.md` - Version history including v0.1.0 release
 - `PLANNING.md` - Updated planning document with feature completion
 - `TROUBLESHOOTING.md` - Play Again troubleshooting information
 

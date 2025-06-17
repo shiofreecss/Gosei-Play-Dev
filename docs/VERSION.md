@@ -1,6 +1,6 @@
 # Gosei Play Version History
 
-## v1.1.1 - Tablet Stone Placement Enhancement (Current) ✅
+## v0.1.1 - Tablet Stone Placement Enhancement (Current) ✅
 
 **Release Date**: December 2024  
 **Status**: Production Ready - Enhanced Tablet Experience  
@@ -44,7 +44,7 @@
 
 ---
 
-## v1.1.0 - Play Again Feature ✅
+## v0.1.0 - Play Again Feature ✅
 
 **Release Date**: June 4, 2025  
 **Status**: Production Ready - Seamless Game Continuation  
@@ -144,7 +144,7 @@
 ### 📚 Documentation Complete ✅
 - **`PLAY_AGAIN_FEATURE.md`** - Comprehensive technical documentation
 - **`README.md`** - Updated with Play Again feature overview
-- **`VERSION.md`** - Complete version history with v1.1.0 details
+- **`VERSION.md`** - Complete version history with v0.1.0 details
 - **`PLANNING.md`** - Updated planning document with completion status
 
 ### 🎯 Future Enhancement Opportunities
@@ -155,7 +155,7 @@
 
 ---
 
-## v1.0.9 - Complete Timer System Overhaul (Current) ✅
+## v0.0.9 - Complete Timer System Overhaul (Current) ✅
 
 **Release Date**: March 6, 2025  
 **Status**: Production Ready - Tournament Grade  
@@ -272,7 +272,7 @@ if (periodExpired && periodsRemaining > 0) {
 
 ---
 
-## v1.0.8 - Proper Byo-Yomi Reset System (Previous) ✅
+## v0.0.8 - Proper Byo-Yomi Reset System (Previous) ✅
 
 ### Byo-Yomi Reset Implementation
 - **Authentic Byo-Yomi Behavior**: Implemented traditional Japanese byo-yomi reset rules
@@ -313,7 +313,7 @@ if (periodExpired && periodsRemaining > 0) {
 - **Deployment**: Ready for production deployment
 - **Documentation**: Complete technical documentation
 
-## v1.0.7 - Move-Based Time Tracking System
+## v0.0.7 - Move-Based Time Tracking System
 
 ### Major Overhaul
 - **Complete Time Tracking Redesign**: Implemented move-based time deduction system
@@ -364,7 +364,7 @@ if (periodExpired && periodsRemaining > 0) {
 - `server/server.js` - Complete time tracking system implementation
 - `docs/BYO_YOMI_CLOCK_RESET_ISSUE.md` - Updated to reflect resolution
 
-## v1.0.6 - Byo-Yomi Timeout Implementation
+## v0.0.6 - Byo-Yomi Timeout Implementation
 
 ### New Features
 - **Complete Byo-Yomi System**: Full implementation of Japanese time control
@@ -402,7 +402,7 @@ if (periodExpired && periodsRemaining > 0) {
 - Comprehensive event cleanup and memory management
 - Server-authoritative time control with client synchronization
 
-## v1.0.5 - Time Control Flexibility
+## v0.0.5 - Time Control Flexibility
 
 ### Major Changes
 - **Flexible Time Controls**: Users can now set any main time (0+ minutes)
@@ -428,7 +428,7 @@ if (periodExpired && periodsRemaining > 0) {
 - **Teaching Games**: Extended time for learning and discussion
 - **Demonstration Games**: 0-minute games for position analysis
 
-## v1.0.4 - Enhanced Game Features
+## v0.0.4 - Enhanced Game Features
 
 ### Features Added
 - Advanced scoring systems (Chinese, Japanese, Korean, AGA, Ing)
@@ -442,7 +442,7 @@ if (periodExpired && periodsRemaining > 0) {
 - Improved socket connection stability
 - Better error handling for network issues
 
-## v1.0.3 - Core Gameplay
+## v0.0.3 - Core Gameplay
 
 ### Features Added
 - Complete Go rules implementation
@@ -456,7 +456,7 @@ if (periodExpired && periodsRemaining > 0) {
 - Improved move validation
 - Enhanced game state management
 
-## v1.0.2 - Multiplayer Foundation
+## v0.0.2 - Multiplayer Foundation
 
 ### Features Added
 - Real-time multiplayer functionality
@@ -469,7 +469,7 @@ if (periodExpired && periodsRemaining > 0) {
 - WebSocket communication
 - Session persistence
 
-## v1.0.1 - Basic UI
+## v0.0.1 - Basic UI
 
 ### Features Added
 - Interactive Go board
@@ -483,7 +483,7 @@ if (periodExpired && periodsRemaining > 0) {
 - Move history
 - Game status display
 
-## v1.0.0 - Initial Release
+## v0.0.0 - Initial Release
 
 ### Core Features
 - Basic Go board setup
@@ -499,7 +499,7 @@ if (periodExpired && periodsRemaining > 0) {
 
 ## Development Roadmap
 
-### Upcoming Features (v1.1.0+)
+### Upcoming Features (v0.1.0+)
 - **Enhanced Teaching Mode**: Annotation system and move variations
 - **Tournament System**: Organized competitive play
 - **Rating System**: Player skill tracking

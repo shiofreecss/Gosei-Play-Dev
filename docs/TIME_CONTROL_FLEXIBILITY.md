@@ -6,7 +6,7 @@ As of version 1.0.5, Gosei Play now offers complete flexibility in time control 
 
 ## What Changed
 
-### Before (v1.0.4 and earlier)
+### Before (v0.0.4 and earlier)
 - **Enforced minimum time requirements** based on board size:
   - 9×9 board: minimum 10 minutes
   - 13×13 board: minimum 20 minutes  
@@ -17,7 +17,7 @@ As of version 1.0.5, Gosei Play now offers complete flexibility in time control 
 - Board size changes would force time to minimum values
 - Help text stated "Minimum X minutes for Y×Y board"
 
-### After (v1.0.5+)
+### After (v0.0.5+)
 - **Flexible time controls**: Users can set any time they want (≥0 minutes)
 - **Recommended time settings**: Previous minimums are now suggestions
 - **Smart board changes**: Only updates time if user hasn't customized it

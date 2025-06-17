@@ -1,6 +1,6 @@
 # Blitz Game Byo-Yomi Restrictions
 
-## Current Version: v1.0.8 ✅
+## Current Version: v0.0.8 ✅
 
 **Status**: Production Ready | **Last Updated**: May 26, 2025
 
@@ -267,4 +267,4 @@ For Blitz game time control issues:
 
 ---
 
-*This document details the Blitz game byo-yomi restrictions in Gosei Play v1.0.8.* 
+*This document details the Blitz game byo-yomi restrictions in Gosei Play v0.0.8.* 

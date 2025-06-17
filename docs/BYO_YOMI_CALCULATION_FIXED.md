@@ -1,6 +1,6 @@
 # Byo-Yomi Calculation Logic - CORRECTED ✅
 
-## Issue Resolution: v1.0.10
+## Issue Resolution: v0.0.10
 
 **Status**: FIXED | **Date**: December 2025  
 **Priority**: CRITICAL - Incorrect time calculation logic

@@ -14,7 +14,7 @@ This document details the supported board sizes, their star points (hoshi), and 
 
 ## Flexible Time Control System ✅
 
-**Current Implementation (v1.0.8)**: Users have complete flexibility in setting time controls. The system provides intelligent recommendations but does not enforce minimum requirements.
+**Current Implementation (v0.0.8)**: Users have complete flexibility in setting time controls. The system provides intelligent recommendations but does not enforce minimum requirements.
 
 ### Time Setting Options
 - **Any Main Time**: Set from 0+ minutes (no restrictions)

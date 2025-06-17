@@ -2,7 +2,7 @@
 
 ## Overview
 
-As of version 1.1.1, Gosei Play provides a professional display for unlimited time games. When main time is set to 0 minutes, the timer displays an infinity symbol (∞) instead of confusing "0:00" or just "0".
+As of version 0.1.1, Gosei Play provides a professional display for unlimited time games. When main time is set to 0 minutes, the timer displays an infinity symbol (∞) instead of confusing "0:00" or just "0".
 
 ## Feature Details
 

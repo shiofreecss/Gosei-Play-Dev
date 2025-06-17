@@ -20,13 +20,13 @@ A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js.
 ### 📱 **Mobile Experience - Play Anywhere**
 ![Mobile View](../example/4%20-%20mobile-play-view-and-place-button.png)
 
-## Current Version: v1.1.1 🎯
+## Current Version: v0.1.1 🎯
 
 **Latest Update**: Tablet Stone Placement Enhancement - Mobile-style touch-to-preview stone placement now available on tablet devices for consistent cross-device experience.
 
 **Status**: Production Ready ✅ | **Last Updated**: December 2024
 
-## 🎮 New in v1.1.1: Tablet Stone Placement Enhancement ✅
+## 🎮 New in v0.1.1: Tablet Stone Placement Enhancement ✅
 
 ### ✅ Unified Touch Experience
 - **Touch-to-Preview**: Tablets now use mobile's proven stone placement workflow
@@ -41,7 +41,7 @@ A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js.
 - **CSS Optimization**: Tablet-specific media queries with enhanced touch targets
 - **Cross-Device Consistency**: Unified experience across all touch-enabled devices
 
-## 🎮 Recent: Play Again Feature (v1.1.0) ✅
+## 🎮 Recent: Play Again Feature (v0.1.0) ✅
 
 ### ✅ Seamless Game Continuation
 - **One-Click Restart**: Request "play again" directly from the game completion modal
@@ -57,7 +57,7 @@ A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js.
 - **localStorage Management**: Clean data handling and persistence
 - **Error Resilience**: Comprehensive error handling and recovery
 
-## 🏆 Major Achievement: Complete Timer System Overhaul (v1.0.9)
+## 🏆 Major Achievement: Complete Timer System Overhaul (v0.0.9)
 
 ### ✅ All Timer Issues Resolved
 - **Server-Authoritative Timing**: Complete elimination of client-server desynchronization
@@ -123,7 +123,7 @@ A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js.
 - **Game Sharing**: Easy game link sharing
 - **Ko Rule Enforcement**: Complete implementation preventing infinite loops
 
-## Recent Updates (v1.0.9) - March 6, 2025
+## Recent Updates (v0.0.9) - March 6, 2025
 
 ### 🚀 Complete Timer System Overhaul ✅
 **Revolutionary server-authoritative timing system providing tournament-grade accuracy:**
@@ -174,7 +174,7 @@ A modern, real-time Go (Weiqi/Baduk) game platform built with React and Node.js.
 - **Comprehensive Error Handling**: Robust under all conditions
 - **Production-Grade Performance**: Optimized for concurrent games
 
-## Previous Updates (v1.0.8)
+## Previous Updates (v0.0.8)
 
 ### Authentic Byo-Yomi Reset System ✅
 - **Traditional Japanese Rules**: Moves within byo-yomi time reset the period to full time

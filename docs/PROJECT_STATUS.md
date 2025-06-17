@@ -1,7 +1,7 @@
 # Gosei Play - Project Status Report
 
 **Date**: June 4, 2025  
-**Version**: v1.1.0  
+**Version**: v0.1.0  
 **Status**: 🟢 **PRODUCTION READY** - Complete Go Platform with Game Continuation  
 
 ## 🌐 **Live Production: [https://play.gosei.xyz](https://play.gosei.xyz)**
@@ -10,7 +10,7 @@
 
 Gosei Play is a **professional-grade, tournament-quality Go platform** that provides seamless real-time multiplayer gameplay with advanced time controls and comprehensive game management features.
 
-## 🎯 Current Status: v1.1.0
+## 🎯 Current Status: v0.1.0
 
 ### ✅ **COMPLETE** - Core Systems
 | System | Status | Quality | Notes |
@@ -20,7 +20,7 @@ Gosei Play is a **professional-grade, tournament-quality Go platform** that prov
 | **Scoring Systems** | ✅ Complete | Professional | Japanese, Chinese, Korean, AGA, Ing |
 | **Board Sizes** | ✅ Complete | Full Range | 9×9, 13×13, 15×15, 19×19, 21×21 |
 | **Multiplayer** | ✅ Complete | Real-time | Socket.io, perfect synchronization |
-| **Play Again** | ✅ Complete | Production Ready | **NEW v1.1.0** - Seamless continuation |
+| **Play Again** | ✅ Complete | Production Ready | **NEW v0.1.0** - Seamless continuation |
 
 ### 🎮 **COMPLETE** - Game Features
 | Feature | Implementation | Status |
@@ -34,7 +34,7 @@ Gosei Play is a **professional-grade, tournament-quality Go platform** that prov
 | Audio System | Stone sounds, notifications | ✅ Complete |
 | **Play Again** | **One-click game continuation** | ✅ **NEW** |
 
-## 🏆 Latest Achievement: Play Again Feature (v1.1.0)
+## 🏆 Latest Achievement: Play Again Feature (v0.1.0)
 
 ### What's New
 - **Seamless Game Continuation**: Request "play again" directly from game completion modal
@@ -98,13 +98,13 @@ Gosei Play is a **professional-grade, tournament-quality Go platform** that prov
 ## 🚀 Development Timeline
 
 ### Major Milestones Achieved
-- **v1.0.0** (Oct 2024): Initial release with core gameplay
-- **v1.0.5** (Nov 2024): Ko rule implementation
-- **v1.0.6** (Dec 2024): Complete scoring systems
-- **v1.0.7** (Jan 2025): Move-based time tracking
-- **v1.0.8** (Feb 2025): Authentic byo-yomi reset system
-- **v1.0.9** (Mar 2025): Server-authoritative timer system
-- **v1.1.0** (Jun 2025): **Play Again feature** 🎉
+- **v0.0.0** (Oct 2024): Initial release with core gameplay
+- **v0.0.5** (Nov 2024): Ko rule implementation
+- **v0.0.6** (Dec 2024): Complete scoring systems
+- **v0.0.7** (Jan 2025): Move-based time tracking
+- **v0.0.8** (Feb 2025): Authentic byo-yomi reset system
+- **v0.0.9** (Mar 2025): Server-authoritative timer system
+- **v0.1.0** (Jun 2025): **Play Again feature** 🎉
 
 ## 🔮 Future Roadmap
 
@@ -141,7 +141,7 @@ Gosei Play is a **professional-grade, tournament-quality Go platform** that prov
 
 ## 📋 Summary
 
-**Gosei Play v1.1.0** represents a **complete, production-ready Go platform** that successfully delivers:
+**Gosei Play v0.1.0** represents a **complete, production-ready Go platform** that successfully delivers:
 
 - ✅ **Tournament-grade timing system** with perfect synchronization
 - ✅ **Complete Go rule implementation** including Ko rule and all scoring systems

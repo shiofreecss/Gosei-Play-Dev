@@ -2,11 +2,11 @@
 
 ## ⚡ TWO MAJOR ISSUES RESOLVED
 
-### 🔥 Issue #1: Countdown Reset Timing (v1.0.9)
+### 🔥 Issue #1: Countdown Reset Timing (v0.0.9)
 **Problem**: Clock not resetting immediately after move completion
 **Fix**: Emit `byoYomiReset` events immediately when reset happens
 
-### 🔥 Issue #2: Period Calculation Logic (v1.0.10)  
+### 🔥 Issue #2: Period Calculation Logic (v0.0.10)  
 **Problem**: Incorrect byo-yomi period consumption calculation
 **Fix**: Proper mathematical calculation of periods consumed based on time spent
 

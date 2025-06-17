@@ -1,6 +1,6 @@
 # Game Type Time Control Behavior
 
-## Current Version: v1.0.9 ✅
+## Current Version: v0.0.9 ✅
 
 **Status**: Production Ready | **Last Updated**: January 2025
 

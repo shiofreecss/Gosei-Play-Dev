@@ -1,6 +1,6 @@
 # Troubleshooting Guide for Gosei Play
 
-## Current Version: v1.0.8 ✅
+## Current Version: v0.0.8 ✅
 
 **Status**: Production Ready | **Last Updated**: May 26, 2025
 
@@ -81,7 +81,7 @@ npm start
 4. **Network Configuration**: Check proxy settings
 5. **Port Conflicts**: Ensure port 3001 is available
 
-## Time Control Issues (v1.0.8)
+## Time Control Issues (v0.0.8)
 
 ### Problem: Byo-yomi not working correctly
 
@@ -350,7 +350,7 @@ echo $REACT_APP_SERVER_URL
 
 ### Reporting Bugs
 When reporting issues, include:
-- **Version**: Current version (v1.0.8)
+- **Version**: Current version (v0.0.8)
 - **Browser**: Browser type and version
 - **Operating System**: OS and version
 - **Steps to Reproduce**: Detailed reproduction steps

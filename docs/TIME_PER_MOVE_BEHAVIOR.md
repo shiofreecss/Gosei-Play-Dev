@@ -1,6 +1,6 @@
 # Time per Move Behavior
 
-## Current Version: v1.0.8 ✅
+## Current Version: v0.0.8 ✅
 
 **Status**: Production Ready | **Last Updated**: May 26, 2025
 
@@ -240,4 +240,4 @@ For time per move related issues:
 
 ---
 
-*This document details the Time per Move behavior in Gosei Play v1.0.8.* 
+*This document details the Time per Move behavior in Gosei Play v0.0.8.* 

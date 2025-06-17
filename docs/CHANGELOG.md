@@ -7,7 +7,7 @@ All notable changes to Gosei Play will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.2] - 2025-01-08
+## [0.1.2] - 2025-01-08
 
 ### Added
 - **Unlimited Time Display Enhancement**: Professional display for unlimited time games
@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated `src/components/go-board/GameInfo.tsx` timer display condition
 - Added comprehensive test coverage for all time display scenarios
 
-## [1.1.1] - 2024-12-15
+## [0.1.1] - 2024-12-15
 
 ### Added
 - **Tablet Stone Placement Enhancement**: Mobile-style touch interface extended to tablet devices
@@ -55,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added tablet-specific CSS media queries in `src/App.css` with enhanced touch styling
 - Updated documentation in `docs/MOBILE_RESPONSIVENESS.md` with tablet features
 
-## [1.1.0] - 2025-06-04
+## [0.1.0] - 2025-06-04
 
 ### Added
 - **Play Again Feature**: Complete seamless game continuation system
