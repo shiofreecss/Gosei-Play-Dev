@@ -12,7 +12,7 @@ const BoardCoordinateButton: React.FC<BoardCoordinateButtonProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { isMobile } = useDeviceDetect();
+  const { isMobile, isTablet } = useDeviceDetect();
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -33,11 +33,11 @@ const BoardCoordinateButton: React.FC<BoardCoordinateButtonProps> = ({
     setIsOpen(false);
   };
 
-  // Custom styles for the dropdown
+  // Custom styles for the dropdown - position left on mobile/tablet, right on desktop
   const dropdownStyle = {
     position: 'absolute' as const,
     bottom: '100%',
-    right: 0,
+    ...(isMobile || isTablet ? { left: 0 } : { right: 0 }),
     marginBottom: '5px',
     zIndex: 9999,
     maxHeight: '80vh',
