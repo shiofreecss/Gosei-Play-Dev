@@ -17,13 +17,14 @@ cd katago
 echo "📥 Downloading KataGo CPU binary..."
 if [ ! -f "katago" ]; then
     # Download the latest KataGo CPU release
-    KATAGO_VERSION="v1.15.1"
-    KATAGO_URL="https://github.com/lightvector/KataGo/releases/download/${KATAGO_VERSION}/katago-${KATAGO_VERSION}-linux-x64-cpu.zip"
+    KATAGO_VERSION="v1.16.2"
+    KATAGO_URL="https://github.com/lightvector/KataGo/releases/download/${KATAGO_VERSION}/katago-${KATAGO_VERSION}-eigen-linux-x64.zip"
     
     wget -O katago-cpu.zip "$KATAGO_URL"
     unzip katago-cpu.zip
-    mv katago-* katago
-    chmod +x katago
+    # Find the katago executable and move it to the current directory
+    find . -name "katago" -type f -exec mv {} ./katago \;
+    chmod +x katago  
     rm katago-cpu.zip
     
     echo "✅ KataGo binary downloaded and installed"
