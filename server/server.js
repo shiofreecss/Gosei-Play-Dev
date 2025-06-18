@@ -2085,14 +2085,14 @@ io.on('connection', (socket) => {
         
       } else {
         // Regular human vs human game - send request for manual acceptance
-        io.to(gameId).emit('playAgainRequest', {
-          gameId,
-          fromPlayerId,
-          fromUsername,
-          toPlayerId
-        });
-        
-        log(`Play again request sent from ${fromUsername} to player ${toPlayerId} in game ${gameId}`);
+      io.to(gameId).emit('playAgainRequest', {
+        gameId,
+        fromPlayerId,
+        fromUsername,
+        toPlayerId
+      });
+      
+      log(`Play again request sent from ${fromUsername} to player ${toPlayerId} in game ${gameId}`);
       }
     } else {
       log(`Play again request failed: Game ${gameId} not found`);

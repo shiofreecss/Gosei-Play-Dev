@@ -34,12 +34,12 @@ fi
 
 # Download a lightweight neural network model (b6c96 - 6 blocks, ~8MB)
 echo "📥 Downloading lightweight neural network model..."
-if [ ! -f "models/b6c96-s1235592320-d204142634.bin.gz" ]; then
+if [ ! -f "models/kata1-b6c96-s175395328-d26788732.txt.gz" ]; then
     cd models
     
-    # Download b6c96 model (6 blocks, very fast on CPU)
-    MODEL_URL="https://media.katagotraining.org/uploaded/networks/models/kata1/b6c96-s1235592320-d204142634.bin.gz"
-    wget -O b6c96-s1235592320-d204142634.bin.gz "$MODEL_URL"
+    # Download kata1 b6c96 model (6 blocks, very fast on CPU)
+    MODEL_URL="https://media.katagotraining.org/uploaded/networks/models/kata1/kata1-b6c96-s175395328-d26788732.txt.gz"
+    wget -O kata1-b6c96-s175395328-d26788732.txt.gz "$MODEL_URL"
     
     echo "✅ Neural network model downloaded"
     cd ..
@@ -58,7 +58,7 @@ fi
 
 # Create a simple test to verify GTP interface
 echo "🧪 Testing GTP interface..."
-echo -e "boardsize 9\nclear_board\nquit" | timeout 10s ./katago gtp -model models/b6c96-s1235592320-d204142634.bin.gz -config ../engines/katago-cpu-config.cfg > /dev/null 2>&1
+echo -e "boardsize 9\nclear_board\nquit" | timeout 10s ./katago gtp -model models/kata1-b6c96-s175395328-d26788732.txt.gz -config ../engines/katago-cpu-config.cfg > /dev/null 2>&1
 if [ $? -eq 0 ]; then
     echo "✅ GTP interface working correctly"
 else
@@ -72,7 +72,7 @@ echo "🎉 KataGo CPU setup completed!"
 echo ""
 echo "📋 Setup Summary:"
 echo "   • KataGo binary: katago/katago"
-echo "   • Neural network: katago/models/b6c96-s1235592320-d204142634.bin.gz"
+echo "   • Neural network: katago/models/kata1-b6c96-s175395328-d26788732.txt.gz"
 echo "   • Configuration: engines/katago-cpu-config.cfg"
 echo "   • Optimized for: 9x9 boards, 4-8GB RAM, CPU-only"
 echo ""
