@@ -26,6 +26,8 @@ export interface Player {
   byoYomiTimeLeft?: number; // Time remaining in current byo-yomi period (seconds)
   isInByoYomi?: boolean; // Whether player is currently in byo-yomi
   isSpectator?: boolean; // Whether this is a spectator
+  isAI?: boolean; // Whether this is an AI player
+  aiLevel?: 'easy' | 'normal' | 'hard' | 'expert'; // AI difficulty level
 }
 
 // Update ScoringRule to include new rule types
@@ -64,6 +66,9 @@ export interface GameOptions {
   isTeachingMode?: boolean;
   teamPlayers?: string[];
   playerName?: string; // Player name when creating a game
+  // AI Game Options
+  vsAI?: boolean; // Whether this is a game against AI
+  aiLevel?: 'easy' | 'normal' | 'hard' | 'expert'; // AI difficulty level
 }
 
 export interface GameState {
@@ -114,6 +119,10 @@ export interface GameState {
   socket?: Socket | null;
   koPosition?: Position;
   lastMove?: Position; // Position of the last move made for highlighting
+  // AI Game Properties
+  vsAI?: boolean; // Whether this is a game against AI
+  aiLevel?: 'easy' | 'normal' | 'hard' | 'expert'; // AI difficulty level
+  aiUndoUsed?: boolean; // Whether undo has been used in AI game (limit 1 per game)
 }
 
 export type GameMove = Position | { pass: true }; 

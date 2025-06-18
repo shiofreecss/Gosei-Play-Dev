@@ -124,6 +124,9 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
     const opponentPlayer = gameState.players.find(p => p.id !== currentPlayer.id);
     if (!opponentPlayer) return;
 
+    // Check if this is an AI game
+    const isAIGame = gameState.players.some(player => player.isAI);
+    
     gameState.socket.emit('playAgainRequest', {
       gameId: gameState.id,
       fromPlayerId: currentPlayer.id,
@@ -131,7 +134,13 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
       toPlayerId: opponentPlayer.id
     });
 
-    setPlayAgainRequestSent(true);
+    if (isAIGame) {
+      // For AI games, show "Starting New Game..." immediately since AI auto-accepts
+      setWaitingForNewGame(true);
+    } else {
+      // For human vs human games, show "Request Sent" state
+      setPlayAgainRequestSent(true);
+    }
   };
   
   const handleReturnHome = () => {
@@ -319,7 +328,7 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
               disabled={playAgainRequestSent}
               className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {playAgainRequestSent ? 'Request Sent' : 'Play Again'}
+              {playAgainRequestSent ? 'Request Sent' : gameState?.players.some(p => p.isAI) ? 'New AI Game' : 'Play Again'}
             </button>
           </div>
           </div>

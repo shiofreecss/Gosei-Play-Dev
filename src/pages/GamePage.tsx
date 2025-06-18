@@ -15,6 +15,7 @@ import GameReview from '../components/GameReview';
 import GoseiLogo from '../components/GoseiLogo';
 import GameNotification from '../components/GameNotification';
 import UndoNotification from '../components/UndoNotification';
+import AIUndoConfirmModal from '../components/AIUndoConfirmModal';
 import MobileStoneControls from '../components/go-board/MobileStoneControls';
 import MobilePlayerPanel from '../components/mobile/MobilePlayerPanel';
 import MobileGameTools from '../components/mobile/MobileGameTools';
@@ -73,6 +74,7 @@ const GamePage: React.FC = () => {
     toggleDeadStone,
     confirmScore,
     requestUndo,
+    requestAIUndo,
     respondToUndoRequest,
     cancelScoring,
     resetGame,
@@ -169,6 +171,9 @@ const GamePage: React.FC = () => {
   const [spectatorReviewStones, setSpectatorReviewStones] = useState<Stone[] | null>(null);
   const [spectatorReviewMoveIndex, setSpectatorReviewMoveIndex] = useState<number | null>(null);
   const [spectatorIsReviewing, setSpectatorIsReviewing] = useState<boolean>(false);
+
+  // AI undo confirmation modal state
+  const [showAIUndoConfirm, setShowAIUndoConfirm] = useState<boolean>(false);
 
   // Check if there's a gameId in the URL and try to load that game
   useEffect(() => {
@@ -627,7 +632,25 @@ const GamePage: React.FC = () => {
   };
 
   const handleRequestUndo = () => {
-    requestUndo();
+    // Check if this is an AI game
+    const isAIGame = gameState?.players.some(player => player.isAI);
+    
+    if (isAIGame) {
+      // Show confirmation modal for AI games
+      setShowAIUndoConfirm(true);
+    } else {
+      // Direct undo for human vs human games
+      requestUndo();
+    }
+  };
+
+  const handleConfirmAIUndo = () => {
+    setShowAIUndoConfirm(false);
+    requestAIUndo();
+  };
+
+  const handleCancelAIUndo = () => {
+    setShowAIUndoConfirm(false);
   };
 
   const handleAcceptUndo = () => {
@@ -1135,14 +1158,21 @@ const GamePage: React.FC = () => {
           onClose={handleNotificationClose}
         />
 
-        {/* Undo Request Notification */}
-        {gameState.undoRequest && currentPlayer && gameState.undoRequest.requestedBy !== currentPlayer.id && (
+        {/* Undo Request Notification - Only show for human vs human games */}
+        {gameState.undoRequest && currentPlayer && gameState.undoRequest.requestedBy !== currentPlayer.id && !gameState.players.some(player => player.isAI) && (
           <UndoNotification
             onAccept={handleAcceptUndo}
             onReject={handleRejectUndo}
             moveIndex={gameState.undoRequest.moveIndex}
           />
         )}
+
+        {/* AI Undo Confirmation Modal */}
+        <AIUndoConfirmModal
+          isOpen={showAIUndoConfirm}
+          onConfirm={handleConfirmAIUndo}
+          onCancel={handleCancelAIUndo}
+        />
       </div>
       
       {/* Floating Chat Bubble - moved outside the positioned container to fix positioning */}

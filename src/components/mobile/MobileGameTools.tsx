@@ -55,6 +55,10 @@ const MobileGameTools: React.FC<MobileGameToolsProps> = ({
   // Check if it's the current player's turn
   const isPlayerTurn = currentPlayer?.color === currentTurn;
   const isSpectator = currentPlayer?.isSpectator === true;
+  
+  // Check if this is an AI game
+  const isAIGame = gameState.players.some(player => player.isAI);
+  const isHumanPlayer = currentPlayer && !currentPlayer.isAI;
 
   // Helper functions from GameInfo
   const getScoringRuleName = () => {
@@ -150,7 +154,7 @@ const MobileGameTools: React.FC<MobileGameToolsProps> = ({
             
             <button
               onClick={onRequestUndo}
-              disabled={history.length === 0 || !!undoRequest || isPlayerTurn || isSpectator}
+              disabled={history.length === 0 || !!undoRequest || (isPlayerTurn && !isAIGame) || isSpectator || (isAIGame && !isHumanPlayer) || (isAIGame && history.length < 2) || (isAIGame && gameState.aiUndoUsed)}
               className={`flex items-center justify-center gap-2 ${
                 isMobile ? 'py-3' : 'py-4'
               } ${!!undoRequest 
@@ -165,7 +169,7 @@ const MobileGameTools: React.FC<MobileGameToolsProps> = ({
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              {!!undoRequest ? 'Pending...' : 'Undo'}
+              {!!undoRequest ? 'Pending...' : (isAIGame ? 'Undo (1x)' : 'Undo')}
             </button>
           </div>
         )}

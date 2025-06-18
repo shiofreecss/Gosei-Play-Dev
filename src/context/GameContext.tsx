@@ -55,6 +55,7 @@ interface GameContextType {
   toggleDeadStone: (position: Position) => void;
   confirmScore: () => void;
   requestUndo: () => void;
+  requestAIUndo: () => void; // New function for AI undo with confirmation
   respondToUndoRequest: (accept: boolean) => void;
   cancelScoring: () => void;
 }
@@ -79,6 +80,7 @@ const GameContext = createContext<GameContextType>({
   toggleDeadStone: () => {},
   confirmScore: () => {},
   requestUndo: () => {},
+  requestAIUndo: () => {},
   respondToUndoRequest: () => {},
   cancelScoring: () => {},
 });
@@ -365,11 +367,17 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         });
         
         newSocket.on('moveMade', (moveData) => {
+          if (moveData.pass) {
+            console.log(`Player ${moveData.playerId} passed`);
+          } else if (moveData.position) {
           console.log(`Move made at (${moveData.position.x}, ${moveData.position.y}) by ${moveData.playerId}`);
+          } else {
+            console.log(`Move made by ${moveData.playerId}`);
+          }
           
-          // Play stone sound when opponent makes a move
+          // Play stone sound when opponent makes a move (but not for passes)
           // We only want to play the sound if the current player exists and the move wasn't made by them
-          if (state.currentPlayer && moveData.playerId !== state.currentPlayer.id) {
+          if (state.currentPlayer && moveData.playerId !== state.currentPlayer.id && !moveData.pass && moveData.position) {
             playStoneSound();
           }
         });
@@ -864,10 +872,16 @@ export const GameProvider: React.FC<GameProviderProps> = ({
 
       // Handle move updates
       state.socket.on('moveMade', (moveData) => {
+        if (moveData.pass) {
+          console.log(`Player ${moveData.playerId} passed`);
+        } else if (moveData.position) {
         console.log(`Move made at (${moveData.position.x}, ${moveData.position.y}) by ${moveData.playerId}`);
+        } else {
+          console.log(`Move made by ${moveData.playerId}`);
+        }
         
-        // Play stone sound when opponent makes a move
-        if (state.currentPlayer && moveData.playerId !== state.currentPlayer.id) {
+        // Play stone sound when opponent makes a move (but not for passes)
+        if (state.currentPlayer && moveData.playerId !== state.currentPlayer.id && !moveData.pass && moveData.position) {
           playStoneSound();
         }
       });
@@ -1124,12 +1138,16 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       komi: adjustedKomi,
       gameType: gameType,
       handicap: handicap,
-      timePerMove: timePerMove // Add timePerMove field to gameState
+      timePerMove: timePerMove, // Add timePerMove field to gameState
+      // AI Game Properties
+      vsAI: options.vsAI,
+      aiLevel: options.aiLevel
     };
     
     // Send the game data to the server
     if (state.socket) {
       console.log('Sending createGame request to server with game state:', gameState.id);
+      console.log('AI Game settings:', { vsAI: options.vsAI, aiLevel: options.aiLevel });
       state.socket.emit('createGame', {
         gameState,
         playerId,
@@ -2073,8 +2091,20 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     // Clear any previous move errors
     dispatch({ type: 'CLEAR_MOVE_ERROR' });
     
-    // Create undo request - undo just the previous move
-    const moveIndex = gameState.history.length - 1;
+    // Create undo request - in AI games, undo both AI's move and human's move
+    // so human can replay their move differently
+    const isAIGame = gameState.players.some(player => player.isAI);
+    const isHumanPlayer = !currentPlayer.isAI;
+    
+    let moveIndex;
+    if (isAIGame && isHumanPlayer) {
+      // In AI games, human wants to undo their own move to try differently
+      // So we need to undo both the AI's response and the human's move
+      moveIndex = Math.max(0, gameState.history.length - 2);
+    } else {
+      // In human vs human games, just undo the previous move
+      moveIndex = gameState.history.length - 1;
+    }
     
     // Update the game state with the undo request
     const updatedGameState: GameState = {
@@ -2106,6 +2136,13 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     } catch (e) {
       console.error('Failed to save game state after undo request:', e);
     }
+  };
+
+  // Request AI undo with confirmation (will be handled by UI component)
+  const requestAIUndo = () => {
+    // This function will be called by the UI component after confirmation
+    // The actual undo logic is the same as requestUndo
+    requestUndo();
   };
 
   // Respond to undo request
@@ -2240,6 +2277,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         toggleDeadStone,
         confirmScore,
         requestUndo,
+        requestAIUndo,
         respondToUndoRequest,
         cancelScoring
       }}

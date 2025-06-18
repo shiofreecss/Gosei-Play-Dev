@@ -105,6 +105,10 @@ const GameInfo: React.FC<GameInfoProps> = ({
   // Check if current user is a spectator
   const isSpectator = currentPlayer?.isSpectator === true;
   
+  // Check if this is an AI game
+  const isAIGame = players.some(player => player.isAI);
+  const isHumanPlayer = currentPlayer && !currentPlayer.isAI;
+  
   // Keep spectators synchronized with the latest move when new moves are made
   useEffect(() => {
     if (isSpectator && !isReviewing) {
@@ -491,7 +495,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
           
           <button
             onClick={onRequestUndo}
-            disabled={status !== 'playing' || history.length === 0 || !!undoRequest || isPlayerTurn || isSpectator}
+            disabled={status !== 'playing' || history.length === 0 || !!undoRequest || (isPlayerTurn && !isAIGame) || isSpectator || (isAIGame && !isHumanPlayer) || (isAIGame && history.length < 2) || (isAIGame && gameState.aiUndoUsed)}
             className={`flex items-center justify-center gap-2 ${
               isTablet 
                 ? 'text-base gap-4 px-6 py-4' 
@@ -508,7 +512,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
             <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${isTablet ? 'h-5 w-5' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            {!!undoRequest ? 'Undo Pending...' : 'Undo'}
+            {!!undoRequest ? 'Undo Pending...' : (isAIGame ? 'Undo (1x only)' : 'Undo')}
           </button>
         </div>
 

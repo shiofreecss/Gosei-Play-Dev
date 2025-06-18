@@ -4,6 +4,9 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 
+// Import AI game manager (moved to top to fix initialization order)
+const AIGameManager = require('./managers/ai-game-manager');
+
 const app = express();
 app.use(cors());
 
@@ -136,6 +139,9 @@ const DEBUG = true;
 // Import captcha validation utilities
 const { validateGameCreation } = require('./utils/captcha');
 
+// Initialize AI Game Manager
+const aiGameManager = new AIGameManager();
+
 // Game types and their default configurations
 const GAME_CONFIGURATIONS = {
   standard: {
@@ -206,6 +212,120 @@ function broadcastGameUpdate(gameId, gameState) {
   
   // Store the game state
   activeGames.set(gameId, gameState);
+}
+
+function processUndo(gameState, moveIndex, gameId) {
+  // Revert to the requested move index (keep all moves up to but not including moveIndex)
+  const historyToKeep = gameState.history.slice(0, moveIndex);
+  
+  log(`Undo accepted: Keeping ${historyToKeep.length} moves out of ${gameState.history.length} total moves`);
+  
+  // Reset board state and replay from the beginning
+  let stones = [];
+  let currentTurn = 'black'; // Black always starts first
+  let capturedStones = { black: 0, white: 0 };
+  
+  // ONLY add handicap stones if this is actually a handicap game AND we're going back to the beginning
+  if (gameState.gameType === 'handicap' && gameState.handicap > 0 && historyToKeep.length === 0) {
+    // Find handicap stones from the original board setup
+    const handicapStones = getHandicapStones(gameState.board.size, gameState.handicap);
+    stones = handicapStones;
+    currentTurn = 'white'; // White plays first in handicap games
+    log(`Added ${handicapStones.length} handicap stones for handicap game`);
+  }
+  
+  // Replay each move in the history with proper capture logic
+  historyToKeep.forEach((move, index) => {
+    if (!move.pass) {
+      // Extract position from move - handle both formats safely
+      let position;
+      if (move.position && typeof move.position === 'object' && typeof move.position.x === 'number' && typeof move.position.y === 'number') {
+        // Server format: { position: { x, y }, ... }
+        position = move.position;
+      } else if (typeof move === 'object' && typeof move.x === 'number' && typeof move.y === 'number') {
+        // Client format: { x, y }
+        position = move;
+      } else {
+        log(`ERROR: Invalid move format during undo replay at index ${index}:`, move);
+        return; // Skip this invalid move
+      }
+      
+      // Validate position is within bounds
+      if (position.x < 0 || position.x >= gameState.board.size || position.y < 0 || position.y >= gameState.board.size) {
+        log(`ERROR: Invalid position during undo replay at index ${index}: (${position.x}, ${position.y})`);
+        return; // Skip this invalid move
+      }
+      
+      // Add the stone
+      const newStone = {
+        position: position,
+        color: currentTurn
+      };
+      stones.push(newStone);
+      
+      // Apply capture logic (simplified version)
+      const updatedStones = [...stones];
+      const captureResult = captureDeadStones(
+        { ...gameState, board: { ...gameState.board, stones: updatedStones } },
+        updatedStones,
+        newStone.position,
+        currentTurn
+      );
+      
+      stones = captureResult.remainingStones;
+      
+      // Update captured count
+      capturedStones[currentTurn] += captureResult.capturedCount;
+      
+      log(`Replayed move ${index + 1}: ${currentTurn} at (${newStone.position.x}, ${newStone.position.y}), captured ${captureResult.capturedCount} stones`);
+    }
+    
+    // Toggle turn for next move
+    currentTurn = currentTurn === 'black' ? 'white' : 'black';
+  });
+  
+  // Calculate the current turn after undo
+  let nextTurn;
+  if (gameState.gameType === 'handicap' && gameState.handicap > 0) {
+    // In handicap games, white starts first, so:
+    // historyToKeep.length = 0 -> white's turn
+    // historyToKeep.length = 1 -> black's turn  
+    // historyToKeep.length = 2 -> white's turn
+    nextTurn = historyToKeep.length % 2 === 0 ? 'white' : 'black';
+  } else {
+    // In normal games, black starts first, so:
+    // historyToKeep.length = 0 -> black's turn
+    // historyToKeep.length = 1 -> white's turn
+    // historyToKeep.length = 2 -> black's turn
+    nextTurn = historyToKeep.length % 2 === 0 ? 'black' : 'white';
+  }
+  
+  // Update game state
+  gameState.board.stones = stones;
+  gameState.currentTurn = nextTurn;
+  gameState.history = historyToKeep;
+  gameState.capturedStones = capturedStones;
+  
+  // Clear KO position since board state changed
+  gameState.koPosition = undefined;
+  
+  // Clear the undo request (in case it was set)
+  gameState.undoRequest = undefined;
+  
+  // Mark AI undo as used if this is an AI game
+  const isAIGame = gameState.players.some(player => player.isAI);
+  if (isAIGame) {
+    gameState.aiUndoUsed = true;
+    log(`AI undo used - no more undos allowed in this AI game`);
+  }
+  
+  // Store updated game state
+  activeGames.set(gameId, gameState);
+  
+  // Use the new broadcast function for move updates
+  broadcastGameUpdate(gameId, gameState);
+  
+  log(`Undo completed: Board has ${stones.length} stones, next turn: ${nextTurn}`);
 }
 
 // Improved timer handling function
@@ -354,6 +474,49 @@ io.on('connection', (socket) => {
     socketToGame.set(socket.id, gameState.id);
     
     log(`Player ${playerId} created and joined game ${gameState.id}`);
+    
+    // Check if this should be an AI game
+    if (gameState.vsAI) {
+      const humanPlayer = gameState.players.find(p => p.id === playerId);
+      const aiLevel = gameState.aiLevel || 'normal';
+      
+      log(`🤖 Creating AI game with level: ${aiLevel}`);
+      
+      // Create AI player asynchronously
+      aiGameManager.createAIGame(gameState, humanPlayer, aiLevel)
+        .then((aiPlayer) => {
+          log(`✅ AI player created: ${aiPlayer.username}`);
+          
+          // Set game status to playing since we now have 2 players (human + AI)
+          gameState.status = 'playing';
+          
+          // Start the timer for standard games
+          if (gameState.gameType !== 'blitz') {
+            gameState.lastMoveTime = Date.now();
+          }
+          
+          log(`Game ${gameState.id} status set to playing with AI opponent`);
+          
+          // Update the stored game state
+          activeGames.set(gameState.id, gameState);
+          
+          // Broadcast updated game state with AI player
+          broadcastGameUpdate(gameState.id, gameState);
+          
+          // If AI plays first (black), make first move
+          if (aiPlayer.color === 'black') {
+            setTimeout(() => {
+              makeAIMove(gameState.id);
+            }, 1000); // Small delay for better UX
+          }
+        })
+        .catch((error) => {
+          log(`❌ Failed to create AI player: ${error.message}`);
+          socket.emit('gameCreationError', {
+            error: 'Failed to create AI opponent. Please try again.'
+          });
+        });
+    }
     
     // Use the new broadcast function
     broadcastGameUpdate(gameState.id, gameState);
@@ -853,6 +1016,24 @@ io.on('connection', (socket) => {
       // Change turn immediately - no delay needed since byo-yomi reset events are sent immediately
       gameState.currentTurn = color === 'black' ? 'white' : 'black';
       broadcastGameUpdate(gameId, gameState);
+      
+      // Check if AI should make a move after human move
+      if (aiGameManager.isAIGame(gameState)) {
+        aiGameManager.handleHumanMove(gameState, {
+          color: color,
+          position: position,
+          playerId: playerId
+        }).then(() => {
+          // Make AI move if it's AI's turn
+          if (aiGameManager.shouldAIMakeMove(gameState)) {
+            setTimeout(() => {
+              makeAIMove(gameId);
+            }, 500); // Small delay for better UX
+          }
+        }).catch(error => {
+          log(`❌ Error handling human move in AI game: ${error.message}`);
+        });
+      }
     }
   });
 
@@ -1475,6 +1656,7 @@ io.on('connection', (socket) => {
     // If no players left in the room, remove the game immediately
     if (!room || clientsCount === 0) {
       log(`No players remaining in game ${gameId}, removing it immediately`);
+      cleanupAIGame(gameId);
       activeGames.delete(gameId);
     }
   });
@@ -1499,6 +1681,7 @@ io.on('connection', (socket) => {
         const room = io.sockets.adapter.rooms.get(gameId);
         if (!room || room.size === 0) {
           log(`Removing inactive game ${gameId}`);
+            cleanupAIGame(gameId);
           activeGames.delete(gameId);
         }
       }, 5 * 60 * 1000); // 5 minutes timeout
@@ -1710,7 +1893,30 @@ io.on('connection', (socket) => {
     if (gameState) {
       log(`Current game has ${gameState.history.length} moves, requesting to keep ${moveIndex} moves (removing ${gameState.history.length - moveIndex} moves)`);
       
-      // Add undo request to game state
+      // Check if this is an AI game - if so, auto-accept the undo
+      const isAIGame = gameState.players.some(player => player.isAI);
+      const requestingPlayer = gameState.players.find(player => player.id === playerId);
+      const isHumanRequestingUndo = requestingPlayer && !requestingPlayer.isAI;
+      
+      if (isAIGame && isHumanRequestingUndo) {
+        log(`🤖 AI game detected - auto-accepting undo request from human player`);
+        
+        // Auto-process the undo immediately for AI games
+        processUndo(gameState, moveIndex, gameId);
+        
+        // Sync AI engine state after undo
+        if (aiGameManager && aiGameManager.isAIGame(gameState)) {
+          setTimeout(async () => {
+            try {
+              await aiGameManager.syncGameState(gameState);
+              log(`🔄 AI engine synced after undo`);
+            } catch (error) {
+              log(`❌ Failed to sync AI engine after undo: ${error.message}`);
+            }
+          }, 100);
+        }
+      } else {
+        // Regular human vs human game - add undo request to game state
       gameState.undoRequest = {
         requestedBy: playerId,
         moveIndex
@@ -1721,6 +1927,7 @@ io.on('connection', (socket) => {
       
       // Use the new broadcast function for move updates
       broadcastGameUpdate(gameId, gameState);
+      }
     }
   });
 
@@ -1731,101 +1938,7 @@ io.on('connection', (socket) => {
     const gameState = activeGames.get(gameId);
     if (gameState) {
       if (accepted) {
-        // Revert to the requested move index (keep all moves up to but not including moveIndex)
-        const historyToKeep = gameState.history.slice(0, moveIndex);
-        
-        log(`Undo accepted: Keeping ${historyToKeep.length} moves out of ${gameState.history.length} total moves`);
-        
-        // Reset board state and replay from the beginning
-        let stones = [];
-        let currentTurn = 'black'; // Black always starts first
-        let capturedStones = { black: 0, white: 0 };
-        
-        // ONLY add handicap stones if this is actually a handicap game AND we're going back to the beginning
-        if (gameState.gameType === 'handicap' && gameState.handicap > 0 && historyToKeep.length === 0) {
-          // Find handicap stones from the original board setup
-          const handicapStones = getHandicapStones(gameState.board.size, gameState.handicap);
-          stones = handicapStones;
-          currentTurn = 'white'; // White plays first in handicap games
-          log(`Added ${handicapStones.length} handicap stones for handicap game`);
-        }
-        
-        // Replay each move in the history with proper capture logic
-        historyToKeep.forEach((move, index) => {
-          if (!move.pass) {
-            // Extract position from move - handle both formats safely
-            let position;
-            if (move.position && typeof move.position === 'object' && typeof move.position.x === 'number' && typeof move.position.y === 'number') {
-              // Server format: { position: { x, y }, ... }
-              position = move.position;
-            } else if (typeof move === 'object' && typeof move.x === 'number' && typeof move.y === 'number') {
-              // Client format: { x, y }
-              position = move;
-            } else {
-              log(`ERROR: Invalid move format during undo replay at index ${index}:`, move);
-              return; // Skip this invalid move
-            }
-            
-            // Validate position is within bounds
-            if (position.x < 0 || position.x >= gameState.board.size || position.y < 0 || position.y >= gameState.board.size) {
-              log(`ERROR: Invalid position during undo replay at index ${index}: (${position.x}, ${position.y})`);
-              return; // Skip this invalid move
-            }
-            
-            // Add the stone
-            const newStone = {
-              position: position,
-              color: currentTurn
-            };
-            stones.push(newStone);
-            
-            // Apply capture logic (simplified version)
-            const updatedStones = [...stones];
-            const captureResult = captureDeadStones(
-              { ...gameState, board: { ...gameState.board, stones: updatedStones } },
-              updatedStones,
-              newStone.position,
-              currentTurn
-            );
-            
-            stones = captureResult.remainingStones;
-            
-            // Update captured count
-            capturedStones[currentTurn] += captureResult.capturedCount;
-            
-            log(`Replayed move ${index + 1}: ${currentTurn} at (${newStone.position.x}, ${newStone.position.y}), captured ${captureResult.capturedCount} stones`);
-          }
-          
-          // Toggle turn for next move
-          currentTurn = currentTurn === 'black' ? 'white' : 'black';
-        });
-        
-        // Calculate the current turn after undo
-        let nextTurn;
-        if (gameState.gameType === 'handicap' && gameState.handicap > 0) {
-          // In handicap games, white starts first, so:
-          // historyToKeep.length = 0 -> white's turn
-          // historyToKeep.length = 1 -> black's turn  
-          // historyToKeep.length = 2 -> white's turn
-          nextTurn = historyToKeep.length % 2 === 0 ? 'white' : 'black';
-        } else {
-          // In normal games, black starts first, so:
-          // historyToKeep.length = 0 -> black's turn
-          // historyToKeep.length = 1 -> white's turn
-          // historyToKeep.length = 2 -> black's turn
-          nextTurn = historyToKeep.length % 2 === 0 ? 'black' : 'white';
-        }
-        
-        // Update game state
-        gameState.board.stones = stones;
-        gameState.currentTurn = nextTurn;
-        gameState.history = historyToKeep;
-        gameState.capturedStones = capturedStones;
-        
-        // Clear KO position since board state changed
-        gameState.koPosition = undefined;
-        
-        log(`Undo completed: Board has ${stones.length} stones, next turn: ${nextTurn}`);
+        processUndo(gameState, moveIndex, gameId);
       }
       
       // Clear the undo request
@@ -1845,25 +1958,142 @@ io.on('connection', (socket) => {
     
     const gameState = activeGames.get(gameId);
     if (gameState) {
-      // Broadcast the play again request to the specific opponent
-      const targetSocket = [...socketToGame.entries()]
-        .find(([socketId, gId]) => {
-          if (gId === gameId) {
-            const player = gameState.players.find(p => p.id === toPlayerId);
-            return player;
-          }
-          return false;
-        });
-
-      // Send to all sockets in the game room, the client will filter by player ID
-      io.to(gameId).emit('playAgainRequest', {
-        gameId,
-        fromPlayerId,
-        fromUsername,
-        toPlayerId
-      });
+      // Check if this is an AI game
+      const isAIGame = gameState.players.some(player => player.isAI);
+      const targetPlayer = gameState.players.find(p => p.id === toPlayerId);
+      const isTargetAI = targetPlayer && targetPlayer.isAI;
       
-      log(`Play again request sent from ${fromUsername} to player ${toPlayerId} in game ${gameId}`);
+      log(`🔍 Play again debug: isAIGame=${isAIGame}, targetPlayer=${JSON.stringify(targetPlayer)}, isTargetAI=${isTargetAI}`);
+      log(`🔍 All players: ${JSON.stringify(gameState.players.map(p => ({ id: p.id, username: p.username, isAI: p.isAI })))}`);
+      
+      if (isAIGame && isTargetAI) {
+        // Auto-accept play again requests for AI games
+        log(`🤖 AI game detected - auto-accepting play again request`);
+        
+        // Create a new game immediately (same logic as accepted response)
+        const originalGame = gameState;
+        const newGameId = uuidv4();
+        const newGameCode = Math.random().toString(36).substr(2, 6).toUpperCase();
+        
+        // Create new game state with same settings but reset board
+        const newGameState = {
+          id: newGameId,
+          code: newGameCode,
+          players: originalGame.players.map(player => ({
+            ...player,
+            timeRemaining: originalGame.timeControl ? originalGame.timeControl.timeControl * 60 : undefined,
+            byoYomiPeriodsLeft: originalGame.timeControl?.byoYomiPeriods || 0,
+            byoYomiTimeLeft: originalGame.timeControl?.byoYomiTime || 30,
+            isInByoYomi: false
+          })),
+          board: {
+            size: originalGame.board.size,
+            stones: []
+          },
+          currentTurn: 'black',
+          status: 'playing',
+          history: [],
+          capturedStones: { black: 0, white: 0 },
+          komi: originalGame.komi,
+          scoringRule: originalGame.scoringRule,
+          gameType: originalGame.gameType,
+          handicap: originalGame.handicap || 0,
+          timeControl: originalGame.timeControl,
+          timePerMove: originalGame.timePerMove,
+          lastMoveTime: Date.now(),
+          createdAt: Date.now(),
+          vsAI: originalGame.vsAI,
+          aiLevel: originalGame.aiLevel,
+          aiUndoUsed: false // Reset undo usage for new game
+        };
+        
+        log(`🔍 New game state players: ${JSON.stringify(newGameState.players.map(p => ({ id: p.id, username: p.username, isAI: p.isAI })))}`);
+
+        // Store the new game first
+        activeGames.set(newGameId, newGameState);
+
+        // Add handicap stones if it's a handicap game
+        if (newGameState.gameType === 'handicap' && newGameState.handicap > 0) {
+          const handicapStones = getHandicapStones(newGameState.board.size, newGameState.handicap);
+          newGameState.board.stones = handicapStones;
+          newGameState.currentTurn = 'white';
+        }
+
+        // Create AI engine for the new game (players are already copied over)
+        if (aiGameManager && originalGame.vsAI) {
+          const humanPlayer = newGameState.players.find(p => !p.isAI);
+          const aiPlayer = newGameState.players.find(p => p.isAI);
+          const aiLevel = originalGame.aiLevel || 'normal';
+          
+          if (humanPlayer && aiPlayer) {
+            setTimeout(async () => {
+              try {
+                // Just recreate the AI engine, not the player (player already exists)
+                const aiSettings = {
+                  boardSize: newGameState.board.size,
+                  maxVisits: 100,
+                  maxTime: 3.0,
+                  threads: 1
+                };
+                
+                // Store AI engine mapping
+                const KataGoCPUEngine = require('./engines/katago-cpu');
+                const engine = new KataGoCPUEngine(aiSettings);
+                aiGameManager.aiPlayers.set(newGameId, engine);
+                aiGameManager.aiGames.add(newGameId);
+                
+                await engine.initialize();
+                log(`✅ AI engine recreated for new game ${newGameId}`);
+                
+                // Update the stored game state
+                const updatedGameState = activeGames.get(newGameId);
+                if (updatedGameState) {
+                  broadcastGameUpdate(newGameId, updatedGameState);
+                }
+              } catch (error) {
+                log(`❌ Failed to recreate AI engine: ${error.message}`);
+              }
+            }, 100);
+          }
+        }
+        
+        // Move player to the new game room
+        const gameRoom = io.sockets.adapter.rooms.get(gameId);
+        if (gameRoom) {
+          gameRoom.forEach(socketId => {
+            const socket = io.sockets.sockets.get(socketId);
+            if (socket) {
+              socket.leave(gameId);
+              socket.join(newGameId);
+              socketToGame.set(socketId, newGameId);
+            }
+          });
+        }
+        
+        log(`Created new AI game ${newGameId} (${newGameCode}) - auto-accepted play again`);
+        
+        // Broadcast the new game to the player
+        setTimeout(() => {
+          io.to(newGameId).emit('playAgainResponse', {
+            accepted: true,
+            gameId: newGameId,
+            newGameState: newGameState
+          });
+          
+          broadcastGameUpdate(newGameId, newGameState);
+        }, 200);
+        
+      } else {
+        // Regular human vs human game - send request for manual acceptance
+        io.to(gameId).emit('playAgainRequest', {
+          gameId,
+          fromPlayerId,
+          fromUsername,
+          toPlayerId
+        });
+        
+        log(`Play again request sent from ${fromUsername} to player ${toPlayerId} in game ${gameId}`);
+      }
     } else {
       log(`Play again request failed: Game ${gameId} not found`);
       socket.emit('error', `Game ${gameId} not found`);
@@ -2084,6 +2314,340 @@ io.on('connection', (socket) => {
       socket.emit('error', `Game ${gameId} not found`);
     }
   });
+});
+
+// Helper function to apply time logic for AI players (same as human players)
+function applyAITimeLogic(gameState, aiPlayer, thinkingTimeSeconds, io, gameId) {
+  if (!aiPlayer || thinkingTimeSeconds <= 0) return;
+
+  log(`🤖 TIME CALCULATION - AI ${aiPlayer.color}: Main=${aiPlayer.timeRemaining}s, InByoYomi=${aiPlayer.isInByoYomi}, Thinking=${thinkingTimeSeconds}s`);
+
+  if (gameState.gameType === 'blitz') {
+    // For blitz games, check if AI exceeded time per move
+    if (thinkingTimeSeconds > gameState.timePerMove) {
+      log(`💀 BLITZ TIMEOUT - AI ${aiPlayer.color} spent ${thinkingTimeSeconds}s, exceeded time limit of ${gameState.timePerMove}s per move`);
+      handlePlayerTimeout(gameState, aiPlayer);
+      return false; // Indicate timeout
+    } else {
+      log(`⚡ BLITZ MOVE - AI ${aiPlayer.color} spent ${thinkingTimeSeconds}s (within ${gameState.timePerMove}s limit)`);
+    }
+    
+    // Reset AI timer for next move (if it's AI vs AI)
+    aiPlayer.timeRemaining = gameState.timePerMove;
+    return true;
+  } else {
+    // Standard game time deduction logic
+    let timerAlreadyReset = false;
+    
+    if (aiPlayer.isInByoYomi) {
+      // AI is already in byo-yomi mode
+      if (thinkingTimeSeconds <= gameState.timeControl.byoYomiTime) {
+        // Move made within byo-yomi period - reset clock, keep same period count
+        aiPlayer.byoYomiTimeLeft = gameState.timeControl.byoYomiTime;
+        log(`🔄 AI BYO-YOMI RESET - AI ${aiPlayer.color} thought for ${thinkingTimeSeconds}s (within period), period reset to ${gameState.timeControl.byoYomiTime}s, periods remain: ${aiPlayer.byoYomiPeriodsLeft}`);
+        
+        // Emit byoYomiReset event
+        io.to(gameId).emit('byoYomiReset', {
+          gameId,
+          color: aiPlayer.color,
+          byoYomiTimeLeft: aiPlayer.byoYomiTimeLeft,
+          byoYomiPeriodsLeft: aiPlayer.byoYomiPeriodsLeft
+        });
+        log(`📤 AI BYO-YOMI RESET EVENT SENT - AI ${aiPlayer.color}: ${aiPlayer.byoYomiTimeLeft}s, Periods=${aiPlayer.byoYomiPeriodsLeft}`);
+        
+        timerAlreadyReset = true;
+      } else {
+        // Move exceeded byo-yomi period - calculate periods consumed
+        const periodsConsumed = Math.floor(thinkingTimeSeconds / gameState.timeControl.byoYomiTime);
+        const newPeriodsLeft = Math.max(0, aiPlayer.byoYomiPeriodsLeft - periodsConsumed);
+        
+        if (newPeriodsLeft > 0) {
+          // Still have periods remaining
+          aiPlayer.byoYomiPeriodsLeft = newPeriodsLeft;
+          aiPlayer.byoYomiTimeLeft = gameState.timeControl.byoYomiTime;
+          log(`⏳ AI BYO-YOMI PERIODS CONSUMED - AI ${aiPlayer.color} thought for ${thinkingTimeSeconds}s, consumed ${periodsConsumed} periods, ${newPeriodsLeft} periods remaining`);
+          
+          // Emit reset event when periods are consumed and reset
+          io.to(gameId).emit('byoYomiReset', {
+            gameId,
+            color: aiPlayer.color,
+            byoYomiTimeLeft: aiPlayer.byoYomiTimeLeft,
+            byoYomiPeriodsLeft: aiPlayer.byoYomiPeriodsLeft
+          });
+          log(`📤 AI BYO-YOMI PERIODS CONSUMED EVENT SENT - AI ${aiPlayer.color}: ${aiPlayer.byoYomiTimeLeft}s, Periods=${aiPlayer.byoYomiPeriodsLeft}`);
+          
+          timerAlreadyReset = true;
+        } else {
+          // No more periods - AI times out
+          log(`💀 TIMEOUT - AI ${aiPlayer.color} consumed all byo-yomi periods (thought for ${thinkingTimeSeconds}s, consumed ${periodsConsumed} periods)`);
+          handlePlayerTimeout(gameState, aiPlayer);
+          return false; // Indicate timeout
+        }
+      }
+    } else {
+      // AI is in main time
+      const newMainTime = Math.max(0, aiPlayer.timeRemaining - thinkingTimeSeconds);
+      
+      if (newMainTime > 0) {
+        // Still in main time
+        aiPlayer.timeRemaining = newMainTime;
+        log(`⏰ AI TIME DEDUCTED - AI ${aiPlayer.color} spent ${thinkingTimeSeconds}s from main time, ${newMainTime}s remaining`);
+      } else {
+        // First time entering byo-yomi - calculate periods consumed
+        if (gameState.timeControl && gameState.timeControl.byoYomiPeriods > 0) {
+          const timeOverage = thinkingTimeSeconds - aiPlayer.timeRemaining; // How much time exceeded main time
+          const periodsConsumed = Math.floor(timeOverage / gameState.timeControl.byoYomiTime);
+          const remainingPeriods = Math.max(0, gameState.timeControl.byoYomiPeriods - periodsConsumed);
+          
+          if (remainingPeriods > 0) {
+            // Enter byo-yomi with calculated periods remaining
+            aiPlayer.timeRemaining = 0;
+            aiPlayer.isInByoYomi = true;
+            aiPlayer.byoYomiPeriodsLeft = remainingPeriods;
+            aiPlayer.byoYomiTimeLeft = gameState.timeControl.byoYomiTime;
+            log(`🚨 AI ENTERING BYO-YOMI: AI ${aiPlayer.color} thought for ${thinkingTimeSeconds}s (${timeOverage}s over main time), consumed ${periodsConsumed} periods, ${remainingPeriods} periods remaining`);
+            
+            // Emit byo-yomi reset event for entering byo-yomi
+            io.to(gameId).emit('byoYomiReset', {
+              gameId,
+              color: aiPlayer.color,
+              byoYomiTimeLeft: aiPlayer.byoYomiTimeLeft,
+              byoYomiPeriodsLeft: aiPlayer.byoYomiPeriodsLeft
+            });
+            log(`📤 AI BYO-YOMI ENTERED EVENT SENT - AI ${aiPlayer.color}: ${aiPlayer.byoYomiTimeLeft}s, Periods=${aiPlayer.byoYomiPeriodsLeft}`);
+            
+            timerAlreadyReset = true;
+          } else {
+            // No periods left - AI times out
+            log(`💀 TIMEOUT - AI ${aiPlayer.color} exceeded main time and consumed all byo-yomi periods (thought for ${thinkingTimeSeconds}s, overage ${timeOverage}s, consumed ${periodsConsumed} periods)`);
+            handlePlayerTimeout(gameState, aiPlayer);
+            return false; // Indicate timeout
+          }
+        } else {
+          // No byo-yomi available - check if unlimited time before timing out
+          const isUnlimitedTime = (gameState.timeControl?.timeControl || 0) === 0;
+          if (!isUnlimitedTime) {
+            log(`💀 TIMEOUT - AI ${aiPlayer.color} exceeded main time with no byo-yomi available (thought for ${thinkingTimeSeconds}s, main time was ${aiPlayer.timeRemaining}s)`);
+            handlePlayerTimeout(gameState, aiPlayer);
+            return false; // Indicate timeout
+          } else {
+            log(`⏰ UNLIMITED TIME - AI ${aiPlayer.color} thinking time but no timeout (unlimited time mode)`);
+          }
+        }
+      }
+    }
+    
+    return true; // No timeout
+  }
+}
+
+// AI Game Functions
+async function makeAIMove(gameId) {
+  try {
+    const gameState = activeGames.get(gameId);
+    if (!gameState) {
+      log(`❌ Game ${gameId} not found for AI move`);
+      return;
+    }
+
+    if (gameState.status !== 'playing') {
+      log(`❌ Game ${gameId} not playing (status: ${gameState.status}), skipping AI move`);
+      return;
+    }
+
+    if (!aiGameManager.shouldAIMakeMove(gameState)) {
+      log(`❌ AI should not make move for game ${gameId}`);
+      return;
+    }
+
+    const currentColor = gameState.currentTurn;
+    log(`🤖 Making AI move for ${currentColor} in game ${gameId}`);
+
+    const aiMoveResult = await aiGameManager.makeAIMove(gameState, currentColor);
+    const aiPlayer = gameState.players.find(p => p.color === currentColor && p.isAI);
+    
+    if (!aiPlayer) {
+      log(`❌ AI player not found for color ${currentColor}`);
+      return;
+    }
+
+    // Apply time logic for AI move
+    const thinkingTime = aiMoveResult.thinkingTime || 1;
+    const timeoutOccurred = !applyAITimeLogic(gameState, aiPlayer, thinkingTime, io, gameId);
+    
+    if (timeoutOccurred) {
+      log(`💀 AI ${currentColor} timed out, game ended`);
+      return;
+    }
+    
+    if (aiMoveResult.type === 'pass') {
+      // Handle AI pass
+      log(`🤖 AI (${currentColor}) decided to pass`);
+      
+      // Add pass to history with proper time tracking
+      gameState.history.push({
+        pass: true,
+        color: currentColor,
+        playerId: aiMoveResult.playerId,
+        timestamp: Date.now(),
+        timeSpentOnMove: thinkingTime,
+        timeSpentDisplay: formatMoveTimeDisplay(thinkingTime),
+        timeDisplay: formatTimeDisplay(aiPlayer),
+        timeRemaining: aiPlayer.timeRemaining,
+        isInByoYomi: aiPlayer.isInByoYomi,
+        byoYomiTimeLeft: aiPlayer.byoYomiTimeLeft,
+        byoYomiPeriodsLeft: aiPlayer.byoYomiPeriodsLeft
+      });
+
+      // Switch turn
+      gameState.currentTurn = currentColor === 'black' ? 'white' : 'black';
+      
+      // Check for double pass (game end)
+      const historyLength = gameState.history.length;
+      if (historyLength >= 2) {
+        const lastMove = gameState.history[historyLength - 1];
+        const secondLastMove = gameState.history[historyLength - 2];
+        
+        if (lastMove.pass && secondLastMove.pass) {
+          gameState.status = 'scoring';
+          gameState.deadStones = [];
+          gameState.scoreConfirmation = { black: false, white: false };
+          log(`Game ${gameId} ended with double pass, entering scoring phase`);
+        }
+      }
+      
+      // Broadcast the pass
+      io.to(gameId).emit('moveMade', {
+        pass: true,
+        color: currentColor,
+        playerId: aiMoveResult.playerId
+      });
+
+    } else if (aiMoveResult.type === 'move') {
+      // Handle AI move
+      const { position } = aiMoveResult;
+      log(`🤖 AI (${currentColor}) plays at (${position.x}, ${position.y})`);
+
+      // Validate move
+      const isOccupied = gameState.board.stones.some(
+        stone => stone.position.x === position.x && stone.position.y === position.y
+      );
+      
+      if (isOccupied) {
+        log(`❌ AI generated invalid move - position occupied`);
+        return;
+      }
+
+      // Check KO rule
+      if (gameState.koPosition && 
+          position.x === gameState.koPosition.x && 
+          position.y === gameState.koPosition.y) {
+        log(`❌ AI generated invalid move - KO violation`);
+        return;
+      }
+
+      // Add the stone
+      const updatedStones = [...gameState.board.stones, {
+        position,
+        color: currentColor
+      }];
+
+      // Capture opponent stones
+      const capturedStones = captureDeadStones(gameState, updatedStones, position, currentColor);
+      gameState.board.stones = capturedStones.remainingStones;
+
+      // Track move
+      gameState.lastMove = position;
+      gameState.lastMoveColor = currentColor;
+      gameState.lastMovePlayerId = aiMoveResult.playerId;
+      gameState.lastMoveCapturedCount = capturedStones.capturedCount;
+
+      // Add to history with proper time tracking
+      gameState.history.push({
+        position: position,
+        color: currentColor,
+        playerId: aiMoveResult.playerId,
+        timestamp: Date.now(),
+        timeSpentOnMove: thinkingTime,
+        timeSpentDisplay: formatMoveTimeDisplay(thinkingTime),
+        timeDisplay: formatTimeDisplay(aiPlayer),
+        timeRemaining: aiPlayer.timeRemaining,
+        isInByoYomi: aiPlayer.isInByoYomi,
+        byoYomiTimeLeft: aiPlayer.byoYomiTimeLeft,
+        byoYomiPeriodsLeft: aiPlayer.byoYomiPeriodsLeft,
+        capturedCount: capturedStones.capturedCount
+      });
+
+      // Set KO position
+      if (capturedStones.koPosition) {
+        gameState.koPosition = capturedStones.koPosition;
+      } else if (gameState.koPosition) {
+        gameState.koPosition = undefined;
+      }
+
+      // Update captured stones count
+      if (!gameState.capturedStones) {
+        gameState.capturedStones = { black: 0, white: 0 };
+      }
+      if (capturedStones.capturedCount > 0) {
+        gameState.capturedStones[currentColor] += capturedStones.capturedCount;
+      }
+
+      // Switch turn
+      gameState.currentTurn = currentColor === 'black' ? 'white' : 'black';
+      
+      // Reset timer for next player's move (only for standard games, not blitz)
+      if (gameState.gameType !== 'blitz') {
+        gameState.lastMoveTime = Date.now();
+      }
+    }
+
+    // Update stored game state
+    activeGames.set(gameId, gameState);
+    
+    // Send time update for AI player
+    io.to(gameId).emit('timeUpdate', {
+      gameId,
+      playerId: aiPlayer.id,
+      color: aiPlayer.color,
+      timeRemaining: aiPlayer.timeRemaining,
+      isInByoYomi: aiPlayer.isInByoYomi,
+      byoYomiTimeLeft: aiPlayer.byoYomiTimeLeft,
+      byoYomiPeriodsLeft: aiPlayer.byoYomiPeriodsLeft,
+      serverTimestamp: Date.now()
+    });
+    log(`📤 AI TIME UPDATE SENT - AI ${aiPlayer.color}: Main=${aiPlayer.timeRemaining}s, InByoYomi=${aiPlayer.isInByoYomi}, ByoYomiLeft=${aiPlayer.byoYomiTimeLeft}s, Periods=${aiPlayer.byoYomiPeriodsLeft}`);
+    
+    // Broadcast updated game state
+    broadcastGameUpdate(gameId, gameState);
+    
+    log(`✅ AI move completed for game ${gameId}`);
+
+  } catch (error) {
+    log(`❌ Error making AI move for game ${gameId}: ${error.message}`);
+    console.error(error);
+  }
+}
+
+// Clean up AI games when they end
+function cleanupAIGame(gameId) {
+  if (aiGameManager.getActiveAIGames().includes(gameId)) {
+    aiGameManager.cleanupGame(gameId);
+    log(`🧹 Cleaned up AI game ${gameId}`);
+  }
+}
+
+// Graceful shutdown handling
+process.on('SIGINT', () => {
+  console.log('🛑 Shutting down server...');
+  aiGameManager.shutdown();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('🛑 Shutting down server...');
+  aiGameManager.shutdown();
+  process.exit(0);
 });
 
 // Route to check server status

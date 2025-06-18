@@ -92,3 +92,6 @@ netlify.toml
 **/*-secrets.json
 **/*_secrets.json
 **/*.secret.*
+
+# KataGo AI engine files
+/server/katago

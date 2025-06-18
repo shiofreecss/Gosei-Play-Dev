@@ -21,7 +21,9 @@ const STORAGE_KEYS = {
   TIME_PER_MOVE: 'gosei-time-per-move',
   HANDICAP: 'gosei-handicap',
   SCORING_RULE: 'gosei-scoring-rule',
-  GAME_TYPE: 'gosei-game-type'
+  GAME_TYPE: 'gosei-game-type',
+  VS_AI: 'gosei-vs-ai',
+  AI_LEVEL: 'gosei-ai-level'
 };
 
 
@@ -113,6 +115,9 @@ const HomePage: React.FC = () => {
       byoYomiTime: getStoredValue((STORAGE_KEYS as any).BYO_YOMI_TIME, 30),
       fischerTime: getStoredValue((STORAGE_KEYS as any).FISCHER_TIME, 0)
     },
+    // AI Game Options
+    vsAI: getStoredValue(STORAGE_KEYS.VS_AI, false),
+    aiLevel: getStoredValue(STORAGE_KEYS.AI_LEVEL, 'normal') as GameOptions['aiLevel'],
   });
 
   // Effect to navigate to game after creation or joining
@@ -143,6 +148,9 @@ const HomePage: React.FC = () => {
     setStoredValue((STORAGE_KEYS as any).BYO_YOMI_PERIODS, gameOptions.timeControlOptions.byoYomiPeriods);
     setStoredValue((STORAGE_KEYS as any).BYO_YOMI_TIME, gameOptions.timeControlOptions.byoYomiTime);
     setStoredValue((STORAGE_KEYS as any).FISCHER_TIME, gameOptions.timeControlOptions.fischerTime);
+    // Save AI options
+    setStoredValue(STORAGE_KEYS.VS_AI, gameOptions.vsAI);
+    setStoredValue(STORAGE_KEYS.AI_LEVEL, gameOptions.aiLevel);
   }, [gameOptions]);
 
   // Helper function to update a single game option and save it
@@ -391,6 +399,13 @@ const HomePage: React.FC = () => {
   const handleCreateGameWithCaptcha = (playerName: string, options: GameOptions, captcha?: any, captchaAnswer?: any) => {
     setIsCreatingGame(true);
     setLocalError(null);
+
+    // Validate AI game constraints
+    if (options.vsAI && options.boardSize > 19) {
+      setLocalError('AI opponents are not supported on boards larger than 19x19. Please choose a smaller board size or disable AI.');
+      setIsCreatingGame(false);
+      return;
+    }
 
     console.log('Creating game with captcha verification:', { playerName, options, captcha: !!captcha, captchaAnswer: !!captchaAnswer });
     
@@ -688,6 +703,154 @@ const HomePage: React.FC = () => {
                 <option value="blitz">Blitz Game</option>
               </select>
             </div>
+          </div>
+        </div>
+
+        {/* AI Opponent Settings */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+            🤖 AI Opponent
+          </h3>
+          
+          <div className="space-y-4">
+            {/* AI Toggle */}
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-neutral-50">
+              <div>
+                <label htmlFor="vs-ai" className="text-sm font-medium text-neutral-700">
+                  Play against KataGo AI
+                </label>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Challenge yourself against a powerful Go AI engine (optimized for 9x9 boards)
+                </p>
+              </div>
+              <input
+                id="vs-ai"
+                type="checkbox"
+                checked={gameOptions.vsAI || false}
+                onChange={(e) => updateGameOption('vsAI', e.target.checked)}
+                className="h-4 w-4 text-primary-500 focus:ring-primary-400 rounded"
+              />
+            </div>
+
+            {/* AI Difficulty Selection */}
+            {gameOptions.vsAI && (
+              <div className="pl-4 border-l-2 border-primary-200">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  AI Difficulty Level
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {[
+                    { 
+                      level: 'easy' as const, 
+                      title: '🐣 Easy', 
+                      description: 'Great for beginners (1s thinking time, 50 visits)',
+                      recommended: 'Recommended for new players'
+                    },
+                    { 
+                      level: 'normal' as const, 
+                      title: '🎯 Normal', 
+                      description: 'Balanced challenge (3s thinking time, 100 visits)',
+                      recommended: 'Good for most players'
+                    },
+                    { 
+                      level: 'hard' as const, 
+                      title: '🔥 Hard', 
+                      description: 'Strong challenge (5s thinking time, 200 visits)',
+                      recommended: 'For experienced players'
+                    },
+                    { 
+                      level: 'expert' as const, 
+                      title: '💎 Expert', 
+                      description: 'Maximum strength (8s thinking time, 400 visits)',
+                      recommended: 'For advanced players only'
+                    }
+                  ].map(({ level, title, description, recommended }) => (
+                    <div
+                      key={level}
+                      className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                        gameOptions.aiLevel === level
+                          ? 'border-primary-500 bg-primary-50'
+                          : 'border-neutral-200 hover:border-neutral-300'
+                      }`}
+                      onClick={() => updateGameOption('aiLevel', level)}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-medium text-sm">{title}</span>
+                        <input
+                          type="radio"
+                          name="ai-level"
+                          checked={gameOptions.aiLevel === level}
+                          onChange={() => updateGameOption('aiLevel', level)}
+                          className="h-4 w-4 text-primary-500"
+                        />
+                      </div>
+                      <p className="text-xs text-neutral-600 mb-1">{description}</p>
+                      <p className="text-xs text-primary-600 font-medium">{recommended}</p>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* AI Board Size Optimization Notice */}
+                {gameOptions.boardSize !== 9 && gameOptions.boardSize <= 19 && (
+                  <div className={`mt-3 p-3 rounded-lg border ${
+                    isDarkMode 
+                      ? 'bg-yellow-900/20 border-yellow-700/50' 
+                      : 'bg-yellow-50 border-yellow-200'
+                  }`}>
+                    <div className="flex items-start gap-2">
+                      <span className={isDarkMode ? 'text-yellow-400' : 'text-yellow-600'}>⚠️</span>
+                      <div>
+                        <p className={`text-sm font-medium ${
+                          isDarkMode ? 'text-yellow-300' : 'text-yellow-800'
+                        }`}>
+                          Performance Notice
+                        </p>
+                        <p className={`text-xs mt-1 ${
+                          isDarkMode ? 'text-yellow-200' : 'text-yellow-700'
+                        }`}>
+                          KataGo is optimized for 9x9 boards. {gameOptions.boardSize}x{gameOptions.boardSize} boards will be slower and require more system resources.
+                        </p>
+                        <div className={`text-xs mt-2 ${
+                          isDarkMode ? 'text-yellow-200' : 'text-yellow-700'
+                        }`}>
+                          <p><strong>Expected performance:</strong></p>
+                          <ul className="ml-2 mt-1 space-y-1">
+                            {gameOptions.boardSize === 13 && <li>• 13x13: Good performance (3-15 seconds per move)</li>}
+                            {gameOptions.boardSize === 15 && <li>• 15x15: Decent performance (5-20 seconds per move)</li>}
+                            {gameOptions.boardSize === 19 && <li>• 19x19: Slower but playable (10-30 seconds per move)</li>}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Not Supported Warning for Large Boards */}
+                {gameOptions.boardSize > 19 && (
+                  <div className={`mt-3 p-3 rounded-lg border ${
+                    isDarkMode 
+                      ? 'bg-red-900/20 border-red-700/50' 
+                      : 'bg-red-50 border-red-200'
+                  }`}>
+                    <div className="flex items-start gap-2">
+                      <span className={isDarkMode ? 'text-red-400' : 'text-red-500'}>🚫</span>
+                      <div>
+                        <p className={`text-sm font-medium ${
+                          isDarkMode ? 'text-red-300' : 'text-red-800'
+                        }`}>
+                          AI Not Available
+                        </p>
+                        <p className={`text-xs mt-1 ${
+                          isDarkMode ? 'text-red-200' : 'text-red-700'
+                        }`}>
+                          AI opponents are not supported on {gameOptions.boardSize}x{gameOptions.boardSize} boards. Please choose a smaller board size (19x19 or smaller) to play against AI, or disable AI to play on larger boards.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
