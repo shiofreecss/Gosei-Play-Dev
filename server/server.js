@@ -1726,6 +1726,23 @@ io.on('connection', (socket) => {
       // Update the confirmation for this player
       gameState.scoreConfirmation[playerColor] = confirmed;
       
+      // Check if this is an AI game and handle AI auto-acceptance
+      const isAIGame = gameState.players.some(player => player.isAI);
+      const confirmingPlayer = gameState.players.find(player => player.id === playerId);
+      const isHumanConfirming = confirmingPlayer && !confirmingPlayer.isAI;
+      
+      if (isAIGame && isHumanConfirming && confirmed) {
+        log(`🤖 AI game detected - human player confirmed score, AI will auto-accept`);
+        
+        // Find the AI player and auto-confirm for them
+        const aiPlayer = gameState.players.find(player => player.isAI);
+        if (aiPlayer) {
+          const aiPlayerColor = aiPlayer.color;
+          gameState.scoreConfirmation[aiPlayerColor] = true;
+          log(`🤖 AI player (${aiPlayerColor}) automatically confirmed score`);
+        }
+      }
+      
       log(`Score confirmations for game ${gameId}: Black: ${gameState.scoreConfirmation.black}, White: ${gameState.scoreConfirmation.white}`);
       
       // Store updated game state

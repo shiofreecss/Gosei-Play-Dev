@@ -1073,24 +1073,28 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-100">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-neutral-100 flex flex-col">
+      <div className="container mx-auto px-4 py-8 flex-grow">
         {/* Header */}
         <header className="text-center mb-12">
-          {/* Logo, title, and theme toggle - all on same row */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-2">
-            {/* Left spacer for mobile centering */}
-            <div className="hidden sm:block w-20"></div>
-            
-            {/* Logo and title - centered */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <GoseiLogo size={48} />
-              <h1 className="text-3xl sm:text-4xl font-bold text-primary-700">Gosei Play</h1>
+          {/* Logo, title, and theme toggle - responsive layout */}
+          <div className="flex flex-col items-center justify-center gap-4 mb-2">
+            {/* Desktop layout: Logo + Title + Theme Toggle on same row */}
+            <div className="hidden md:flex items-center justify-center gap-6">
+              <div className="flex items-center gap-3">
+                <GoseiLogo size={48} />
+                <h1 className="text-4xl font-bold text-primary-700">Gosei Play</h1>
+              </div>
+              <ThemeToggleButton />
             </div>
             
-            {/* Theme toggle - right aligned on desktop, centered on mobile */}
-            <div className="flex justify-center sm:justify-end w-20">
-              <ThemeToggleButton />
+            {/* Mobile/Tablet layout: Logo and Title on same row, Theme Toggle below */}
+            <div className="md:hidden flex flex-col items-center gap-4">
+              <div className="flex items-center gap-3">
+                <GoseiLogo size={48} />
+                <h1 className="text-3xl font-bold text-primary-700">Gosei Play</h1>
+                <ThemeToggleButton />
+              </div>
             </div>
           </div>
           <p className="text-lg sm:text-xl text-neutral-600">
@@ -1316,6 +1320,23 @@ const HomePage: React.FC = () => {
           )}
         </div>
       </div>
+      
+      {/* Footer */}
+      <footer className="bg-white border-t border-neutral-200 py-6 mt-auto">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-sm text-neutral-600">
+            Powered by{' '}
+            <a 
+              href="https://beaver.foundation" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary-600 hover:text-primary-700 font-medium underline decoration-dotted underline-offset-2 hover:decoration-solid transition-all duration-200"
+            >
+              Beaver Foundation
+            </a>
+          </p>
+        </div>
+      </footer>
       
       {/* Captcha Modal */}
       {showCreateForm && createPortal(

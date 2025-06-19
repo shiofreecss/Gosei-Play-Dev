@@ -43,9 +43,6 @@ const ThemeToggleButton: React.FC = () => {
           </svg>
         )}
       </div>
-      <span className="theme-toggle-text">
-        {isDarkMode ? 'Light' : 'Dark'}
-      </span>
     </button>
   );
 };
