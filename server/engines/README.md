@@ -1,45 +1,92 @@
 # KataGo CPU Engine for Gosei Play
 
-This implementation integrates KataGo (CPU version) into Gosei Play, allowing players to challenge a powerful Go AI optimized for CPU-only systems with 4-8GB RAM.
+This implementation integrates KataGo (CPU version) into Gosei Play, allowing players to challenge a powerful Go AI optimized for CPU-only systems with 4-8GB RAM. Supports both **Windows** and **Linux** development environments.
 
 ## 🎯 Features
 
+- **Cross-Platform**: Works on Windows 10/11 and Ubuntu Linux 16.04+
 - **CPU-Optimized**: Specifically tuned for CPU-only systems with limited RAM
-- **9x9 Board Focus**: Optimized for 9x9 Go boards for best performance
+- **Multi-Board Support**: Optimized for 9x9 boards, supports 13x13 and 19x19
 - **Multiple Difficulty Levels**: Easy, Normal, Hard, and Expert AI opponents
 - **Low Memory Footprint**: Uses lightweight neural network models (6-10 blocks)
 - **Real-time Integration**: Seamlessly integrated with the existing game system
+- **Automatic Configuration**: Self-configuring setup with optimized settings
 
 ## 🚀 Quick Setup
 
-### 1. Run the Setup Script
+### Windows Setup
 
+#### Method 1: Automated Setup (Recommended)
+```cmd
+cd server
+setup-katago-windows.bat
+```
+
+#### Method 2: Manual Setup
+1. **Download KataGo v1.16.2 for Windows:**
+   - Visit: https://github.com/lightvector/KataGo/releases/latest
+   - Download: `katago-v1.16.2-windows-x64.zip`
+   - Extract to `server/katago/` directory
+
+2. **Download Neural Network Model:**
+   - Visit: https://katagotraining.org/
+   - Download a `b6c96` model (~8MB) for CPU usage
+   - Save to `server/katago/` directory
+
+3. **Test Installation:**
+   ```cmd
+   cd server
+   node test-katago-setup.js
+   ```
+
+### Linux Setup
+
+#### Method 1: Automated Setup (Recommended)
 ```bash
 cd server
 chmod +x setup-katago.sh
 ./setup-katago.sh
 ```
 
-This script will:
-- Download KataGo CPU binary for Linux
-- Download a lightweight neural network model (b6c96 - 6 blocks, ~8MB)
-- Set up the optimized configuration
-- Test the installation
+#### Method 2: Manual Setup
+```bash
+# 1. Create directories
+mkdir -p server/katago/models
+cd server/katago
 
-### 2. Verify Installation
+# 2. Download KataGo binary
+wget https://github.com/lightvector/KataGo/releases/download/v1.15.1/katago-v1.15.1-linux-x64-cpu.zip
+unzip katago-v1.15.1-linux-x64-cpu.zip
+mv katago-v* katago
+chmod +x katago
 
-After running the setup script, you should see:
+# 3. Download neural network model
+cd models
+wget https://media.katagotraining.org/uploaded/networks/models/kata1/b6c96-s1235592320-d204142634.bin.gz
+
+# 4. Test installation
+cd ..
+./katago version
+```
+
+### Verification
+
+After setup, you should see:
 ```
 ✅ KataGo binary downloaded and installed
-✅ Neural network model downloaded
+✅ Neural network model downloaded  
 ✅ KataGo is working correctly
 ✅ GTP interface working correctly
 ```
 
-### 3. Start the Server
+### Start Playing
 
 ```bash
+# Start the server
 npm start
+
+# Or for development
+node server.js
 ```
 
 The server will automatically detect KataGo and enable AI games.
@@ -52,7 +99,7 @@ The server will automatically detect KataGo and enable AI games.
    - Go to the game creation page
    - Enable "🤖 Play against KataGo AI" 
    - Select your preferred difficulty level
-   - Choose 9x9 board size for best performance
+   - Choose board size (9x9 recommended for best performance)
    - Create the game
 
 2. **AI Difficulty Levels**:
@@ -70,73 +117,112 @@ The server will automatically detect KataGo and enable AI games.
 5. AI thinks for the specified time and makes moves
 6. Game continues until completion or resignation
 
-## ⚙️ Configuration
+## ⚙️ Configuration & System Requirements
 
 ### System Requirements
 
 **Minimum (Easy/Normal difficulty)**:
-- Ubuntu 16.04+ or compatible Linux distro
-- 4GB RAM
-- 2-core CPU
-- 20MB disk space
+- **Windows**: Windows 10/11 x64
+- **Linux**: Ubuntu 16.04+ or compatible
+- **RAM**: 4GB minimum
+- **CPU**: 2-core processor
+- **Storage**: 50MB disk space
+- **Network**: Internet connection for initial download
 
 **Recommended (Hard/Expert difficulty)**:
-- Ubuntu 18.04+ or compatible Linux distro
-- 8GB RAM
-- 4-core CPU
-- 50MB disk space
+- **Windows**: Windows 10/11 x64  
+- **Linux**: Ubuntu 18.04+ or compatible
+- **RAM**: 8GB or more
+- **CPU**: 4-core processor
+- **Storage**: 100MB disk space
+
+### Performance by Board Size
+
+| Board Size | Performance | Recommended For |
+|------------|-------------|-----------------|
+| **9x9** | ⭐ Optimal (1-8s per move) | Development, casual play |
+| **13x13** | ✅ Good (5-15s per move) | Intermediate play |
+| **19x19** | ⚠️ Slow (15-60s per move) | Patient players only |
 
 ### Memory Optimization
 
 The implementation uses several optimizations for low-memory systems:
 
-```javascript
-// CPU Configuration Highlights
+```cfg
+# CPU Configuration Highlights  
 analysisThreads = 1
-numSearchThreads = 1
+numSearchThreads = 8
 nnMaxBatchSize = 1
-nnCacheSizePowerOfTwo = 16  // 64KB cache
+nnCacheSizePowerOfTwo = 16  # 64KB cache
 ponderingEnabled = false
+maxVisits = 100
+maxTime = 3.0
 ```
 
-### Model Information
+### Neural Network Models
 
-**Default Model**: `b6c96-s1235592320-d204142634.bin.gz`
-- **Size**: ~8MB compressed
-- **Blocks**: 6 blocks (very fast on CPU)
-- **Strength**: Strong enough for most players on 9x9
-- **Memory Usage**: ~100-200MB during play
+**Recommended Models for CPU**:
+- `b6c96-s1235592320-d204142634.bin.gz` (~8MB, 6 blocks)
+- `kata1-b6c96-s175395328-d26788732.bin.gz` (~8MB, 6 blocks) 
+- `b10c128-s197428736-d67404019.bin.gz` (~15MB, 10 blocks)
 
-## 🛠️ Manual Installation
+**Model Performance**:
+- **6-block models**: ~100-200MB RAM, 1-5s per move on 9x9
+- **10-block models**: ~200-400MB RAM, 2-8s per move on 9x9
 
-If the setup script doesn't work, you can install manually:
+## 🛠️ Advanced Configuration
 
-### 1. Download KataGo Binary
+### Custom Difficulty Settings
 
-```bash
-cd server/katago
-wget https://github.com/lightvector/KataGo/releases/download/v1.15.1/katago-v1.15.1-linux-x64-cpu.zip
-unzip katago-v1.15.1-linux-x64-cpu.zip
-mv katago-v* katago
-chmod +x katago
+You can customize AI strength by editing `katago-cpu-config.cfg`:
+
+```cfg
+# For weaker AI (good for beginners)
+maxVisits = 25
+maxTime = 1.0
+
+# For stronger AI (advanced players)  
+maxVisits = 800
+maxTime = 10.0
+numSearchThreads = 4
 ```
 
-### 2. Download Neural Network
+### Multi-Threading
 
-```bash
-cd models
-wget https://media.katagotraining.org/uploaded/networks/models/kata1/b6c96-s1235592320-d204142634.bin.gz
-```
-
-### 3. Test Installation
-
-```bash
-./katago version
+For systems with 8GB+ RAM:
+```cfg
+numSearchThreads = 4    # Use 4 threads
+analysisThreads = 2     # Use 2 analysis threads  
+nnMaxBatchSize = 2      # Larger batches
 ```
 
 ## 🔧 Troubleshooting
 
-### Common Issues
+### Windows Issues
+
+**1. "KataGo executable not found"**
+```cmd
+# Check if binary exists
+dir server\katago\katago.exe
+
+# Download manually if missing
+# Visit: https://github.com/lightvector/KataGo/releases/latest
+```
+
+**2. "Missing DLL files"**
+- Download the full Windows release package
+- Ensure all `.dll` files are in the same directory as `katago.exe`
+- Install Microsoft Visual C++ Redistributable if needed
+
+**3. "Neural network model not found"**
+```cmd
+# Check if model exists
+dir server\katago\*.bin.gz
+
+# Download manually from https://katagotraining.org/
+```
+
+### Linux Issues
 
 **1. "KataGo executable not found"**
 ```bash
@@ -158,28 +244,25 @@ cd server/katago
 echo "boardsize 9" | ./katago gtp -model models/b6c96-s1235592320-d204142634.bin.gz
 ```
 
-**4. AI moves too slowly**
-- Reduce AI difficulty level
-- Ensure you're using 9x9 board size
+### Performance Issues
+
+**AI moves too slowly:**
+- Reduce AI difficulty level to "Easy" or "Normal"
+- Use 9x9 board size only
 - Close other applications to free RAM
-- Check system resources with `htop`
+- Check system resources with Task Manager (Windows) or `htop` (Linux)
 
-**5. Out of memory errors**
-- Use "Easy" or "Normal" difficulty only
-- Ensure swap is enabled
+**Out of memory errors:**
+- Use "Easy" difficulty only
+- Enable virtual memory/swap space
 - Close browser tabs and other applications
+- Use a smaller neural network model (6-block instead of 10-block)
 
-### Performance Tuning
-
-**For 4GB RAM systems**:
-- Use Easy or Normal difficulty only
-- Set `maxVisits = 50` in katago-cpu-config.cfg
-- Enable swap space if not already enabled
-
-**For 8GB+ RAM systems**:
-- Can use Hard or Expert difficulty
-- Increase `maxVisits` for stronger play
-- Consider multiple threads: `numSearchThreads = 2`
+**Server won't start with AI:**
+1. Check server console for error messages
+2. Run `node test-katago-setup.js` to diagnose issues
+3. Verify KataGo installation with `katago version`
+4. Check log files in `server/katago/logs/gtp.log`
 
 ## 📊 Technical Details
 
@@ -200,21 +283,26 @@ echo "boardsize 9" | ./katago gtp -model models/b6c96-s1235592320-d204142634.bin
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
-### Files Structure
+### File Structure
 
 ```
 server/
 ├── engines/
-│   ├── katago-cpu.js           # KataGo engine wrapper
-│   ├── katago-cpu-config.cfg   # Generated CPU config
-│   └── README.md               # This file
+│   ├── katago-cpu.js           # KataGo engine wrapper (cross-platform)
+│   ├── katago-cpu-config.cfg   # Auto-generated CPU config
+│   └── README.md               # This documentation
 ├── managers/
 │   └── ai-game-manager.js      # AI game management
-├── katago/
-│   ├── katago                  # KataGo binary
-│   └── models/
-│       └── b6c96-*.bin.gz      # Neural network model
-└── setup-katago.sh            # Setup script
+├── katago/                     # KataGo installation directory
+│   ├── katago(.exe)           # KataGo binary (Linux/Windows)
+│   ├── *.dll                  # Windows dependencies
+│   ├── *.bin.gz               # Neural network models
+│   ├── gtp_dev.cfg           # Development configuration
+│   └── logs/
+│       └── gtp.log           # GTP communication logs
+├── setup-katago.sh           # Linux setup script
+├── setup-katago-windows.bat  # Windows setup script
+└── test-katago-setup.js      # Installation test script
 ```
 
 ### API Integration
@@ -225,58 +313,88 @@ The KataGo engine integrates through the existing game system:
 - **Move Handling**: AI moves are generated after human moves
 - **Game Flow**: Standard game rules apply (time controls, scoring, etc.)
 - **Cleanup**: AI engines are properly shut down when games end
+- **Multi-Platform**: Automatic platform detection and configuration
 
-## 🎯 Optimization Tips
+## 🎯 Best Practices
 
-### For Best Performance
+### For Optimal Performance
 
-1. **Use 9x9 boards**: Optimal performance and user experience
-2. **Start with Normal difficulty**: Good balance of strength and speed
+1. **Use 9x9 boards**: Fastest and most responsive gameplay
+2. **Start with Normal difficulty**: Good balance of strength and speed  
 3. **Close unnecessary applications**: Free up RAM for KataGo
-4. **Use SSD storage**: Faster model loading
-5. **Enable swap**: Prevents out-of-memory crashes
+4. **Use SSD storage**: Faster model loading times
+5. **Enable swap/virtual memory**: Prevents out-of-memory crashes
+6. **Monitor system resources**: Keep RAM usage under 80%
 
-### Board Size Recommendations
+### Development Tips
 
-- **9x9**: Optimal ⭐ (1-8 seconds per move)
-- **13x13**: Good ✓ (5-15 seconds per move)
-- **19x19**: Slow ⚠️ (15-60+ seconds per move)
+1. **Use Easy difficulty during development**: Faster iteration cycles
+2. **Test with small boards first**: Quicker feedback loops
+3. **Check logs regularly**: `server/katago/logs/gtp.log` for debugging
+4. **Run test script**: `node test-katago-setup.js` to verify setup
+5. **Monitor memory usage**: Task Manager or htop during play
 
 ## 🔮 Future Enhancements
 
-- [ ] Support for larger neural network models
-- [ ] GPU acceleration support
-- [ ] Advanced analysis features
-- [ ] Multiple AI personalities
-- [ ] Adjustable playing style parameters
+- [ ] GPU acceleration support (CUDA/OpenCL)
+- [ ] Larger neural network models for stronger play
+- [ ] Advanced analysis and review features
+- [ ] Multiple AI personalities and playing styles
 - [ ] Opening book integration
+- [ ] Territory estimation and live analysis
+- [ ] Handicap game support
+- [ ] Teaching mode with move suggestions
 
-## 📝 License & Credits
+## 📋 Testing Checklist
 
-- **KataGo**: [MIT License](https://github.com/lightvector/KataGo/blob/master/LICENSE)
-- **Neural Networks**: Licensed for non-commercial use
-- **Gosei Play Integration**: Part of the Gosei Play project
+Before deploying, verify:
 
-## 🤝 Contributing
+- [ ] `node test-katago-setup.js` passes all tests
+- [ ] AI can create games and make moves on 9x9 boards
+- [ ] Performance is acceptable for chosen difficulty
+- [ ] Memory usage stays within system limits
+- [ ] Logs show no critical errors
+- [ ] AI properly resigns when behind
+- [ ] Games can be completed and scored correctly
+
+## 📝 Version History
+
+- **v1.16.2** (Windows): Latest KataGo release with improved CPU performance
+- **v1.15.1** (Linux): Stable Linux release with proven compatibility
+- **CPU Config**: Optimized configurations for 4-8GB RAM systems
+- **Cross-Platform**: Unified codebase supporting Windows and Linux
+
+## 📞 Support & Contributing
+
+### Getting Help
+
+If you encounter issues:
+
+1. **Check this documentation** - especially the troubleshooting section
+2. **Run the test script**: `node test-katago-setup.js`
+3. **Check system requirements** - ensure minimum specs are met
+4. **Review log files** - `server/katago/logs/gtp.log` for errors
+5. **Test with Easy difficulty** - rule out performance issues
+6. **Verify file permissions** - especially on Linux systems
+
+### Contributing
 
 To improve the KataGo integration:
 
 1. Test on different system configurations
-2. Report performance issues
+2. Report performance issues with detailed system specs
 3. Suggest configuration improvements
-4. Help with documentation
+4. Help with documentation updates
+5. Submit bug reports with reproduction steps
 
-## 📞 Support
+## 🏆 Credits & License
 
-If you encounter issues:
-
-1. Check the troubleshooting section above
-2. Verify system requirements
-3. Test with Easy difficulty first
-4. Check server logs for error messages
-
-Remember: KataGo AI is very strong! Don't be discouraged if you lose games. Use it as a learning opportunity to improve your Go skills. 🎓
+- **KataGo**: Created by David Wu - [MIT License](https://github.com/lightvector/KataGo/blob/master/LICENSE)
+- **Neural Networks**: Licensed for research and non-commercial use
+- **Gosei Play Integration**: Part of the Gosei Play project
 
 ---
 
-**Happy playing! 🎮** 
+**Ready to challenge the AI? Start with Easy difficulty and work your way up! 🎮🤖**
+
+*Remember: KataGo is extremely strong, even on Easy mode. Don't be discouraged by losses - use them as learning opportunities to improve your Go skills!* 🎓 
