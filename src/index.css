@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,11 +7,34 @@
 /* Custom styles */
 @layer base {
   body {
-    @apply antialiased text-neutral-800 bg-neutral-50;
+    @apply antialiased text-neutral-800 bg-neutral-50 font-sans;
+    font-feature-settings: 'cv01', 'cv03', 'cv04', 'cv09';
+    letter-spacing: -0.01em;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold text-neutral-900;
+    @apply font-display font-bold text-neutral-900;
+    letter-spacing: -0.025em;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl font-extrabold;
+    letter-spacing: -0.035em;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl font-bold;
+    letter-spacing: -0.03em;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl font-semibold;
+    letter-spacing: -0.025em;
+  }
+
+  .text-display {
+    @apply font-display;
+    letter-spacing: -0.02em;
   }
 }
 

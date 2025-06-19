@@ -1083,7 +1083,7 @@ const HomePage: React.FC = () => {
             <div className="hidden md:flex items-center justify-center gap-6">
               <div className="flex items-center gap-3">
                 <GoseiLogo size={48} />
-                <h1 className="text-4xl font-bold text-primary-700">Gosei Play</h1>
+                                 <h1 className="text-4xl font-extrabold text-primary-700 font-display tracking-tight">Gosei Play</h1>
               </div>
               <ThemeToggleButton />
             </div>
@@ -1092,7 +1092,7 @@ const HomePage: React.FC = () => {
             <div className="md:hidden flex flex-col items-center gap-4">
               <div className="flex items-center gap-3">
                 <GoseiLogo size={48} />
-                <h1 className="text-3xl font-bold text-primary-700">Gosei Play</h1>
+                                 <h1 className="text-3xl font-extrabold text-primary-700 font-display tracking-tight">Gosei Play</h1>
                 <ThemeToggleButton />
               </div>
             </div>
@@ -1147,7 +1147,7 @@ const HomePage: React.FC = () => {
           <div className="lg:flex">
                 {/* Left panel - Create Game */}
                 <div className="lg:w-1/2 p-6 md:p-10 border-r border-neutral-200">
-              <h2 className="text-3xl font-bold mb-8">Play Go</h2>
+              <h2 className="text-3xl font-bold mb-8 font-display tracking-tight">Play Go</h2>
               
               {(error || localError) && (
                 <div className="mb-6 p-4 bg-red-100 border border-red-200 text-red-700 rounded-lg">
@@ -1238,7 +1238,7 @@ const HomePage: React.FC = () => {
                 
                 {/* Right panel - About Go */}
                 <div className="hidden lg:block lg:w-1/2 bg-neutral-50 p-6 md:p-10">
-                  <h2 className="text-3xl font-bold mb-6">About Go</h2>
+                  <h2 className="text-3xl font-bold mb-6 font-display tracking-tight">About Go</h2>
                   <div className="prose prose-neutral max-w-none">
                     <p className="text-lg mb-6">
                       Go originated in China more than 2,500 years ago and is believed to be the oldest board game continuously played today. The game is played by two players who take turns placing black and white stones on the intersections of the grid.
@@ -1285,7 +1285,7 @@ const HomePage: React.FC = () => {
               <div className="bg-white rounded-xl shadow p-6">
                 <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h2 className="text-3xl font-bold">Game Settings</h2>
+                    <h2 className="text-3xl font-bold font-display tracking-tight">Game Settings</h2>
                     <p className="text-neutral-600 mt-1">Welcome, {username}! Configure your game preferences.</p>
                   </div>
                   <button 
