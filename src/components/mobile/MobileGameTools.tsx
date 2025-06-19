@@ -16,6 +16,7 @@ interface MobileGameToolsProps {
   onCopyGameLink?: () => void;
   onConfirmScore?: () => void;
   onCancelScoring?: () => void;
+  onForceScoring?: () => void;
   autoSaveEnabled?: boolean;
   onToggleAutoSave?: () => void;
   onSaveNow?: () => void;
@@ -33,6 +34,7 @@ const MobileGameTools: React.FC<MobileGameToolsProps> = ({
   onCopyGameLink,
   onConfirmScore,
   onCancelScoring,
+  onForceScoring,
   autoSaveEnabled,
   onToggleAutoSave,
   onSaveNow,
@@ -95,6 +97,19 @@ const MobileGameTools: React.FC<MobileGameToolsProps> = ({
   };
   
   const totalStones = history.filter(move => !isPassMove(move)).length;
+
+  // Check for recent passes
+  const lastMove = history.length > 0 ? history[history.length - 1] : null;
+  const lastMoveWasPass = lastMove && isPassMove(lastMove);
+  
+  // Check if force scoring should be available
+  const shouldShowForceScoring = isAIGame && 
+    !isSpectator && 
+    status === 'playing' && 
+    currentPlayer?.color !== currentTurn && // It's AI's turn
+    lastMoveWasPass && // Last move was a pass
+    history.length > 0 && 
+    (history[history.length - 1] as any).color === currentPlayer?.color; // Last pass was by human player
 
   const handleResignClick = () => {
     setShowResignConfirm(true);
@@ -170,6 +185,27 @@ const MobileGameTools: React.FC<MobileGameToolsProps> = ({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               {!!undoRequest ? 'Pending...' : (isAIGame ? 'Undo (1x)' : 'Undo')}
+            </button>
+          </div>
+        )}
+
+        {/* Force Scoring Button - Only show in AI games when AI is unresponsive after human pass */}
+        {shouldShowForceScoring && (
+          <div className="mb-3">
+            <button
+              onClick={onForceScoring}
+              className={`w-full flex items-center justify-center gap-2 ${
+                isMobile ? 'py-3' : 'py-4'
+              } ${
+                isDarkMode
+                  ? 'bg-orange-900/30 hover:bg-orange-900/40 text-orange-300 border border-orange-700 hover:border-orange-600'
+                  : 'bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 hover:border-orange-300'
+              } rounded-lg transition-all duration-200 font-medium shadow-sm hover:shadow-md`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Force Scoring (AI Unresponsive)
             </button>
           </div>
         )}

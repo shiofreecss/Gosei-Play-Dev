@@ -77,6 +77,7 @@ const GamePage: React.FC = () => {
     requestAIUndo,
     respondToUndoRequest,
     cancelScoring,
+    forceScoring,
     resetGame,
     syncDeadStones,
     clearMoveError
@@ -566,6 +567,11 @@ const GamePage: React.FC = () => {
 
   const handleCancelScoring = () => {
     cancelScoring();
+  };
+
+  const handleForceScoring = () => {
+    forceScoring();
+    showNotification('Scoring phase initiated due to unresponsive AI', 'info');
   };
 
   // Handle username input changes with validation
@@ -1077,6 +1083,7 @@ const GamePage: React.FC = () => {
                 onSaveNow={saveGameNow}
                 onConfirmScore={handleConfirmScore}
                 onCancelScoring={handleCancelScoring}
+                onForceScoring={handleForceScoring}
                 showCoordinates={showCoordinates}
                 onToggleCoordinates={handleToggleCoordinates}
                 onReviewBoardChange={(stones: Stone[], moveIndex: number, isReviewing: boolean) => {
@@ -1113,6 +1120,7 @@ const GamePage: React.FC = () => {
             onCopyGameLink={handleShareGame}
             onConfirmScore={handleConfirmScore}
             onCancelScoring={handleCancelScoring}
+            onForceScoring={handleForceScoring}
             autoSaveEnabled={autoSaveEnabled}
             onToggleAutoSave={toggleAutoSave}
             onSaveNow={saveGameNow}

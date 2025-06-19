@@ -96,9 +96,9 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, gameCode }) =>
       {/* Modal content */}
       <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 ${visible ? 'scale-100' : 'scale-95'}`}>
       {/* Header */}
-      <div className="bg-indigo-600 dark:bg-indigo-800 text-white py-4 px-6">
+      <div className="bg-indigo-600 dark:bg-indigo-800 py-4 px-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold font-display tracking-tight">Share Game</h2>
+          <h2 className="text-xl font-bold font-display tracking-tight text-white">Share Game</h2>
           <button
             onClick={handleClose}
             className="text-white hover:text-gray-200 transition-colors"
@@ -114,7 +114,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, gameCode }) =>
       <div className="p-6">
         {/* Share URL Section */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-neutral-800 dark:text-gray-300 mb-2">
             Share URL
           </label>
           <div className="flex items-center space-x-2">
@@ -122,11 +122,11 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, gameCode }) =>
               type="text"
               value={shareUrl}
               readOnly
-              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+              className="flex-1 px-3 py-2 border border-neutral-300 dark:border-gray-600 rounded-md bg-neutral-50 dark:bg-gray-700 text-neutral-900 dark:text-gray-100 text-sm font-medium"
             />
             <button
               onClick={() => handleCopy(shareUrl, 'url')}
-              className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors text-sm font-medium"
+              className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors text-sm font-medium text-white"
             >
               {copiedItem === 'url' ? 'Copied!' : 'Copy'}
             </button>
@@ -135,7 +135,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, gameCode }) =>
 
         {/* Share Code Section */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-neutral-800 dark:text-gray-300 mb-2">
             Game Code
           </label>
           <div className="flex items-center space-x-2">
@@ -143,11 +143,11 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, gameCode }) =>
               type="text"
               value={shareCodeFormatted}
               readOnly
-              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-mono"
+              className="flex-1 px-3 py-2 border border-neutral-300 dark:border-gray-600 rounded-md bg-neutral-50 dark:bg-gray-700 text-neutral-900 dark:text-gray-100 text-sm font-mono font-medium"
             />
             <button
               onClick={() => handleCopy(shareCodeFormatted, 'code')}
-              className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors text-sm font-medium"
+              className="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors text-sm font-medium text-white"
             >
               {copiedItem === 'code' ? 'Copied!' : 'Copy'}
             </button>
@@ -156,7 +156,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, gameCode }) =>
 
         {/* Share Platforms */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <label className="block text-sm font-medium text-neutral-800 dark:text-gray-300 mb-3">
             Share via
           </label>
           <div className="grid grid-cols-4 gap-4">
@@ -210,7 +210,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, gameCode }) =>
         <div className="flex justify-end">
           <button
             onClick={handleClose}
-            className="px-4 py-2 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 rounded-md transition-colors"
+            className="px-4 py-2 bg-neutral-200 dark:bg-gray-600 hover:bg-neutral-300 dark:hover:bg-gray-500 text-neutral-800 dark:text-gray-200 rounded-md transition-colors font-medium"
           >
             Close
           </button>

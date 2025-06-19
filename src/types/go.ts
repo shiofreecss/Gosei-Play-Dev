@@ -125,4 +125,17 @@ export interface GameState {
   aiUndoUsed?: boolean; // Whether undo has been used in AI game (limit 1 per game)
 }
 
-export type GameMove = Position | { pass: true }; 
+export type GameMove = Position | { 
+  pass: true;
+  color?: StoneColor;
+  playerId?: string;
+  timestamp?: number;
+  timeSpentOnMove?: number;
+  timeSpentDisplay?: string;
+  timeDisplay?: string;
+  timeRemaining?: number;
+  isInByoYomi?: boolean;
+  byoYomiTimeLeft?: number;
+  byoYomiPeriodsLeft?: number;
+  isForced?: boolean; // For forced moves (like AI unresponsive)
+}; 

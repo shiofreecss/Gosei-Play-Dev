@@ -1125,8 +1125,8 @@ const HomePage: React.FC = () => {
               rel="noopener noreferrer"
               className={`inline-flex items-center px-2 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 text-sm sm:text-base ${
                 isDarkMode
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 border border-blue-500 text-white hover:from-blue-600 hover:to-indigo-700 hover:border-blue-600'
-                  : 'bg-gradient-to-r from-primary-500 to-primary-600 border border-primary-500 !text-white hover:from-primary-600 hover:to-primary-700 hover:border-primary-600'
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 border border-blue-500 text-white hover:from-blue-600 hover:to-indigo-700 hover:border-blue-600 hover:text-white'
+                  : 'bg-gradient-to-r from-primary-500 to-primary-600 border border-primary-500 !text-white hover:from-primary-600 hover:to-primary-700 hover:border-primary-600 hover:!text-white'
               }`}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">

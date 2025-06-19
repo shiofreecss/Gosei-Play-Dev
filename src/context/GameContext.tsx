@@ -58,6 +58,7 @@ interface GameContextType {
   requestAIUndo: () => void; // New function for AI undo with confirmation
   respondToUndoRequest: (accept: boolean) => void;
   cancelScoring: () => void;
+  forceScoring: () => void; // New function to force scoring when AI doesn't respond
 }
 
 // Create context with default values
@@ -83,6 +84,7 @@ const GameContext = createContext<GameContextType>({
   requestAIUndo: () => {},
   respondToUndoRequest: () => {},
   cancelScoring: () => {},
+  forceScoring: () => {},
 });
 
 // Action types
@@ -2256,6 +2258,107 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     }
   };
 
+  // Force scoring - allows user to force game into scoring mode when AI is unresponsive
+  const forceScoring = () => {
+    if (!state.gameState || !state.currentPlayer) {
+      console.log("Cannot force scoring: no game state or current player");
+      dispatch({ type: 'MOVE_ERROR', payload: 'Game not started properly' });
+      return;
+    }
+    
+    const { gameState, currentPlayer } = state;
+    
+    // Only allow in AI games
+    const isAIGame = gameState.players.some(player => player.isAI);
+    if (!isAIGame) {
+      console.log("Cannot force scoring: not an AI game");
+      dispatch({ type: 'MOVE_ERROR', payload: 'Force scoring only available in AI games' });
+      return;
+    }
+    
+    // Only allow if game is playing and it's AI's turn
+    if (gameState.status !== 'playing') {
+      console.log("Cannot force scoring: game not in playing state");
+      dispatch({ type: 'MOVE_ERROR', payload: 'Game is not currently in progress' });
+      return;
+    }
+    
+    // Check if it's AI's turn (not human's turn)
+    if (currentPlayer.color === gameState.currentTurn) {
+      console.log("Cannot force scoring: it's still your turn");
+      dispatch({ type: 'MOVE_ERROR', payload: 'It is still your turn to play' });
+      return;
+    }
+    
+    // Check if last move was a human pass
+    const lastMove = gameState.history[gameState.history.length - 1];
+    if (!lastMove || !isPassMove(lastMove) || (lastMove as any).color !== currentPlayer.color) {
+      console.log("Force scoring only available after human pass when AI doesn't respond");
+      dispatch({ type: 'MOVE_ERROR', payload: 'Force scoring only available after you pass and AI doesn\'t respond' });
+      return;
+    }
+    
+    console.log("Forcing game into scoring mode due to unresponsive AI");
+    
+    // Clear any previous move errors
+    dispatch({ type: 'CLEAR_MOVE_ERROR' });
+    
+    // Create an AI pass move to complete the double pass requirement
+    const aiPlayer = gameState.players.find(p => p.isAI && p.color === gameState.currentTurn);
+    const aiPassMove: GameMove = {
+      pass: true as const,
+      color: gameState.currentTurn,
+      playerId: aiPlayer?.id || `ai_${gameState.currentTurn}`,
+      timestamp: Date.now(),
+      timeSpentOnMove: 0,
+      timeSpentDisplay: '0s',
+      timeDisplay: 'Force scoring',
+      isForced: true // Mark this as a forced move
+    };
+    
+    // Update the game state for forced scoring
+    const updatedGameState: GameState = {
+      ...gameState,
+      status: 'scoring',
+      history: [...gameState.history, aiPassMove],
+      deadStones: [], // Initialize empty dead stones array
+      scoreConfirmation: { black: false, white: false }, // Initialize score confirmations
+      lastMove: undefined  // Clear lastMove since this is a pass
+    };
+    
+    // Update local state immediately for responsive UI
+    dispatch({ type: 'UPDATE_GAME_STATE', payload: updatedGameState });
+    
+    // Emit force scoring to server if socket is available
+    if (state.socket && state.socket.connected) {
+      const forceScoringData = {
+        gameId: gameState.id,
+        playerId: currentPlayer.id,
+        playerColor: currentPlayer.color,
+        reason: 'AI unresponsive after human pass'
+      };
+      
+      console.log('Emitting forceScoring to server:', forceScoringData);
+      state.socket.emit('forceScoring', forceScoringData);
+    } else {
+      console.warn('Socket not connected, updating state locally only');
+      
+      // Try to reconnect
+      if (state.socket) {
+        console.log('Attempting to reconnect...');
+        state.socket.connect();
+      }
+    }
+    
+    // Update the game in localStorage as backup
+    try {
+      localStorage.setItem(`gosei-game-${updatedGameState.code}`, JSON.stringify(updatedGameState));
+      console.log("Game state saved to localStorage after forcing scoring");
+    } catch (e) {
+      console.error('Failed to save game state after forcing scoring:', e);
+    }
+  };
+
   return (
     <GameContext.Provider
       value={{
@@ -2279,7 +2382,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         requestUndo,
         requestAIUndo,
         respondToUndoRequest,
-        cancelScoring
+        cancelScoring,
+        forceScoring
       }}
     >
       {children}

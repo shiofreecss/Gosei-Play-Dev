@@ -57,15 +57,15 @@ const MobileStoneControls: React.FC<MobileStoneControlsProps> = ({
         <button
           onClick={onPlaceStone}
           disabled={!previewPosition || !isPlayerTurn}
-          className={`place-stone-btn px-6 py-3 font-medium rounded-lg shadow-md transition-colors duration-200 flex items-center gap-2 ${
+          className={`place-stone-btn px-6 py-3 font-semibold rounded-lg shadow-md transition-colors duration-200 flex items-center gap-2 text-white ${
             !isPlayerTurn
-              ? 'bg-gray-700 dark:bg-gray-600 text-white cursor-not-allowed animate-pulse'
+              ? 'bg-gray-700 dark:bg-gray-600 cursor-not-allowed animate-pulse'
               : previewPosition && isPlayerTurn
-                ? 'bg-green-600 hover:bg-green-700 text-white' 
-                : 'bg-gray-400 text-gray-700 dark:text-gray-200 cursor-not-allowed'
+                ? 'bg-emerald-500 hover:bg-emerald-600' 
+                : 'bg-gray-400 cursor-not-allowed'
           }`}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
           {!isPlayerTurn ? 'Thinking' : 'Place'}

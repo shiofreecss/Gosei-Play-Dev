@@ -1571,6 +1571,9 @@ io.on('connection', (socket) => {
           gameState.deadStones = []; // Initialize empty dead stones array
           gameState.scoreConfirmation = { black: false, white: false }; // Initialize score confirmations
           
+          // Auto-confirm AI score immediately
+          autoConfirmAIScore(gameState);
+          
           log(`Game ${gameId} has transitioned to scoring phase after two consecutive passes.`);
         }
       }
@@ -1580,6 +1583,10 @@ io.on('connection', (socket) => {
         gameState.status = 'scoring';
         gameState.deadStones = gameState.deadStones || []; // Ensure deadStones array exists
         gameState.scoreConfirmation = gameState.scoreConfirmation || { black: false, white: false }; // Ensure score confirmation exists
+        
+        // Auto-confirm AI score immediately
+        autoConfirmAIScore(gameState);
+        
         log(`Client signaled end game, ensuring scoring state for game ${gameId}`);
       }
       
@@ -1726,22 +1733,8 @@ io.on('connection', (socket) => {
       // Update the confirmation for this player
       gameState.scoreConfirmation[playerColor] = confirmed;
       
-      // Check if this is an AI game and handle AI auto-acceptance
-      const isAIGame = gameState.players.some(player => player.isAI);
-      const confirmingPlayer = gameState.players.find(player => player.id === playerId);
-      const isHumanConfirming = confirmingPlayer && !confirmingPlayer.isAI;
-      
-      if (isAIGame && isHumanConfirming && confirmed) {
-        log(`🤖 AI game detected - human player confirmed score, AI will auto-accept`);
-        
-        // Find the AI player and auto-confirm for them
-        const aiPlayer = gameState.players.find(player => player.isAI);
-        if (aiPlayer) {
-          const aiPlayerColor = aiPlayer.color;
-          gameState.scoreConfirmation[aiPlayerColor] = true;
-          log(`🤖 AI player (${aiPlayerColor}) automatically confirmed score`);
-        }
-      }
+      // Note: AI score confirmation is now handled automatically when entering scoring mode
+      // No need for additional logic here since AI already confirmed when game status changed to 'scoring'
       
       log(`Score confirmations for game ${gameId}: Black: ${gameState.scoreConfirmation.black}, White: ${gameState.scoreConfirmation.white}`);
       
@@ -1832,6 +1825,89 @@ io.on('connection', (socket) => {
       // Also broadcast the full game state
       io.to(gameId).emit('gameState', gameState);
       log(`Broadcasting updated game state to all clients in room ${gameId}`);
+    }
+  });
+
+  // Handle force scoring - allows human player to force game into scoring when AI is unresponsive
+  socket.on('forceScoring', ({ gameId, playerId, playerColor, reason }) => {
+    log(`🚨 FORCE SCORING: Player ${playerId} (${playerColor}) forcing scoring for game ${gameId} - Reason: ${reason}`);
+    
+    const gameState = activeGames.get(gameId);
+    if (gameState) {
+      // Validate this is an AI game
+      const isAIGame = gameState.players.some(player => player.isAI);
+      if (!isAIGame) {
+        log(`Cannot force scoring: game ${gameId} is not an AI game`);
+        socket.emit('error', 'Force scoring only available in AI games');
+        return;
+      }
+      
+      // Only allow if game is currently playing
+      if (gameState.status !== 'playing') {
+        log(`Cannot force scoring: game ${gameId} not in playing state (current: ${gameState.status})`);
+        socket.emit('error', 'Cannot force scoring: game not in progress');
+        return;
+      }
+      
+      // Check if last move was a pass by the requesting player
+      const lastMove = gameState.history[gameState.history.length - 1];
+      if (!lastMove || !lastMove.pass || lastMove.color !== playerColor) {
+        log(`Cannot force scoring: last move was not a pass by requesting player`);
+        socket.emit('error', 'Force scoring only available after you pass');
+        return;
+      }
+      
+      // Add AI pass move to complete double pass requirement
+      const aiPlayer = gameState.players.find(p => p.isAI && p.color === gameState.currentTurn);
+      const aiPassMove = {
+        pass: true,
+        color: gameState.currentTurn,
+        playerId: aiPlayer ? aiPlayer.id : `ai_${gameState.currentTurn}`,
+        timestamp: Date.now(),
+        timeSpentOnMove: 0,
+        timeSpentDisplay: '0s',
+        timeDisplay: 'Forced by human',
+        isForced: true,
+        reason: 'AI unresponsive'
+      };
+      
+      // Update game state
+      gameState.history.push(aiPassMove);
+      gameState.status = 'scoring';
+      gameState.deadStones = [];
+      gameState.scoreConfirmation = { black: false, white: false };
+      
+      // Auto-confirm AI score immediately
+      autoConfirmAIScore(gameState);
+      
+      log(`🎯 Game ${gameId} forced into scoring phase - AI move added automatically`);
+      
+      // Store updated game state
+      activeGames.set(gameId, gameState);
+      
+      // Broadcast the forced AI pass
+      io.to(gameId).emit('moveMade', {
+        pass: true,
+        color: gameState.currentTurn,
+        playerId: aiPassMove.playerId,
+        isForced: true
+      });
+      
+      // Broadcast the transition to scoring
+      io.to(gameId).emit('scoringPhaseStarted', { 
+        gameId,
+        reason: 'Forced due to unresponsive AI'
+      });
+      
+      // Use the new broadcast function for move updates
+      broadcastGameUpdate(gameId, gameState);
+      
+      // Also broadcast the full game state
+      io.to(gameId).emit('gameState', gameState);
+      log(`Broadcasting forced scoring transition to all clients in room ${gameId}`);
+    } else {
+      log(`Game ${gameId} not found for force scoring request`);
+      socket.emit('error', `Game ${gameId} not found`);
     }
   });
 
@@ -2529,6 +2605,10 @@ async function makeAIMove(gameId) {
           gameState.status = 'scoring';
           gameState.deadStones = [];
           gameState.scoreConfirmation = { black: false, white: false };
+          
+          // Auto-confirm AI score immediately
+          autoConfirmAIScore(gameState);
+          
           log(`Game ${gameId} ended with double pass, entering scoring phase`);
         }
       }
@@ -2652,6 +2732,30 @@ function cleanupAIGame(gameId) {
     aiGameManager.cleanupGame(gameId);
     log(`🧹 Cleaned up AI game ${gameId}`);
   }
+}
+
+// Helper function to auto-confirm AI score when entering scoring mode
+function autoConfirmAIScore(gameState) {
+  const isAIGame = gameState.players.some(player => player.isAI);
+  if (!isAIGame || gameState.status !== 'scoring') {
+    return false;
+  }
+  
+  // Initialize score confirmation if it doesn't exist
+  if (!gameState.scoreConfirmation) {
+    gameState.scoreConfirmation = { black: false, white: false };
+  }
+  
+  // Find the AI player and auto-confirm for them
+  const aiPlayer = gameState.players.find(player => player.isAI);
+  if (aiPlayer) {
+    const aiPlayerColor = aiPlayer.color;
+    gameState.scoreConfirmation[aiPlayerColor] = true;
+    log(`🤖 AI (${aiPlayerColor}) automatically confirmed score when entering scoring mode`);
+    return true;
+  }
+  
+  return false;
 }
 
 // Graceful shutdown handling

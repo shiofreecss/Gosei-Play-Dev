@@ -250,8 +250,8 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
     >
       <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 ${visible ? 'scale-100' : 'scale-95'}`}>
         {/* Header */}
-        <div className="bg-indigo-600 dark:bg-indigo-800 text-white py-4 px-6">
-                        <h2 className="text-xl font-bold text-center font-display tracking-tight">Game Complete!</h2>
+        <div className="bg-indigo-600 dark:bg-indigo-800 py-4 px-6">
+                        <h2 className="text-xl font-bold text-center font-display tracking-tight text-white">Game Complete!</h2>
         </div>
         
         {/* Result Card */}
@@ -319,7 +319,7 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
           <div className="flex gap-4">
             <button
               onClick={handleReturnHome}
-              className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors"
+              className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md transition-colors text-white"
             >
               Return Home
             </button>

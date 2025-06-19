@@ -40,6 +40,7 @@ interface GameInfoProps {
   onSaveNow?: () => void;
   onConfirmScore?: () => void;
   onCancelScoring?: () => void;
+  onForceScoring?: () => void;
   showCoordinates?: boolean;
   onToggleCoordinates?: (show: boolean) => void;
   onReviewBoardChange?: (stones: Stone[], moveIndex: number, isReviewing: boolean) => void;
@@ -60,6 +61,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
   onSaveNow,
   onConfirmScore,
   onCancelScoring,
+  onForceScoring,
   showCoordinates = true,
   onToggleCoordinates,
   onReviewBoardChange
@@ -123,6 +125,15 @@ const GameInfo: React.FC<GameInfoProps> = ({
   
   const lastMoveWasPass = lastMove && isPassMove(lastMove);
   const consecutivePasses = lastMoveWasPass && secondLastMove && isPassMove(secondLastMove);
+  
+  // Check if force scoring should be available
+  const shouldShowForceScoring = isAIGame && 
+    !isSpectator && 
+    status === 'playing' && 
+    currentPlayer?.color !== currentTurn && // It's AI's turn
+    lastMoveWasPass && // Last move was a pass
+    history.length > 0 && 
+    (history[history.length - 1] as any).color === currentPlayer?.color; // Last pass was by human player
   
   // Count total moves excluding passes
   const totalStones = history.filter(move => !isPassMove(move)).length;
@@ -515,6 +526,29 @@ const GameInfo: React.FC<GameInfoProps> = ({
             {!!undoRequest ? 'Undo Pending...' : (isAIGame ? 'Undo (1x only)' : 'Undo')}
           </button>
         </div>
+
+        {/* Force Scoring Button - Only show in AI games when AI is unresponsive after human pass */}
+        {shouldShowForceScoring && (
+          <div className="w-full">
+            <button
+              onClick={onForceScoring}
+              className={`w-full flex items-center justify-center gap-2 ${
+                isTablet 
+                  ? 'text-base gap-4 px-6 py-4' 
+                  : 'sm:gap-2 px-4 py-2.5'
+              } ${
+                isDarkMode
+                  ? 'bg-orange-900/30 hover:bg-orange-900/40 text-orange-300 border border-orange-700 hover:border-orange-600'
+                  : 'bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 hover:border-orange-300'
+              } rounded-lg transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ${isTablet ? 'h-5 w-5' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Force Scoring (AI Unresponsive)
+            </button>
+          </div>
+        )}
 
         {/* Secondary Game Controls */}
         <div className={`grid grid-cols-2 gap-3 ${isTablet ? 'gap-4' : 'sm:gap-3'}`}>
