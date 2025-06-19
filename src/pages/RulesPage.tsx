@@ -57,7 +57,7 @@ const RulesPage: React.FC = () => {
         <header className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-2">
             <GoseiLogo size={48} />
-            <h1 className="text-4xl font-bold text-primary-700">Go Rules & Guide</h1>
+            <h1 className="text-4xl font-bold text-primary-700 font-display tracking-tight">Go Rules & Guide</h1>
           </div>
           <p className="text-xl text-neutral-600">
             Learn the ancient game of Go (Weiqi/Baduk)
@@ -320,7 +320,7 @@ const RulesPage: React.FC = () => {
 
           {/* Quick Reference */}
           <div className="bg-white p-6 rounded-xl shadow-lg">
-            <h3 className="text-xl font-semibold mb-4 text-center">Quick Reference</h3>
+            <h3 className="text-xl font-semibold mb-4 text-center font-display tracking-tight">Quick Reference</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div>
                 <h4 className="font-semibold text-neutral-800 mb-2">✅ You Can:</h4>
@@ -354,7 +354,7 @@ const RulesPage: React.FC = () => {
 
           {/* Call to Action */}
           <div className="text-center py-8">
-            <h3 className="text-2xl font-semibold mb-4 text-neutral-800">Ready to Play?</h3>
+            <h3 className="text-2xl font-semibold mb-4 text-neutral-800 font-display tracking-tight">Ready to Play?</h3>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/board-demo"

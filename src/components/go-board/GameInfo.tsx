@@ -340,7 +340,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
           ? 'w-full'
           : 'w-[400px] xl:w-[500px]'
     }`}>
-      <h2 className="flex items-center justify-between text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-neutral-800">
+      <h2 className="flex items-center justify-between text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-neutral-800 font-display tracking-tight">
         <div className="flex items-center gap-2">
           Game Info
           <span className={`text-xs ${isTablet ? 'text-base' : 'sm:text-sm'} bg-neutral-100 px-2 py-1 rounded text-neutral-600`}>

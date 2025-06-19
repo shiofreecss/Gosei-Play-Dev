@@ -210,7 +210,7 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
         <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 ${visible ? 'scale-100' : 'scale-95'}`}>
           {/* Header */}
           <div className="bg-blue-600 dark:bg-blue-800 text-white py-4 px-6">
-            <h2 className="text-xl font-bold text-center">Play Again?</h2>
+                          <h2 className="text-xl font-bold text-center font-display tracking-tight">Play Again?</h2>
           </div>
           
           {/* Content */}
@@ -251,7 +251,7 @@ const GameCompleteModal: React.FC<GameCompleteModalProps> = ({ onClose, onPlayAg
       <div className={`fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl overflow-hidden w-[90%] max-w-md transition-all duration-300 ${visible ? 'scale-100' : 'scale-95'}`}>
         {/* Header */}
         <div className="bg-indigo-600 dark:bg-indigo-800 text-white py-4 px-6">
-          <h2 className="text-xl font-bold text-center">Game Complete!</h2>
+                        <h2 className="text-xl font-bold text-center font-display tracking-tight">Game Complete!</h2>
         </div>
         
         {/* Result Card */}

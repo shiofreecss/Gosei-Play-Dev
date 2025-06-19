@@ -208,7 +208,7 @@ const BoardDemoPage: React.FC = () => {
         <header className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-2">
             <GoseiLogo size={48} />
-            <h1 className="text-4xl font-bold text-primary-700">
+            <h1 className="text-4xl font-bold text-primary-700 font-display tracking-tight">
               {selectedSize ? `${selectedSize}×${selectedSize} Board` : 'Board Sizes'}
             </h1>
           </div>

@@ -36,11 +36,35 @@
     @apply font-display;
     letter-spacing: -0.02em;
   }
+
+  /* Improve text rendering across the app */
+  p, span, label, input, select, textarea, button {
+    font-feature-settings: 'kern' 1, 'liga' 1;
+  }
+
+  /* Better button text */
+  button {
+    @apply font-semibold;
+    letter-spacing: -0.01em;
+  }
+
+  /* Better label styling */
+  label {
+    @apply font-medium;
+    letter-spacing: -0.005em;
+  }
+
+  /* Better paragraph text */
+  p {
+    line-height: 1.6;
+    letter-spacing: -0.005em;
+  }
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 transform hover:scale-105 shadow-lg hover:shadow-xl;
+    letter-spacing: -0.01em;
   }
 
   .btn-primary {
@@ -52,7 +76,7 @@
   }
 
   .btn-success {
-    @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+    @apply bg-emerald-500 text-white hover:bg-emerald-600 focus:ring-emerald-500;
   }
 
   .btn-danger {
@@ -64,7 +88,7 @@
   }
 
   .btn-disabled:hover {
-    @apply bg-neutral-300 text-neutral-500;
+    @apply bg-neutral-300 text-neutral-500 transform-none;
   }
 
   .card {
@@ -72,11 +96,13 @@
   }
 
   .form-input {
-    @apply w-full px-3 py-2 border border-neutral-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-500;
+    @apply w-full px-3 py-2 border border-neutral-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-500 font-medium transition-all duration-200;
+    letter-spacing: -0.01em;
   }
 
   .form-select {
-    @apply w-full px-3 py-2 border border-neutral-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-500;
+    @apply w-full px-3 py-2 border border-neutral-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-500 font-medium transition-all duration-200;
+    letter-spacing: -0.01em;
   }
 
   .board-bg {

@@ -59,7 +59,7 @@ const UndoNotification: React.FC<UndoNotificationProps> = ({ onAccept, onReject,
         <div className={`text-white py-4 px-6 ${
           isDarkMode ? 'bg-orange-700' : 'bg-orange-600'
         }`}>
-          <h2 className="text-xl font-bold text-center">Undo Request</h2>
+          <h2 className="text-xl font-bold text-center font-display tracking-tight">Undo Request</h2>
         </div>
         
         {/* Content */}

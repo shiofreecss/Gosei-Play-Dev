@@ -98,7 +98,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, gameCode }) =>
       {/* Header */}
       <div className="bg-indigo-600 dark:bg-indigo-800 text-white py-4 px-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">Share Game</h2>
+          <h2 className="text-xl font-bold font-display tracking-tight">Share Game</h2>
           <button
             onClick={handleClose}
             className="text-white hover:text-gray-200 transition-colors"

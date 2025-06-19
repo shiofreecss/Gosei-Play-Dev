@@ -44,7 +44,7 @@ const GameSettings: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold mb-4">Game Settings</h2>
+      <h2 className="text-2xl font-bold mb-4 font-display tracking-tight">Game Settings</h2>
       
       {/* Board Theme Settings */}
       <BoardThemeSelector />

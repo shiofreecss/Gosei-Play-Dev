@@ -776,7 +776,7 @@ const GamePage: React.FC = () => {
         </div>
         
         <div className="card max-w-md w-full text-center">
-          <h2 className="text-2xl font-bold mb-4">Loading Game...</h2>
+                          <h2 className="text-2xl font-bold mb-4 font-display tracking-tight">Loading Game...</h2>
           <p>Please wait while we set up the game.</p>
         </div>
       </div>
@@ -823,7 +823,7 @@ const GamePage: React.FC = () => {
         </div>
         
         <div className="card max-w-md w-full">
-          <h2 className="text-2xl font-bold mb-4">Join Game</h2>
+                          <h2 className="text-2xl font-bold mb-4 font-display tracking-tight">Join Game</h2>
           <p className="mb-4">
             You've been invited to play a game of Go. Enter your name to join this game.
           </p>
@@ -935,7 +935,7 @@ const GamePage: React.FC = () => {
             {/* Logo and title - centered on mobile, left-aligned on larger screens */}
             <div className="flex items-center gap-3 flex-1 sm:flex-none justify-center sm:justify-start">
               <GoseiLogo size={40} />
-              <h1 className="text-2xl sm:text-3xl font-bold text-primary-700">Gosei Play</h1>
+                              <h1 className="text-2xl sm:text-3xl font-bold text-primary-700 font-display tracking-tight">Gosei Play</h1>
             </div>
             
             {/* Theme Toggle Button - always on the right */}

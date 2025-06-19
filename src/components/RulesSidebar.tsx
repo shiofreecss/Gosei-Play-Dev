@@ -11,7 +11,7 @@ const RulesSidebar: React.FC<RulesSidebarProps> = ({ className = '' }) => {
   return (
     <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-neutral-800">Go Rules Quick Guide</h2>
+        <h2 className="text-xl font-bold text-neutral-800 font-display tracking-tight">Go Rules Quick Guide</h2>
         <Link 
           to="/rules" 
           className="text-primary-600 hover:text-primary-700 text-sm font-medium"

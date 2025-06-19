@@ -1082,7 +1082,7 @@ const HomePage: React.FC = () => {
             {/* Desktop layout: Logo + Title + Theme Toggle on same row */}
             <div className="hidden md:flex items-center justify-center gap-6">
               <div className="flex items-center gap-3">
-                <GoseiLogo size={48} />
+              <GoseiLogo size={48} />
                                  <h1 className="text-4xl font-extrabold text-primary-700 font-display tracking-tight">Gosei Play</h1>
               </div>
               <ThemeToggleButton />
@@ -1093,7 +1093,7 @@ const HomePage: React.FC = () => {
               <div className="flex items-center gap-3">
                 <GoseiLogo size={48} />
                                  <h1 className="text-3xl font-extrabold text-primary-700 font-display tracking-tight">Gosei Play</h1>
-                <ThemeToggleButton />
+              <ThemeToggleButton />
               </div>
             </div>
           </div>
@@ -1185,9 +1185,15 @@ const HomePage: React.FC = () => {
                   <div className="space-y-4">
                 <button
                       onClick={handleCreateGame}
-                      className="btn btn-primary w-full text-lg py-3"
+                      className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-lg py-4 px-6 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
                 >
-                  Create New Game
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <path d="M12 8v8M8 12h8"></path>
+                    </svg>
+                    Create New Game
+                  </div>
                 </button>
                 
                     <div className="relative">
@@ -1210,13 +1216,18 @@ const HomePage: React.FC = () => {
                       <button
                         onClick={handleJoinGame}
                         disabled={!username.trim() || !gameId.trim()}
-                        className={`btn w-full whitespace-nowrap ${
+                        className={`w-full font-semibold text-lg py-4 px-6 rounded-2xl transition-all duration-200 transform shadow-lg whitespace-nowrap ${
                           !username.trim() || !gameId.trim() 
-                            ? 'btn-disabled cursor-not-allowed opacity-60' 
-                            : 'btn-secondary hover:btn-primary'
+                            ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-60' 
+                            : 'bg-emerald-500 hover:bg-emerald-600 text-white hover:scale-105 hover:shadow-xl'
                         }`}
                       >
-                        Join Game
+                        <div className="flex items-center justify-center gap-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                          </svg>
+                          Join Game
+                        </div>
                       </button>
                       {(!username.trim() || !gameId.trim()) && (
                         <p className={`text-xs text-center ${
@@ -1310,9 +1321,15 @@ const HomePage: React.FC = () => {
                 <div className="mt-8 flex justify-center md:justify-end">
                     <button
                     onClick={() => setShowCreateForm(true)}
-                    className="btn btn-primary text-lg py-3 px-8"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-lg py-4 px-8 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-xl"
                   >
-                    Create Game
+                    <div className="flex items-center justify-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 8v8M8 12h8"></path>
+                      </svg>
+                      Create Game
+                    </div>
                     </button>
                 </div>
                 </div>
