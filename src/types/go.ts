@@ -69,6 +69,8 @@ export interface GameOptions {
   // AI Game Options
   vsAI?: boolean; // Whether this is a game against AI
   aiLevel?: 'easy' | 'normal' | 'hard' | 'expert'; // AI difficulty level
+  // AI Network Selection Options
+  selectedNetworkId?: string; // Selected AI network ID (format: category-elo)
 }
 
 export interface GameState {
@@ -123,6 +125,8 @@ export interface GameState {
   vsAI?: boolean; // Whether this is a game against AI
   aiLevel?: 'easy' | 'normal' | 'hard' | 'expert'; // AI difficulty level
   aiUndoUsed?: boolean; // Whether undo has been used in AI game (limit 1 per game)
+  // AI Network Selection Options
+  selectedNetworkId?: string; // Selected AI network ID (format: category-elo)
 }
 
 export type GameMove = Position | { 

@@ -349,7 +349,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
         ? 'w-[600px] mx-auto'
         : isMobile
           ? 'w-full'
-          : 'w-[400px] xl:w-[500px]'
+          : 'w-[450px] xl:w-[550px] 2xl:w-[600px]'
     }`}>
       <h2 className="flex items-center justify-between text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-neutral-800 font-display tracking-tight">
         <div className="flex items-center gap-2">
@@ -374,7 +374,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
             />
             <div className="text-center mt-2 sm:mt-4">
               <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 mb-1 sm:mb-2">
-                <span className={`font-semibold text-neutral-900 ${isTablet ? 'text-xl' : 'text-sm sm:text-lg'} truncate max-w-[90px] sm:max-w-full`}>
+                <span className={`font-semibold text-neutral-900 ${isTablet ? 'text-xl' : 'text-sm sm:text-lg'} truncate max-w-[140px] sm:max-w-[180px] lg:max-w-[220px] xl:max-w-[260px]`}>
                   {blackPlayer?.username || 'Waiting for opponent'}
                   {blackPlayer && currentPlayer && blackPlayer.id === currentPlayer.id && ' (me)'}
                 </span>
@@ -398,7 +398,7 @@ const GameInfo: React.FC<GameInfoProps> = ({
             />
             <div className="text-center mt-2 sm:mt-4">
               <div className="flex items-center justify-center gap-1.5 sm:gap-2.5 mb-1 sm:mb-2">
-                <span className={`font-semibold text-neutral-900 ${isTablet ? 'text-xl' : 'text-sm sm:text-lg'} truncate max-w-[90px] sm:max-w-full`}>
+                <span className={`font-semibold text-neutral-900 ${isTablet ? 'text-xl' : 'text-sm sm:text-lg'} truncate max-w-[140px] sm:max-w-[180px] lg:max-w-[220px] xl:max-w-[260px]`}>
                   {whitePlayer?.username || 'Waiting for opponent'}
                   {whitePlayer && currentPlayer && whitePlayer.id === currentPlayer.id && ' (me)'}
                 </span>

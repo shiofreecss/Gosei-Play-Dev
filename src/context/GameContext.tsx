@@ -1143,7 +1143,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       timePerMove: timePerMove, // Add timePerMove field to gameState
       // AI Game Properties
       vsAI: options.vsAI,
-      aiLevel: options.aiLevel
+      aiLevel: options.aiLevel,
+      selectedNetworkId: options.selectedNetworkId
     };
     
     // Send the game data to the server

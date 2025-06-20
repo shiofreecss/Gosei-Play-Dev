@@ -4,8 +4,8 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 
-// Import AI game manager (moved to top to fix initialization order)
-const AIGameManager = require('./managers/ai-game-manager');
+// Import Enhanced AI game manager (moved to top to fix initialization order)
+const EnhancedAIManager = require('./managers/enhanced-ai-manager');
 
 const app = express();
 app.use(cors());
@@ -139,8 +139,14 @@ const DEBUG = true;
 // Import captcha validation utilities
 const { validateGameCreation } = require('./utils/captcha');
 
-// Initialize AI Game Manager
-const aiGameManager = new AIGameManager();
+// Initialize Enhanced AI Game Manager
+const aiGameManager = new EnhancedAIManager();
+
+// Import AI Game API
+const AIGameAPI = require('./api/ai-game-api');
+
+// Initialize AI Game API
+const aiGameAPI = new AIGameAPI(aiGameManager);
 
 // Game types and their default configurations
 const GAME_CONFIGURATIONS = {
@@ -478,44 +484,86 @@ io.on('connection', (socket) => {
     // Check if this should be an AI game
     if (gameState.vsAI) {
       const humanPlayer = gameState.players.find(p => p.id === playerId);
-      const aiLevel = gameState.aiLevel || 'normal';
       
-      log(`🤖 Creating AI game with level: ${aiLevel}`);
-      
-      // Create AI player asynchronously
-      aiGameManager.createAIGame(gameState, humanPlayer, aiLevel)
-        .then((aiPlayer) => {
-          log(`✅ AI player created: ${aiPlayer.username}`);
-          
-          // Set game status to playing since we now have 2 players (human + AI)
-          gameState.status = 'playing';
-          
-          // Start the timer for standard games
-          if (gameState.gameType !== 'blitz') {
-            gameState.lastMoveTime = Date.now();
-          }
-          
-          log(`Game ${gameState.id} status set to playing with AI opponent`);
-          
-          // Update the stored game state
-          activeGames.set(gameState.id, gameState);
-          
-          // Broadcast updated game state with AI player
-          broadcastGameUpdate(gameState.id, gameState);
-          
-          // If AI plays first (black), make first move
-          if (aiPlayer.color === 'black') {
-            setTimeout(() => {
-              makeAIMove(gameState.id);
-            }, 1000); // Small delay for better UX
-          }
-        })
-        .catch((error) => {
-          log(`❌ Failed to create AI player: ${error.message}`);
-          socket.emit('gameCreationError', {
-            error: 'Failed to create AI opponent. Please try again.'
+      // Check if direct network selection is used
+      if (gameState.selectedNetworkId) {
+        log(`🤖 Creating AI game with direct network selection: ${gameState.selectedNetworkId}`);
+        
+        // Create AI player with direct network selection
+        aiGameManager.createAIGameWithDirectNetwork(gameState, humanPlayer, gameState.selectedNetworkId)
+          .then((aiPlayer) => {
+            log(`✅ AI player created with direct network: ${aiPlayer.username} (${aiPlayer.aiNetwork.elo} Elo)`);
+            
+            // Set game status to playing since we now have 2 players (human + AI)
+            gameState.status = 'playing';
+            
+            // Start the timer for standard games
+            if (gameState.gameType !== 'blitz') {
+              gameState.lastMoveTime = Date.now();
+            }
+            
+            log(`Game ${gameState.id} status set to playing with AI opponent`);
+            
+            // Update the stored game state
+            activeGames.set(gameState.id, gameState);
+            
+            // Broadcast updated game state with AI player
+            broadcastGameUpdate(gameState.id, gameState);
+            
+            // If AI plays first (black), make first move
+            if (aiPlayer.color === 'black') {
+              setTimeout(() => {
+                makeAIMove(gameState.id);
+              }, 1000); // Small delay for better UX
+            }
+          })
+          .catch((error) => {
+            log(`❌ Failed to create AI player with direct network: ${error.message}`);
+            socket.emit('gameCreationError', {
+              error: 'Failed to create AI opponent. Please try again or select a different network.'
+            });
           });
-        });
+      } else {
+        // Fallback to old method for backward compatibility
+        const aiLevel = gameState.aiLevel || 'normal';
+        
+        log(`🤖 Creating AI game with level: ${aiLevel} (fallback method)`);
+        
+        // Create AI player asynchronously
+        aiGameManager.createAIGame(gameState, humanPlayer, '5k', 'equal') // Default values
+          .then((aiPlayer) => {
+            log(`✅ AI player created: ${aiPlayer.username}`);
+            
+            // Set game status to playing since we now have 2 players (human + AI)
+            gameState.status = 'playing';
+            
+            // Start the timer for standard games
+            if (gameState.gameType !== 'blitz') {
+              gameState.lastMoveTime = Date.now();
+            }
+            
+            log(`Game ${gameState.id} status set to playing with AI opponent`);
+            
+            // Update the stored game state
+            activeGames.set(gameState.id, gameState);
+            
+            // Broadcast updated game state with AI player
+            broadcastGameUpdate(gameState.id, gameState);
+            
+            // If AI plays first (black), make first move
+            if (aiPlayer.color === 'black') {
+              setTimeout(() => {
+                makeAIMove(gameState.id);
+              }, 1000); // Small delay for better UX
+            }
+          })
+          .catch((error) => {
+            log(`❌ Failed to create AI player: ${error.message}`);
+            socket.emit('gameCreationError', {
+              error: 'Failed to create AI opponent. Please try again.'
+            });
+          });
+      }
     }
     
     // Use the new broadcast function
@@ -2097,6 +2145,7 @@ io.on('connection', (socket) => {
           createdAt: Date.now(),
           vsAI: originalGame.vsAI,
           aiLevel: originalGame.aiLevel,
+          selectedNetworkId: originalGame.selectedNetworkId, // Preserve network selection
           aiUndoUsed: false // Reset undo usage for new game
         };
         
@@ -2116,26 +2165,21 @@ io.on('connection', (socket) => {
         if (aiGameManager && originalGame.vsAI) {
           const humanPlayer = newGameState.players.find(p => !p.isAI);
           const aiPlayer = newGameState.players.find(p => p.isAI);
-          const aiLevel = originalGame.aiLevel || 'normal';
           
           if (humanPlayer && aiPlayer) {
             setTimeout(async () => {
               try {
-                // Just recreate the AI engine, not the player (player already exists)
-                const aiSettings = {
-                  boardSize: newGameState.board.size,
-                  maxVisits: 100,
-                  maxTime: 3.0,
-                  threads: 1
-                };
+                // Use the proper AI manager methods to recreate the AI game
+                if (newGameState.selectedNetworkId) {
+                  log(`🤖 Recreating AI game with direct network selection: ${newGameState.selectedNetworkId}`);
+                  await aiGameManager.createAIGameWithDirectNetwork(newGameState, humanPlayer, newGameState.selectedNetworkId);
+                } else {
+                  // Fallback to old method
+                  const aiLevel = originalGame.aiLevel || 'normal';
+                  log(`🤖 Recreating AI game with level: ${aiLevel}`);
+                  await aiGameManager.createAIGame(newGameState, humanPlayer, '5k', aiLevel);
+                }
                 
-                // Store AI engine mapping
-                const KataGoCPUEngine = require('./engines/katago-cpu');
-                const engine = new KataGoCPUEngine(aiSettings);
-                aiGameManager.aiPlayers.set(newGameId, engine);
-                aiGameManager.aiGames.add(newGameId);
-                
-                await engine.initialize();
                 log(`✅ AI engine recreated for new game ${newGameId}`);
                 
                 // Update the stored game state
@@ -2810,6 +2854,30 @@ app.get('/debug/redis', (req, res) => {
   };
   
   res.json(redisStatus);
+});
+
+// Add JSON parsing middleware for AI API routes
+app.use(express.json());
+
+// AI API Routes
+app.get('/api/ai/opponents/:rank', (req, res) => {
+  aiGameAPI.getAvailableOpponents(req, res);
+});
+
+app.get('/api/ai/networks', (req, res) => {
+  aiGameAPI.getNetworkInfo(req, res);
+});
+
+app.get('/api/ai/all-networks', (req, res) => {
+  aiGameAPI.getAllNetworks(req, res);
+});
+
+app.get('/api/ai/test-selection/:rank/:strength', (req, res) => {
+  aiGameAPI.testNetworkSelection(req, res);
+});
+
+app.post('/api/ai/create-game', (req, res) => {
+  aiGameAPI.createAIGame(req, res);
 });
 
 const PORT = process.env.PORT || 3001;
