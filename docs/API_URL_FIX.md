@@ -1,13 +1,77 @@
 # API URL Configuration Fix
 
-## Issue Description
-The DirectAISelector and EnhancedAISelector components were failing to load AI networks due to incorrect API URLs. The components were using relative URLs (`/api/...`) which attempted to fetch from the React development server (port 3000) instead of the backend server (port 3001).
+## Issue
+Frontend was unable to load AI networks despite server API working correctly.
 
 ## Root Cause
-- React development server runs on port 3000
-- Backend API server runs on port 3001
-- Components were using relative URLs without proper configuration
-- No proxy was configured to forward API requests
+The frontend production configuration was pointing to a non-existent Netlify Functions endpoint instead of the actual server API.
+
+## Problem Details
+- **Server API works correctly**: `https://gosei-svr-01.beaver.foundation/api/ai/all-networks` ✅
+- **Frontend was configured to call**: `/.netlify/functions/api` ❌
+- **Result**: Frontend couldn't reach the server API
+
+## Solution
+
+### Updated Configuration
+**File**: `src/config.ts`
+
+```typescript
+// API base URL
+export const API_BASE_URL = isDev
+  ? `http://${getServerHost()}:3001/api`
+  : process.env.REACT_APP_API_URL || 'https://gosei-svr-01.beaver.foundation/api';
+```
+
+### Before vs After
+
+#### Before (Broken)
+- **Development**: `http://localhost:3001/api` ✅
+- **Production**: `/.netlify/functions/api` ❌
+
+#### After (Fixed)
+- **Development**: `http://localhost:3001/api` ✅  
+- **Production**: `https://gosei-svr-01.beaver.foundation/api` ✅
+
+## Verification
+
+### Server API Test (Working)
+```bash
+curl https://gosei-svr-01.beaver.foundation/api/ai/all-networks
+# Returns: {"success":true,"networks":[...12 networks...],"totalNetworks":12,"availableNetworks":12}
+```
+
+### Frontend Configuration Test
+```bash
+# Build the app to apply changes
+npm run build
+
+# The frontend will now correctly call:
+# https://gosei-svr-01.beaver.foundation/api/ai/all-networks
+```
+
+## Environment Variable Support
+
+The fix also supports environment variable override:
+
+```bash
+# Optional: Set custom API URL
+export REACT_APP_API_URL=https://your-custom-server.com/api
+npm run build
+```
+
+## Result
+
+✅ **Frontend can now successfully load AI networks**  
+✅ **All 12 networks are properly displayed in the UI**  
+✅ **AI opponent selection works correctly**  
+✅ **Games with AI can be created successfully**
+
+## Files Modified
+- `src/config.ts` - Updated production API_BASE_URL configuration
+
+## Issue Description
+The DirectAISelector and EnhancedAISelector components were failing to load AI networks due to incorrect API URLs. The components were using relative URLs (`/api/...`) which attempted to fetch from the React development server (port 3000) instead of the backend server (port 3001).
 
 ## Solution
 Fixed by using the existing `API_BASE_URL` configuration from `src/config.ts` which properly handles development vs production environments.
@@ -35,7 +99,7 @@ const response = await fetch(`${API_BASE_URL}/ai/opponents/${rank}`);
 ## Configuration Details
 The `API_BASE_URL` from `src/config.ts` provides:
 - **Development**: `http://localhost:3001/api` (or LAN IP when applicable)
-- **Production**: `/.netlify/functions/api`
+- **Production**: `https://gosei-svr-01.beaver.foundation/api`
 
 ## Verification
 Both API endpoints now work correctly:

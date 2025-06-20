@@ -136,7 +136,7 @@ class AIGameAPI {
         beginner: this.aiManager.networkSelector.networks.beginner,
         normal: this.aiManager.networkSelector.networks.normal,
         dan: this.aiManager.networkSelector.networks.dan,
-        expert: this.aiManager.networkSelector.networks.expert
+        pro: this.aiManager.networkSelector.networks.pro
       };
 
       // Check which networks are available

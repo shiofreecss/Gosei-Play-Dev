@@ -28,7 +28,7 @@ export const SOCKET_URL = isDev
 // API base URL
 export const API_BASE_URL = isDev
   ? `http://${getServerHost()}:3001/api`
-  : '/.netlify/functions/api';
+  : process.env.REACT_APP_API_URL || 'https://gosei-svr-01.beaver.foundation/api';
 
 // Game configuration
 export const DEFAULT_BOARD_SIZE = 19;

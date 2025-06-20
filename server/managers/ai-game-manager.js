@@ -95,7 +95,7 @@ class AIGameManager {
         maxTime: 5.0,
         threads: 2
       },
-      'expert': {
+      'pro': {
         maxVisits: 400,
         maxTime: 8.0,
         threads: 2
