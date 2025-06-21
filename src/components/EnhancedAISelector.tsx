@@ -293,13 +293,6 @@ const EnhancedAISelector: React.FC<EnhancedAISelectorProps> = ({
                                 <span className="font-medium text-sm">
                                   {opponent.network.level}
                                 </span>
-                                <span className={`text-xs px-2 py-1 rounded ${
-                                  isSelected
-                                    ? isDarkMode ? 'bg-black/20 text-current' : 'bg-white/80 text-current'
-                                    : isDarkMode ? 'bg-neutral-700 text-neutral-300' : 'bg-neutral-100 text-neutral-600'
-                                }`}>
-                                  {opponent.network.elo} Elo
-                                </span>
                               </div>
                               <input
                                 type="radio"

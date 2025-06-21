@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppTheme } from '../context/AppThemeContext';
 import { API_BASE_URL } from '../config';
+import { STORAGE_KEYS } from '../constants/storage';
 
 interface NetworkInfo {
   id: string;
@@ -33,7 +34,11 @@ const DirectAISelector: React.FC<DirectAISelectorProps> = ({
   const [networks, setNetworks] = useState<NetworkInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [filterCategory, setFilterCategory] = useState<string>(() => {
+    // Load from localStorage or default to 'all'
+    const stored = localStorage.getItem(STORAGE_KEYS.DIRECT_AI_FILTER_CATEGORY);
+    return stored || 'all';
+  });
 
   useEffect(() => {
     if (enabled) {
@@ -60,6 +65,12 @@ const DirectAISelector: React.FC<DirectAISelectorProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  // Persist filter category to localStorage
+  const handleFilterCategoryChange = (categoryId: string) => {
+    setFilterCategory(categoryId);
+    localStorage.setItem(STORAGE_KEYS.DIRECT_AI_FILTER_CATEGORY, categoryId);
   };
 
   const getCategoryBadgeColor = (category: string) => {
@@ -164,7 +175,7 @@ const DirectAISelector: React.FC<DirectAISelectorProps> = ({
                 {categories.map(category => (
                   <button
                     key={category.id}
-                    onClick={() => setFilterCategory(category.id)}
+                    onClick={() => handleFilterCategoryChange(category.id)}
                     className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                       filterCategory === category.id
                         ? isDarkMode 
@@ -244,13 +255,6 @@ const DirectAISelector: React.FC<DirectAISelectorProps> = ({
                           <span className="font-medium text-sm">
                             {network.level}
                           </span>
-                          <span className={`text-xs px-2 py-1 rounded ${
-                            isSelected
-                              ? isDarkMode ? 'bg-black/20 text-current' : 'bg-white/80 text-current'
-                              : isDarkMode ? 'bg-neutral-700 text-neutral-300' : 'bg-neutral-100 text-neutral-600'
-                          }`}>
-                            {network.elo} Elo
-                          </span>
                         </div>
                         <input
                           type="radio"
@@ -268,14 +272,6 @@ const DirectAISelector: React.FC<DirectAISelectorProps> = ({
                           : isDarkMode ? 'text-neutral-300' : 'text-neutral-600'
                       }`}>
                         Strength: {getEloStrength(network.elo)} level
-                      </p>
-                      
-                      <p className={`text-xs ${
-                        isSelected
-                          ? 'opacity-75'
-                          : isDarkMode ? 'text-neutral-400' : 'text-neutral-500'
-                      }`}>
-                        Network: {network.networkFile}
                       </p>
                       
                       {!network.available && (

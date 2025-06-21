@@ -9,5 +9,6 @@ export const STORAGE_KEYS = {
   FISCHER_TIME: 'gosei-fischer-time',
   HANDICAP: 'gosei-handicap',
   SCORING_RULE: 'gosei-scoring-rule',
-  GAME_TYPE: 'gosei-game-type'
+  GAME_TYPE: 'gosei-game-type',
+  DIRECT_AI_FILTER_CATEGORY: 'gosei-direct-ai-filter-category'
 } as const; 
