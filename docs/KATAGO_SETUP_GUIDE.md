@@ -1,254 +1,326 @@
-# 🤖 KataGo CPU Setup Guide for Gosei Play
+# 🤖 KataGo Setup Guide for Gosei Play
 
-This guide will help you set up KataGo CPU AI for 9x9 Go games on Ubuntu Linux with 4-8GB RAM.
+This comprehensive guide covers KataGo AI setup for both **Windows** and **Ubuntu/Linux** systems. Choose your platform and follow the appropriate setup method.
 
 ## 🎯 What You Get
 
 - **Powerful Go AI**: Play against KataGo, one of the strongest Go programs
-- **4 Difficulty Levels**: Easy, Normal, Hard, and Expert
-- **Optimized for 9x9**: Fast moves (1-8 seconds) on modest hardware
-- **Low Memory Usage**: Works well with 4-8GB RAM systems
+- **Multiple Difficulty Levels**: Beginner to Professional strength
+- **Optimized Performance**: Fast moves on modest hardware
 - **Seamless Integration**: AI players work like human players in the game
+- **Network Selection**: Automatic or manual network selection based on player skill
 
-## 🚀 Quick Start (Ubuntu Linux)
+---
 
-### Step 1: Navigate to Server Directory
-```bash
+## 🚀 Windows Setup
+
+### Method 1: Simple Setup (Binary Only)
+For basic KataGo installation without neural networks:
+
+```cmd
 cd server
+setup-katago.bat
 ```
 
-### Step 2: Run the Setup Script
+**What this does:**
+- Downloads KataGo CPU binary for Windows (v1.16.2)
+- Sets up directory structure
+- Tests KataGo installation
+- Does NOT download neural network models
+
+### Method 2: Complete Setup (Binary + Networks)
+For full AI functionality with all network models:
+
+```cmd
+cd server\katago
+
+# Step 1: Download all neural networks organized by skill level
+w01-download-networks.bat
+
+# Step 2: Extract all networks and clean up
+w02-extract-all-networks.bat
+```
+
+**Network Organization:**
+- `networks/beginner/`: 1000-1500 Elo (8k-7k players) - 1 network
+- `networks/normal/`: 1500-1900 Elo (6k-1k players) - 4 networks  
+- `networks/dan/`: 1941-2400 Elo (1d-4d players) - 4 networks
+- `networks/pro/`: 2545-3050 Elo (5d+ players) - 3 networks
+
+### Windows System Requirements
+- **OS**: Windows 10/11 64-bit
+- **RAM**: 4GB minimum, 8GB+ recommended
+- **Storage**: 200MB for all networks
+- **PowerShell**: Required for downloads and extraction
+
+---
+
+## 🐧 Ubuntu/Linux Setup
+
+### Method 1: Simple Setup (Binary Only)
+For basic KataGo installation without neural networks:
+
 ```bash
+cd server
 chmod +x setup-katago.sh
 ./setup-katago.sh
 ```
 
-### Step 3: Start the Server
+**What this does:**
+- Downloads KataGo CPU binary for Linux (v1.16.2)
+- Sets up directory structure
+- Tests KataGo installation
+- Does NOT download neural network models
+
+### Method 2: Complete Setup (Binary + Networks)
+For full AI functionality with all network models:
+
 ```bash
-npm start
-```
-
-### Step 4: Create AI Games
-1. Open your browser and go to the game creation page
-2. Enable "🤖 Play against KataGo AI"
-3. Select difficulty level (start with "Normal")
-4. Choose 9x9 board size for best performance
-5. Create the game and start playing!
-
-## 📋 System Requirements
-
-### Minimum (Easy/Normal AI)
-- **OS**: Ubuntu 16.04+ or compatible Linux
-- **RAM**: 4GB
-- **CPU**: 2-core processor
-- **Storage**: 50MB free space
-- **Network**: Internet connection for initial download
-
-### Recommended (Hard/Expert AI)
-- **OS**: Ubuntu 18.04+
-- **RAM**: 8GB or more
-- **CPU**: 4-core processor
-- **Storage**: 100MB free space
-
-## 🎮 AI Difficulty Levels
-
-| Level | Thinking Time | Strength | Best For |
-|-------|---------------|----------|----------|
-| 🐣 Easy | 1 second | Beginner-friendly | New Go players |
-| 🎯 Normal | 3 seconds | Balanced challenge | Most players |
-| 🔥 Hard | 5 seconds | Strong opponent | Experienced players |
-| 💎 Expert | 8 seconds | Maximum strength | Advanced players |
-
-## 🔧 Manual Installation (if script fails)
-
-### 1. Create Directories
-```bash
-mkdir -p server/katago/models
 cd server/katago
+
+# Complete setup: downloads, extracts, and organizes all networks
+chmod +x u00-ubuntu-setup-all-networks.sh
+./u00-ubuntu-setup-all-networks.sh
 ```
 
-### 2. Download KataGo Binary
-```bash
-wget https://github.com/lightvector/KataGo/releases/download/v1.15.1/katago-v1.15.1-linux-x64-cpu.zip
-unzip katago-v1.15.1-linux-x64-cpu.zip
-mv katago-v* katago
-chmod +x katago
+**What this does:**
+- Downloads all 12 KataGo networks organized by Elo ranges
+- Extracts all .txt.gz files to .txt files
+- Removes .gz files to save disk space
+- Creates metadata files for each network
+- Automatically organizes networks by skill level
+
+### Ubuntu System Requirements
+- **OS**: Ubuntu 16.04+ or compatible Linux distribution
+- **RAM**: 4GB minimum, 8GB+ recommended
+- **Storage**: 200MB for all networks
+- **Dependencies**: wget, gzip (usually pre-installed)
+
+---
+
+## 🎮 AI Difficulty Levels & Network Selection
+
+### Automatic Selection by Elo Range
+
+| Level | Elo Range | Description | Network Count | Best For |
+|-------|-----------|-------------|---------------|----------|
+| 🐣 **Beginner** | 1000-1500 | 8k-7k strength | 1 network | New Go players |
+| 🎯 **Normal** | 1500-1900 | 6k-1k strength | 4 networks | Most players |
+| 🔥 **Dan** | 1941-2400 | 1d-4d strength | 4 networks | Experienced players |
+| 💎 **Pro** | 2545-3050 | 5d+ strength | 3 networks | Advanced players |
+
+### Manual Network Selection
+If you prefer to choose specific networks, they're located in:
+- **Windows**: `server/katago/networks/[level]/`
+- **Ubuntu**: `server/katago/networks/[level]/`
+
+---
+
+## 🔧 Testing Your Setup
+
+### Windows Testing
+```cmd
+cd server\katago
+
+# Test KataGo binary
+katago.exe version
+
+# Test with a specific network (replace with actual filename)
+echo boardsize 9 | katago.exe gtp -model networks\beginner\kata1-b6c96-s1995008-d1329786.txt -config ..\engines\katago-cpu-config.cfg
 ```
 
-### 3. Download Neural Network Model
+### Ubuntu Testing
 ```bash
-cd models
-wget https://media.katagotraining.org/uploaded/networks/models/kata1/b6c96-s1235592320-d204142634.bin.gz
-```
+cd server/katago
 
-### 4. Test Installation
-```bash
-cd ..
+# Test KataGo binary
 ./katago version
+
+# Test with a specific network (replace with actual filename)
+echo "boardsize 9" | ./katago gtp -model networks/beginner/kata1-b6c96-s1995008-d1329786.txt -config ../engines/katago-cpu-config.cfg
 ```
 
-## 🎯 Performance Tips
+---
 
-### For 4GB RAM Systems
-- Use Easy or Normal difficulty only
-- Stick to 9x9 board sizes
-- Close other applications while playing
-- Enable swap space: `sudo swapon -s`
-
-### For 8GB+ RAM Systems
-- Can use any difficulty level
-- 13x13 boards work but are slower
-- Consider running other applications simultaneously
+## 🎯 Performance Optimization
 
 ### Board Size Performance
 - **9x9**: ⭐ Optimal (1-8 seconds per move)
 - **13x13**: ✅ Good (5-15 seconds per move)  
 - **19x19**: ⚠️ Slow (15-60+ seconds per move)
 
+### Memory Usage by Network
+- **Beginner networks**: ~100MB RAM
+- **Normal/Dan networks**: ~200-400MB RAM
+- **Pro networks**: ~400-600MB RAM
+
+### Tips for Better Performance
+1. **Use appropriate networks for your hardware**
+2. **Close other applications while playing**
+3. **Use 9x9 boards for fastest gameplay**
+4. **Consider upgrading to 8GB+ RAM for Pro level**
+
+---
+
 ## 🛠️ Troubleshooting
 
-### "KataGo executable not found"
+### Common Issues
+
+#### "KataGo executable not found"
+**Windows:**
+```cmd
+# Check if binary exists
+dir server\katago\katago.exe
+
+# Re-run setup if missing
+cd server
+setup-katago.bat
+```
+
+**Ubuntu:**
 ```bash
 # Check if binary exists
 ls -la server/katago/katago
 
-# Make it executable
+# Make it executable if needed
 chmod +x server/katago/katago
 
-# Test directly
-cd server/katago
-./katago version
+# Re-run setup if missing
+cd server
+./setup-katago.sh
 ```
 
-### "Neural network model not found"
-```bash
-# Check if model exists
-ls -la server/katago/models/b6c96-*.bin.gz
+#### "Neural network model not found"
+**Windows:**
+```cmd
+# Check if networks exist
+dir server\katago\networks\beginner\*.txt
 
 # Re-download if missing
-cd server/katago/models
-wget https://media.katagotraining.org/uploaded/networks/models/kata1/b6c96-s1235592320-d204142634.bin.gz
+cd server\katago
+w01-download-networks.bat
+w02-extract-all-networks.bat
 ```
 
-### AI moves very slowly
-1. Lower the difficulty level
+**Ubuntu:**
+```bash
+# Check if networks exist
+ls -la server/katago/networks/beginner/*.txt
+
+# Re-download if missing
+cd server/katago
+./u00-ubuntu-setup-all-networks.sh
+```
+
+#### AI moves very slowly
+1. Lower the difficulty level (use Beginner/Normal networks)
 2. Use 9x9 board size only
 3. Close other applications
-4. Check system resources: `htop`
-5. Ensure you have enough RAM
+4. Check system resources
+5. Ensure sufficient RAM available
 
-### Out of memory errors
-1. Use Easy difficulty only
-2. Enable swap space
-3. Close browser tabs and other apps
-4. Restart the server
+---
 
-### Server won't start with AI
-1. Check server logs for errors
-2. Test KataGo manually:
-   ```bash
-   cd server/katago
-   echo "boardsize 9" | ./katago gtp -model models/b6c96-s1235592320-d204142634.bin.gz
-   ```
-3. Verify all files are in place
+## 📁 Expected File Structure
 
-## 📁 File Structure
+After complete setup, your directory should look like:
 
-After setup, you should have:
 ```
 server/
-├── engines/
-│   ├── katago-cpu.js               # AI engine wrapper
-│   ├── katago-cpu-config.cfg       # Auto-generated config
-│   └── README.md                   # Detailed documentation
-├── managers/
-│   └── ai-game-manager.js          # AI game management
 ├── katago/
-│   ├── katago                      # KataGo binary (executable)
-│   └── models/
-│       └── b6c96-s1235592320-d204142634.bin.gz  # Neural network
-├── setup-katago.sh                # Setup script
-└── server.js                      # Main server (with AI integration)
+│   ├── katago(.exe)                    # KataGo binary
+│   ├── networks/                       # All AI networks
+│   │   ├── beginner/                   # 1000-1500 Elo
+│   │   │   ├── *.txt                   # Network files
+│   │   │   └── *.meta.json             # Metadata
+│   │   ├── normal/                     # 1500-1900 Elo
+│   │   ├── dan/                        # 1941-2400 Elo
+│   │   └── pro/                        # 2545-3050 Elo
+│   ├── gtp_dev.cfg                     # Development config
+│   ├── logs/                           # KataGo logs
+│   ├── w01-download-networks.bat       # Windows download script
+│   ├── w02-extract-all-networks.bat    # Windows extraction script
+│   └── u00-ubuntu-setup-all-networks.sh # Ubuntu complete setup
+├── engines/
+│   ├── katago-cpu.js                   # AI engine wrapper
+│   └── katago-cpu-config.cfg           # CPU-optimized config
+├── managers/
+│   ├── ai-game-manager.js              # AI game management
+│   └── enhanced-ai-manager.js          # Enhanced AI with network selection
+├── setup-katago.bat                    # Windows basic setup
+├── setup-katago.sh                     # Ubuntu basic setup
+└── server.js                           # Main server with AI integration
 ```
+
+---
 
 ## 🎓 How to Play Against AI
 
 ### Game Creation
-1. Fill in your username
-2. Configure game settings (board size, time controls, etc.)
-3. ✅ Enable "Play against KataGo AI"
-4. Select your preferred difficulty
-5. Choose your color preference or leave as "Random"
-6. Create the game
+1. Fill in your username and configure game settings
+2. ✅ Enable "Play against KataGo AI"
+3. Select your preferred difficulty level:
+   - **Beginner**: For new players (8k-7k strength)
+   - **Normal**: For most players (6k-1k strength)
+   - **Dan**: For experienced players (1d-4d strength)
+   - **Pro**: For advanced players (5d+ strength)
+4. Choose your color preference or leave as "Random"
+5. Create the game and start playing!
 
 ### During the Game
 - AI moves are displayed just like human moves
-- AI thinking time is shown in the game
+- AI thinking time is shown in the game interface
 - You can resign, pass, or play normally
 - Time controls work the same as human games
 - Game ends normally with scoring
 
-### Tips for Playing AI
-- **Start with Easy**: Even Easy level is quite strong!
-- **Learn from mistakes**: AI moves are usually very good examples
-- **Don't get discouraged**: Losing to AI is normal and educational
-- **Focus on fundamentals**: AI will punish basic mistakes quickly
-- **Experiment**: Try different strategies and openings
+---
 
 ## 🔮 Advanced Configuration
 
-### Adjusting AI Strength
-Edit `server/engines/katago-cpu-config.cfg`:
-```ini
-# Make AI weaker
-maxVisits = 25
-maxTime = 1.0
+### Custom Network Configuration
+Edit `server/engines/katago-cpu-config.cfg` to:
+- Adjust thinking time limits
+- Modify search parameters
+- Configure memory usage
+- Set logging levels
 
-# Make AI stronger  
-maxVisits = 800
-maxTime = 10.0
-```
-
-### Using Different Models
-Replace the model in `server/katago/models/` with:
-- **b10c128**: Stronger but slower
-- **b15c192**: Even stronger but much slower
-- **b40c256**: Professional strength (requires 16GB+ RAM)
-
-### Multiple Threads (8GB+ RAM)
-```ini
-numSearchThreads = 2
-analysisThreads = 2
-```
-
-## 🚨 Important Notes
-
-1. **Internet Required**: Initial setup downloads ~10MB
-2. **Linux Only**: Currently works on Ubuntu/Linux only
-3. **Performance Varies**: Older CPUs will be slower
-4. **Memory Usage**: Monitor with `htop` or `free -h`
-5. **AI is Strong**: Even "Easy" level beats most beginners
-
-## 📞 Getting Help
-
-If you need help:
-1. Check this guide first
-2. Look at `server/engines/README.md` for technical details
-3. Check server console logs for error messages
-4. Try the manual installation steps
-5. Start with Easy difficulty and 9x9 boards
-
-## 🎉 Success Indicators
-
-You'll know everything is working when:
-- ✅ Setup script completes without errors
-- ✅ Server starts with "AI Game Manager initialized" message
-- ✅ You can create AI games from the web interface
-- ✅ AI makes moves within the expected time (1-8 seconds)
-- ✅ Games complete normally with scoring
+### Enhanced AI Manager
+The Enhanced AI Manager (`server/managers/enhanced-ai-manager.js`) provides:
+- Automatic network selection based on difficulty
+- Dynamic difficulty adjustment
+- Performance monitoring
+- Fallback network handling
 
 ---
 
-**Enjoy playing against KataGo! 🎮🤖**
+## 🆘 Getting Help
 
-*Remember: Even losing to the AI teaches you valuable Go patterns and strategies. Have fun learning!* 
+If you encounter issues:
+
+1. **Check the console output** for error messages
+2. **Review log files** in `server/katago/logs/`
+3. **Verify network files** are properly downloaded and extracted
+4. **Test KataGo directly** using the testing commands above
+5. **Ensure sufficient system resources** (RAM, CPU)
+
+For specific platform issues:
+- **Windows**: Check PowerShell execution policy
+- **Ubuntu**: Verify wget and gzip are installed
+
+---
+
+## 📊 Network Download Summary
+
+Total networks available: **12 networks**
+- **Beginner**: 1 network (~12MB)
+- **Normal**: 4 networks (~48MB)
+- **Dan**: 4 networks (~48MB) 
+- **Pro**: 3 networks (~36MB)
+- **Total size**: ~144MB extracted
+
+All networks are CPU-optimized b6c96 series for fast performance on modest hardware.
+
+---
+
+🎉 **Setup Complete!** Your KataGo AI is now ready for Go games at any skill level! 
