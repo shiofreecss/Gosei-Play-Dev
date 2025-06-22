@@ -32,21 +32,8 @@ else
     echo "✅ KataGo binary already exists"
 fi
 
-# Download and extract lightweight neural network model (b6c96 - 6 blocks, ~8MB)
-echo "📥 Downloading lightweight neural network model..."
-if [ ! -f "kata1-b6c96-s175395328-d26788732.txt" ]; then
-    
-    # Download kata1 b6c96 model (6 blocks, very fast on CPU)
-    MODEL_URL="https://media.katagotraining.org/uploaded/networks/models/kata1/kata1-b6c96-s175395328-d26788732.txt.gz"
-    wget -O kata1-b6c96-s175395328-d26788732.txt.gz "$MODEL_URL"
-    
-    echo "📦 Extracting neural network model..."
-    gunzip kata1-b6c96-s175395328-d26788732.txt.gz
-    
-    echo "✅ Neural network model downloaded and extracted"
-else
-    echo "✅ Neural network model already exists"
-fi
+# Neural network model should be provided separately
+echo "📋 Expecting neural network model to be available..."
 
 # Test KataGo installation
 echo "🧪 Testing KataGo installation..."
